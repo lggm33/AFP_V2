@@ -4,8 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './index.css';
 
-// Import shared types to test path mapping
-import type { User } from '@afp/shared-types';
+// Import local types
+import type { User } from './types';
 
 // Test type usage
 const testUser: User = {

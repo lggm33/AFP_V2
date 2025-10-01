@@ -1,6 +1,6 @@
 // AFP Finance App - Main App Component
 import React from 'react';
-import type { BudgetCategory, Transaction } from '@afp/shared-types';
+import type { BudgetCategory, Transaction } from './types';
 
 export function App() {
   // Test shared types usage

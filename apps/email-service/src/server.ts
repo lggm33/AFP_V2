@@ -4,7 +4,7 @@ import type {
   ApiResponse,
   ProcessEmailsRequest,
   ProcessEmailsResponse,
-} from '@afp/shared-types';
+} from './types/api.js';
 
 const fastify = Fastify({
   logger: true,

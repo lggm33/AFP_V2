@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  // "extends": "../../tsconfig.json", // Disabled for Railway deployment
   "compilerOptions": {
     // Override for Vite + React
     "target": "ES2020",
@@ -34,11 +34,7 @@
       "@/lib/*": ["./src/lib/*"],
       "@/stores/*": ["./src/stores/*"],
       "@/utils/*": ["./src/utils/*"],
-      "@/types/*": ["./src/types/*"],
-      "@afp/shared-types": ["../../packages/shared-types/src"],
-      "@afp/shared-types/*": ["../../packages/shared-types/src/*"],
-      "@afp/ui-components": ["../../packages/ui-components/src"],
-      "@afp/ui-components/*": ["../../packages/ui-components/src/*"]
+      "@/types/*": ["./src/types/*"]
     }
   },
   "include": ["src", "vite.config.ts"],

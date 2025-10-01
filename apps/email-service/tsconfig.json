@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  // "extends": "../../tsconfig.json", // Disabled for Railway deployment
   "compilerOptions": {
     // Node.js specific
     "target": "ES2022",
@@ -47,9 +47,7 @@
       "@/middleware/*": ["./src/middleware/*"],
       "@/utils/*": ["./src/utils/*"],
       "@/config/*": ["./src/config/*"],
-      "@/types/*": ["./src/types/*"],
-      "@afp/shared-types": ["../../packages/shared-types/src"],
-      "@afp/shared-types/*": ["../../packages/shared-types/src/*"]
+      "@/types/*": ["./src/types/*"]
     }
   },
   "include": ["src/**/*"],
