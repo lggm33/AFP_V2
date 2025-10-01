@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": false,
+    
+    // Bundler mode
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    
+    // Type Checking
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    
+    // Interop Constraints
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    // Path Mapping for Workspace
+    "baseUrl": ".",
+    "paths": {
+      "@afp/shared-types": ["./packages/shared-types/src"],
+      "@afp/shared-types/*": ["./packages/shared-types/src/*"],
+      "@afp/ui-components": ["./packages/ui-components/src"],
+      "@afp/ui-components/*": ["./packages/ui-components/src/*"]
+    },
+    
+    // Skip type checking for node_modules
+    "skipLibCheck": true
+  },
+  "include": [],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ],
+  "references": [
+    { "path": "./apps/web" },
+    { "path": "./apps/email-service" },
+    { "path": "./packages/shared-types" },
+    { "path": "./packages/ui-components" }
+  ]
+}

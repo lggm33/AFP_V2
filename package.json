@@ -1,0 +1,80 @@
+{
+  "name": "afp-finance-app",
+  "version": "1.0.0",
+  "description": "Personal Finance App with AI-Powered Email Transaction Detection",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "make dev",
+    "dev:web": "make dev-web",
+    "dev:api": "make dev-api",
+    "build": "make build",
+    "build:web": "make build-web",
+    "build:api": "make build-api",
+    "test": "make test",
+    "test:watch": "make test-watch",
+    "test:web": "make test-web",
+    "test:api": "make test-api",
+    "setup": "make setup",
+    "clean": "make clean",
+    "clean:deps": "make clean-deps",
+    "deploy": "make deploy",
+    "deploy:web": "make deploy-web",
+    "deploy:api": "make deploy-api",
+    "lint": "make lint",
+    "lint:fix": "make lint-fix",
+    "format": "make format",
+    "type-check": "make type-check",
+    "db:setup": "make db-setup",
+    "db:migrate": "make db-migrate",
+    "db:seed": "make db-seed",
+    "db:reset": "make db-reset",
+    "audit": "make security-audit",
+    "audit:fix": "make fix-audit",
+    "update": "make update-deps",
+    "workspace:info": "make workspace-info",
+    "env:check": "make env-check",
+    "logs": "make logs"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "20.19.19",
+    "@typescript-eslint/eslint-plugin": "6.21.0",
+    "@typescript-eslint/parser": "6.21.0",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.2",
+    "eslint-plugin-prettier": "5.5.4",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vitest": "1.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.12.0",
+  "keywords": [
+    "finance",
+    "budgeting",
+    "ai",
+    "email-processing",
+    "pwa",
+    "react",
+    "nodejs",
+    "supabase",
+    "railway"
+  ],
+  "author": "AFP Finance Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/afp-finance-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/afp-finance-app/issues"
+  },
+  "homepage": "https://github.com/your-username/afp-finance-app#readme"
+}

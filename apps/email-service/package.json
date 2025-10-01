@@ -1,0 +1,30 @@
+{
+  "name": "@afp/email-service",
+  "version": "1.0.0",
+  "description": "AFP Finance App - Email Processing Microservice",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest",
+    "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,js,json}\""
+  },
+  "dependencies": {
+    "fastify": "^4.29.1",
+    "bullmq": "^4.18.3",
+    "googleapis": "^126.0.1",
+    "@supabase/supabase-js": "^2.58.0",
+    "openai": "^4.104.0",
+    "ioredis": "^5.8.0",
+    "zod": "^3.25.76",
+    "winston": "^3.18.3",
+    "crypto-js": "4.2.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.0",
+    "tsx": "^4.6.0"
+  }
+}
