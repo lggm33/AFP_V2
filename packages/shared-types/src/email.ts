@@ -4,7 +4,7 @@ export enum EmailProvider {
   GMAIL = 'gmail',
   OUTLOOK = 'outlook',
   YAHOO = 'yahoo',
-  IMAP = 'imap'
+  IMAP = 'imap',
 }
 
 export interface EmailMessage {
@@ -168,4 +168,9 @@ export interface TransactionFeedback {
   created_at: string;
 }
 
-export type EmailAccountStatus = 'connected' | 'disconnected' | 'error' | 'syncing' | 'rate_limited';
+export type EmailAccountStatus =
+  | 'connected'
+  | 'disconnected'
+  | 'error'
+  | 'syncing'
+  | 'rate_limited';

@@ -7,13 +7,13 @@
     "moduleResolution": "bundler",
     "allowJs": true,
     "checkJs": false,
-    
+
     // Bundler mode
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    
+
     // Type Checking
     "strict": true,
     "noUnusedLocals": true,
@@ -25,12 +25,12 @@
     "noImplicitOverride": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    
+
     // Interop Constraints
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    
+
     // Path Mapping for Workspace
     "baseUrl": ".",
     "paths": {
@@ -39,7 +39,7 @@
       "@afp/ui-components": ["./packages/ui-components/src"],
       "@afp/ui-components/*": ["./packages/ui-components/src/*"]
     },
-    
+
     // Skip type checking for node_modules
     "skipLibCheck": true
   },

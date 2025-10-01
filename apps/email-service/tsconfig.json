@@ -7,18 +7,18 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
-    
+
     // Output
     "outDir": "./dist",
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    
+
     // Remove incompatible options for compilation
     "allowImportingTsExtensions": false,
     "isolatedModules": true,
-    
+
     // Type Checking
     "strict": true,
     "noUnusedLocals": true,
@@ -27,16 +27,16 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    
+
     // Interop
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    
+
     // Node.js types
     "types": ["node"],
-    
+
     // Path mapping
     "baseUrl": ".",
     "paths": {
@@ -52,15 +52,8 @@
       "@afp/shared-types/*": ["../../packages/shared-types/src/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

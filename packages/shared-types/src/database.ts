@@ -72,5 +72,8 @@ export type DatabaseTables = {
 
 export type TableName = keyof DatabaseTables;
 export type TableRow<T extends TableName> = DatabaseTables[T];
-export type TableInsert<T extends TableName> = Omit<DatabaseTables[T], 'id' | 'created_at' | 'updated_at'>;
+export type TableInsert<T extends TableName> = Omit<
+  DatabaseTables[T],
+  'id' | 'created_at' | 'updated_at'
+>;
 export type TableUpdate<T extends TableName> = Partial<TableInsert<T>>;

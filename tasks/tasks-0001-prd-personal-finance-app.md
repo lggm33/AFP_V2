@@ -3,6 +3,7 @@
 ## Relevant Files
 
 ### Frontend (apps/web/)
+
 - `apps/web/package.json` - Frontend dependencies and scripts configuration
 - `apps/web/vite.config.ts` - Vite configuration with PWA plugin setup
 - `apps/web/railway.json` - Railway deployment configuration for frontend
@@ -23,6 +24,7 @@
 - `apps/web/src/hooks/useOfflineSync.ts` - PWA offline synchronization hook
 
 ### Backend (apps/email-service/)
+
 - `apps/email-service/package.json` - Backend dependencies and scripts
 - `apps/email-service/railway.json` - Railway deployment configuration for backend
 - `apps/email-service/src/server.ts` - Express/Fastify server setup
@@ -43,6 +45,7 @@
 - `apps/email-service/src/utils/regex.ts` - Regex pattern utilities
 
 ### Shared Packages
+
 - `packages/shared-types/src/database.ts` - Database schema types
 - `packages/shared-types/src/api.ts` - API request/response types
 - `packages/shared-types/src/transactions.ts` - Transaction-related types
@@ -51,6 +54,7 @@
 - `packages/supabase/config.toml` - Supabase configuration
 
 ### Configuration & Scripts
+
 - `package.json` - Root package.json with workspace configuration
 - `pnpm-workspace.yaml` - PNPM workspace configuration
 - `.env.example` - Environment variables template
@@ -69,18 +73,21 @@
 ## Tasks
 
 - [ ] 1.0 Project Infrastructure, Monorepo Setup & Railway Deployment Pipeline
-  - [ x] 1.1 Initialize monorepo with pnpm workspace configuration
-  - [ x] 1.2 Create root package.json with workspace scripts and dependencies
-  - [ ] 1.3 Set up TypeScript configuration for the workspace
-  - [ ] 1.4 Configure ESLint and Prettier for code consistency
-  - [ ] 1.5 Create .gitignore and .env.example files
-  - [ ] 1.6 Set up Railway CLI and create Railway project
-  - [ ] 1.7 Configure Railway services for frontend and backend
-  - [ ] 1.8 Create railway.json files for both apps with deployment settings
-  - [ ] 1.9 Set up GitHub repository and connect to Railway for auto-deployment
-  - [ ] 1.10 Create Makefile with automation tasks for development, testing, and deployment
-  - [ ] 1.11 Configure Railway environment variables and secrets
-  - [ ] 1.12 Test initial deployment pipeline with hello world apps
+  - [x] 1.1 Initialize monorepo with pnpm workspace configuration
+  - [x] 1.2 Create root package.json with workspace scripts and dependencies
+  - [x] 1.3 Set up TypeScript configuration for the workspace
+  - [x] 1.4 Configure ESLint and Prettier for code consistency
+  - [x] 1.5 Create .gitignore and .env.example files
+  - [ ] 1.6 Connect GitHub repository to Railway via web interface
+    - Go to railway.app and connect GitHub account
+    - Deploy from GitHub repo (AFP_V2)
+    - Configure services for /apps/web and /apps/email-service
+  - [ ] 1.7 Configure Railway environment variables and deployment settings
+    - Set up environment variables for both services
+    - Configure build and start commands if needed
+    - Set up custom domains (optional)
+  - [ ] 1.8 Create Makefile with automation tasks for development, testing, and deployment
+  - [ ] 1.9 Test initial deployment pipeline with hello world apps
 
 - [ ] 2.0 Database Schema & Supabase Configuration
   - [ ] 2.1 Create Supabase project and configure basic settings

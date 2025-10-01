@@ -6,18 +6,18 @@
     "lib": ["ES2020"],
     "module": "ESNext",
     "moduleResolution": "node",
-    
+
     // Output
     "outDir": "./dist",
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    
+
     // Remove incompatible options for compilation
     "allowImportingTsExtensions": false,
     "isolatedModules": true,
-    
+
     // Type Checking - Extra strict for shared types
     "strict": true,
     "noUnusedLocals": true,
@@ -27,26 +27,19 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    
+
     // Interop
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    
+
     // Path mapping
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

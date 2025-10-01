@@ -16,7 +16,7 @@ const testUser: User = {
   phone_verified: false,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-  last_login: new Date().toISOString()
+  last_login: new Date().toISOString(),
 };
 
 console.log('Test user:', testUser);

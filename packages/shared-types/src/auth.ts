@@ -33,7 +33,7 @@ export enum AuthProvider {
   EMAIL = 'email',
   GOOGLE = 'google',
   GITHUB = 'github',
-  APPLE = 'apple'
+  APPLE = 'apple',
 }
 
 export interface OAuthProvider {
@@ -117,7 +117,7 @@ export enum Permission {
   WRITE_BUDGETS = 'write:budgets',
   READ_EMAIL_ACCOUNTS = 'read:email_accounts',
   WRITE_EMAIL_ACCOUNTS = 'write:email_accounts',
-  ADMIN = 'admin'
+  ADMIN = 'admin',
 }
 
 export interface Role {

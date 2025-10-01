@@ -3,7 +3,7 @@
 export enum TransactionType {
   INCOME = 'income',
   EXPENSE = 'expense',
-  TRANSFER = 'transfer'
+  TRANSFER = 'transfer',
 }
 
 export enum TransactionCategory {
@@ -12,7 +12,7 @@ export enum TransactionCategory {
   FREELANCE = 'freelance',
   INVESTMENT = 'investment',
   OTHER_INCOME = 'other_income',
-  
+
   // Expenses
   FOOD = 'food',
   TRANSPORTATION = 'transportation',
@@ -26,19 +26,19 @@ export enum TransactionCategory {
   INSURANCE = 'insurance',
   TAXES = 'taxes',
   OTHER_EXPENSE = 'other_expense',
-  
+
   // Transfer
   SAVINGS = 'savings',
   INVESTMENT_TRANSFER = 'investment_transfer',
   LOAN_PAYMENT = 'loan_payment',
-  CREDIT_CARD_PAYMENT = 'credit_card_payment'
+  CREDIT_CARD_PAYMENT = 'credit_card_payment',
 }
 
 export enum TransactionSource {
   MANUAL = 'manual',
   EMAIL_DETECTION = 'email_detection',
   BANK_API = 'bank_api',
-  CSV_IMPORT = 'csv_import'
+  CSV_IMPORT = 'csv_import',
 }
 
 export interface TransactionMetadata {
@@ -48,20 +48,20 @@ export interface TransactionMetadata {
   confidence_score?: number;
   ai_extracted?: boolean;
   regex_pattern_used?: string;
-  
+
   // Bank/Card metadata
   bank_name?: string;
   card_last_four?: string;
   merchant_name?: string;
   merchant_category?: string;
-  
+
   // Location metadata
   location?: string;
   coordinates?: {
     lat: number;
     lng: number;
   };
-  
+
   // Additional metadata
   notes?: string;
   tags?: string[];
@@ -94,7 +94,10 @@ export interface TransactionTrend {
 export interface RecurringTransaction {
   id: string;
   user_id: string;
-  template_transaction: Omit<Transaction, 'id' | 'user_id' | 'transaction_date' | 'created_at' | 'updated_at'>;
+  template_transaction: Omit<
+    Transaction,
+    'id' | 'user_id' | 'transaction_date' | 'created_at' | 'updated_at'
+  >;
   frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
   next_occurrence: string;
   is_active: boolean;
@@ -109,5 +112,8 @@ export type TransactionWithMetadata = Transaction & {
   metadata: TransactionMetadata;
 };
 
-export type TransactionCreateInput = Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type TransactionCreateInput = Omit<
+  Transaction,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
 export type TransactionUpdateInput = Partial<TransactionCreateInput>;

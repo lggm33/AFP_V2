@@ -1,7 +1,7 @@
 # AFP Finance App - Makefile
 # Personal Finance App with AI-Powered Email Transaction Detection
 
-.PHONY: help setup dev build test lint format clean deploy install-deps check-deps
+.PHONY: help setup dev build test lint format format-check clean deploy install-deps check-deps
 
 # Default target
 .DEFAULT_GOAL := help
@@ -47,6 +47,7 @@ help:
 	@echo "  make lint           - Lint all code"
 	@echo "  make lint-fix       - Lint and fix all code"
 	@echo "  make format         - Format all code"
+	@echo "  make format-check   - Check code formatting"
 	@echo "  make type-check     - Run TypeScript type checking"
 	@echo ""
 	@echo "$(YELLOW)Database:$(RESET)"
@@ -128,15 +129,25 @@ test-watch:
 ## Code Quality
 lint:
 	@echo "$(CYAN)🔍 Linting all code...$(RESET)"
-	pnpm -r lint
+	@echo "$(CYAN)Running ESLint on workspace...$(RESET)"
+	npx eslint . --ext .ts,.tsx,.js,.jsx --report-unused-disable-directives
+	@echo "$(GREEN)✅ Linting completed$(RESET)"
 
 lint-fix:
 	@echo "$(CYAN)🔧 Linting and fixing all code...$(RESET)"
-	pnpm -r lint --fix
+	@echo "$(CYAN)Running ESLint with auto-fix...$(RESET)"
+	npx eslint . --ext .ts,.tsx,.js,.jsx --fix --report-unused-disable-directives
+	@echo "$(GREEN)✅ Linting with fixes completed$(RESET)"
 
 format:
 	@echo "$(CYAN)✨ Formatting all code...$(RESET)"
-	pnpm -r format
+	@echo "$(CYAN)Running Prettier on workspace...$(RESET)"
+	npx prettier --write "**/*.{ts,tsx,js,jsx,json,css,md,yml,yaml}"
+	@echo "$(GREEN)✅ Formatting completed$(RESET)"
+
+format-check:
+	@echo "$(CYAN)🔍 Checking code formatting...$(RESET)"
+	npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md,yml,yaml}"
 
 type-check:
 	@echo "$(CYAN)📝 Running TypeScript type checking...$(RESET)"

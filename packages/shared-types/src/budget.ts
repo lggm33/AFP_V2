@@ -4,14 +4,14 @@ export enum BudgetPeriod {
   WEEKLY = 'weekly',
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',
-  YEARLY = 'yearly'
+  YEARLY = 'yearly',
 }
 
 export enum BudgetStatus {
   UNDER_BUDGET = 'under_budget',
   ON_TRACK = 'on_track',
   APPROACHING_LIMIT = 'approaching_limit',
-  OVER_BUDGET = 'over_budget'
+  OVER_BUDGET = 'over_budget',
 }
 
 export interface BudgetAlert {
@@ -41,7 +41,11 @@ export interface BudgetGoal {
 }
 
 export interface BudgetInsight {
-  type: 'overspending' | 'saving_opportunity' | 'trend_change' | 'category_analysis';
+  type:
+    | 'overspending'
+    | 'saving_opportunity'
+    | 'trend_change'
+    | 'category_analysis';
   title: string;
   description: string;
   category?: string;
@@ -106,8 +110,14 @@ export type BudgetCategoryWithBudget = BudgetCategory & {
   status: BudgetStatus;
 };
 
-export type BudgetCreateInput = Omit<Budget, 'id' | 'created_at' | 'updated_at'>;
+export type BudgetCreateInput = Omit<
+  Budget,
+  'id' | 'created_at' | 'updated_at'
+>;
 export type BudgetUpdateInput = Partial<BudgetCreateInput>;
 
-export type BudgetCategoryCreateInput = Omit<BudgetCategory, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type BudgetCategoryCreateInput = Omit<
+  BudgetCategory,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
 export type BudgetCategoryUpdateInput = Partial<BudgetCategoryCreateInput>;
