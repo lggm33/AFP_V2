@@ -78,7 +78,7 @@
   - [x] 1.3 Set up TypeScript configuration for the workspace
   - [x] 1.4 Configure ESLint and Prettier for code consistency
   - [x] 1.5 Create .gitignore and .env.example files
-  - [ ] 1.6 Connect GitHub repository to Railway via web interface
+  - [x] 1.6 Connect GitHub repository to Railway via web interface
     - Go to railway.app and connect GitHub account
     - Deploy from GitHub repo (AFP_V2)
     - Configure services for /apps/web and /apps/email-service
@@ -86,8 +86,12 @@
     - Set up environment variables for both services
     - Configure build and start commands if needed
     - Set up custom domains (optional)
-  - [ ] 1.8 Create Makefile with automation tasks for development, testing, and deployment
-  - [ ] 1.9 Test initial deployment pipeline with hello world apps
+  - [x] 1.8 Create Makefile with automation tasks for development, testing, and deployment
+  - [x] 1.9 Test initial deployment pipeline with hello world apps
+    ✅ Email service deployed successfully to Railway
+    ✅ Web app deployed successfully to Railway  
+    ✅ Both apps have working health endpoints
+    ✅ Deployment pipeline is functional (takes ~10 minutes)
 
 - [ ] 2.0 Database Schema & Supabase Configuration
   - [ ] 2.1 Create Supabase project and configure basic settings

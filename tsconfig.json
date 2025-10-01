@@ -33,12 +33,7 @@
 
     // Path Mapping for Workspace
     "baseUrl": ".",
-    "paths": {
-      "@afp/shared-types": ["./packages/shared-types/src"],
-      "@afp/shared-types/*": ["./packages/shared-types/src/*"],
-      "@afp/ui-components": ["./packages/ui-components/src"],
-      "@afp/ui-components/*": ["./packages/ui-components/src/*"]
-    },
+    "paths": {},
 
     // Skip type checking for node_modules
     "skipLibCheck": true
@@ -58,7 +53,6 @@
   "references": [
     { "path": "./apps/web" },
     { "path": "./apps/email-service" },
-    { "path": "./packages/shared-types" },
-    { "path": "./packages/ui-components" }
+    { "path": "./packages/supabase" }
   ]
 }
