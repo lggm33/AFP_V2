@@ -421,3 +421,4 @@ Este proyecto está bajo la licencia MIT. Ver `LICENSE` para más detalles.
 ---
 
 **Hecho con ❤️ para revolucionar las finanzas personales**
+# Railway deployment fix
