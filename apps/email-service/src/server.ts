@@ -1,10 +1,5 @@
-// AFP Finance App - Email Service Server
+// AFP Finance App - Email Service Server (Minimal Version)
 import Fastify from 'fastify';
-import type {
-  ApiResponse,
-  ProcessEmailsRequest,
-  ProcessEmailsResponse,
-} from './types/api.js';
 
 const fastify = Fastify({
   logger: true,
@@ -12,27 +7,30 @@ const fastify = Fastify({
 
 // Health check endpoint
 fastify.get('/health', async () => {
-  return { status: 'ok', timestamp: new Date().toISOString() };
+  return { 
+    status: 'ok', 
+    service: 'email-service',
+    version: '1.0.0',
+    timestamp: new Date().toISOString() 
+  };
 });
 
-// Test endpoint using shared types
-fastify.post<{
-  Body: ProcessEmailsRequest;
-  Reply: ApiResponse<ProcessEmailsResponse>;
-}>('/process-emails', async request => {
-  const { user_id } = request.body;
+// Simple hello endpoint
+fastify.get('/', async () => {
+  return { 
+    message: 'AFP Email Service is running!',
+    version: '1.0.0',
+    endpoints: ['/health', '/']
+  };
+});
 
-  // TODO: Implement email processing logic
-  console.log('Processing emails for user:', user_id);
-
+// Simple test endpoint (no complex types)
+fastify.post('/test', async (request) => {
   return {
     success: true,
-    data: {
-      processed_count: 0,
-      new_transactions: 0,
-      errors: [],
-      processing_time_ms: 100,
-    },
+    message: 'Email service is working!',
+    received: request.body,
+    timestamp: new Date().toISOString()
   };
 });
 
