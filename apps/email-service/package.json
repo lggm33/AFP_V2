@@ -25,6 +25,8 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
     "tsx": "^4.6.0"
   }
 }
