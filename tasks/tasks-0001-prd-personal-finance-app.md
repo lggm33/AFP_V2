@@ -82,7 +82,7 @@
     - Go to railway.app and connect GitHub account
     - Deploy from GitHub repo (AFP_V2)
     - Configure services for /apps/web and /apps/email-service
-  - [ ] 1.7 Configure Railway environment variables and deployment settings
+  - [X] 1.7 Configure Railway environment variables and deployment settings
     - Set up environment variables for both services
     - Configure build and start commands if needed
     - Set up custom domains (optional)
@@ -93,78 +93,84 @@
     ✅ Both apps have working health endpoints
     ✅ Deployment pipeline is functional (takes ~10 minutes)
 
-- [ ] 2.0 Database Schema & Supabase Configuration
+- [ ] 2.0 Supabase Setup & Basic Authentication Configuration
   - [ ] 2.1 Create Supabase project and configure basic settings
-  - [ ] 2.2 Design and create database schema for users, email_accounts, transactions, and budgets
-  - [ ] 2.3 Set up Row Level Security (RLS) policies for all tables
-  - [ ] 2.4 Create database functions for transaction categorization and budget calculations
-  - [ ] 2.5 Set up Supabase migrations and seed data
-  - [ ] 2.6 Configure Supabase authentication providers (email, OAuth)
-  - [ ] 2.7 Create shared types package with database schema types
-  - [ ] 2.8 Set up Supabase local development environment
-  - [ ] 2.9 Create database backup and recovery procedures
-  - [ ] 2.10 Test database operations and RLS policies
+  - [ ] 2.2 Configure Supabase authentication providers (email, OAuth)
+  - [ ] 2.3 Set up environment variables for Supabase connection
+  - [ ] 2.4 Test Supabase connection and authentication setup
+  - [ ] 2.5 Configure Supabase local development environment (optional)
 
-- [ ] 3.0 Authentication System & User Management
-  - [ ] 3.1 Set up Supabase Auth configuration with email and OAuth providers
+- [ ] 3.0 Basic Authentication System Implementation
+  - [ ] 3.1 Install required dependencies (Zustand, React Router, React Hook Form, Zod)
   - [ ] 3.2 Create authentication store using Zustand for state management
-  - [ ] 3.3 Implement login/register forms with form validation
-  - [ ] 3.4 Create protected route wrapper and authentication guards
-  - [ ] 3.5 Implement user profile management interface
-  - [ ] 3.6 Set up JWT token handling and refresh logic
-  - [ ] 3.7 Create authentication middleware for backend API
-  - [ ] 3.8 Implement password reset and email verification flows
-  - [ ] 3.9 Add user session persistence and automatic logout
-  - [ ] 3.10 Create user onboarding flow for initial setup
-  - [ ] 3.11 Test authentication flows and security measures
+  - [ ] 3.3 Implement useAuth hook for authentication logic
+  - [ ] 3.4 Create login/register forms with form validation
+  - [ ] 3.5 Implement basic routing system with React Router
+  - [ ] 3.6 Create protected route wrapper and authentication guards
+  - [ ] 3.7 Add user session persistence and automatic logout
+  - [ ] 3.8 Update main App component with authentication flow
+  - [ ] 3.9 Test basic authentication flows (login, register, logout)
+  - [ ] 3.10 Create simple dashboard for authenticated users
 
-- [ ] 4.0 Email Processing & AI Integration Microservice
-  - [ ] 4.1 Set up Node.js backend with Fastify framework and TypeScript
-  - [ ] 4.2 Configure Gmail API integration with OAuth2 flow
-  - [ ] 4.3 Implement secure token storage with encryption utilities
-  - [ ] 4.4 Set up BullMQ with Redis for background job processing
-  - [ ] 4.5 Create email fetching service to retrieve banking notifications
-  - [ ] 4.6 Integrate OpenAI API for regex pattern generation and improvement
-  - [ ] 4.7 Implement transaction extraction logic using AI-generated patterns
-  - [ ] 4.8 Create transaction categorization service with learning capabilities
-  - [ ] 4.9 Set up scheduled jobs for hourly email processing
-  - [ ] 4.10 Implement error handling and retry mechanisms for API failures
-  - [ ] 4.11 Create webhook endpoints for real-time email notifications
-  - [ ] 4.12 Add logging and monitoring for email processing pipeline
-  - [ ] 4.13 Implement rate limiting and Gmail API quota management
-  - [ ] 4.14 Create transaction feedback system for AI improvement
-  - [ ] 4.15 Test email processing accuracy and performance
+- [ ] 4.0 Database Schema & Advanced Supabase Configuration
+  - [ ] 4.1 Design and create database schema for users, email_accounts, transactions, and budgets
+  - [ ] 4.2 Set up Row Level Security (RLS) policies for all tables
+  - [ ] 4.3 Create database functions for transaction categorization and budget calculations
+  - [ ] 4.4 Set up Supabase migrations and seed data
+  - [ ] 4.5 Create shared types package with database schema types
+  - [ ] 4.6 Create database backup and recovery procedures
+  - [ ] 4.7 Test database operations and RLS policies
+  - [ ] 4.8 Implement advanced authentication features (password reset, email verification)
+  - [ ] 4.9 Create user profile management interface
+  - [ ] 4.10 Create user onboarding flow for initial setup
 
-- [ ] 5.0 Frontend PWA & User Interface
-  - [ ] 5.1 Set up Vite + React project with TypeScript and PWA plugin
-  - [ ] 5.2 Configure Tailwind CSS and create design system components
-  - [ ] 5.3 Implement PWA manifest and service worker for offline functionality
-  - [ ] 5.4 Create responsive layout with mobile-first design approach
-  - [ ] 5.5 Build main dashboard with budget overview and recent transactions
-  - [ ] 5.6 Implement transaction list with filtering and search capabilities
-  - [ ] 5.7 Create transaction detail view with edit and categorization options
-  - [ ] 5.8 Build email account connection interface with OAuth flow
-  - [ ] 5.9 Implement real-time updates using Supabase subscriptions
-  - [ ] 5.10 Create offline sync functionality for PWA capabilities
-  - [ ] 5.11 Add push notification support for budget alerts
-  - [ ] 5.12 Implement data export functionality (CSV, PDF)
-  - [ ] 5.13 Create settings page for user preferences and account management
-  - [ ] 5.14 Add loading states, error handling, and user feedback
-  - [ ] 5.15 Optimize performance and implement lazy loading
-  - [ ] 5.16 Test PWA functionality and cross-device compatibility
+- [ ] 5.0 Email Processing & AI Integration Microservice
+  - [ ] 5.1 Set up Node.js backend with Fastify framework and TypeScript
+  - [ ] 5.2 Configure Gmail API integration with OAuth2 flow
+  - [ ] 5.3 Implement secure token storage with encryption utilities
+  - [ ] 5.4 Set up BullMQ with Redis for background job processing
+  - [ ] 5.5 Create email fetching service to retrieve banking notifications
+  - [ ] 5.6 Integrate OpenAI API for regex pattern generation and improvement
+  - [ ] 5.7 Implement transaction extraction logic using AI-generated patterns
+  - [ ] 5.8 Create transaction categorization service with learning capabilities
+  - [ ] 5.9 Set up scheduled jobs for hourly email processing
+  - [ ] 5.10 Implement error handling and retry mechanisms for API failures
+  - [ ] 5.11 Create webhook endpoints for real-time email notifications
+  - [ ] 5.12 Add logging and monitoring for email processing pipeline
+  - [ ] 5.13 Implement rate limiting and Gmail API quota management
+  - [ ] 5.14 Create transaction feedback system for AI improvement
+  - [ ] 5.15 Test email processing accuracy and performance
 
-- [ ] 6.0 Budget Management & Transaction Categorization
-  - [ ] 6.1 Create budget category management system with CRUD operations
-  - [ ] 6.2 Implement monthly budget limits and spending tracking
-  - [ ] 6.3 Build automatic transaction categorization with AI assistance
-  - [ ] 6.4 Create budget alert system for spending limit notifications
-  - [ ] 6.5 Implement spending trend analysis and reporting features
-  - [ ] 6.6 Build interactive charts and visualizations using Recharts
-  - [ ] 6.7 Create budget vs actual spending comparison views
-  - [ ] 6.8 Implement transaction recategorization with user feedback
-  - [ ] 6.9 Add support for multiple currencies and exchange rates
-  - [ ] 6.10 Create recurring transaction detection and management
-  - [ ] 6.11 Implement budget goal setting and progress tracking
-  - [ ] 6.12 Add budget sharing and export capabilities
-  - [ ] 6.13 Create financial insights and recommendations system
-  - [ ] 6.14 Test budget calculations and alert accuracy
+- [ ] 6.0 Frontend PWA & User Interface
+  - [ ] 6.1 Set up Vite + React project with TypeScript and PWA plugin
+  - [ ] 6.2 Configure Tailwind CSS and create design system components
+  - [ ] 6.3 Implement PWA manifest and service worker for offline functionality
+  - [ ] 6.4 Create responsive layout with mobile-first design approach
+  - [ ] 6.5 Build main dashboard with budget overview and recent transactions
+  - [ ] 6.6 Implement transaction list with filtering and search capabilities
+  - [ ] 6.7 Create transaction detail view with edit and categorization options
+  - [ ] 6.8 Build email account connection interface with OAuth flow
+  - [ ] 6.9 Implement real-time updates using Supabase subscriptions
+  - [ ] 6.10 Create offline sync functionality for PWA capabilities
+  - [ ] 6.11 Add push notification support for budget alerts
+  - [ ] 6.12 Implement data export functionality (CSV, PDF)
+  - [ ] 6.13 Create settings page for user preferences and account management
+  - [ ] 6.14 Add loading states, error handling, and user feedback
+  - [ ] 6.15 Optimize performance and implement lazy loading
+  - [ ] 6.16 Test PWA functionality and cross-device compatibility
+
+- [ ] 7.0 Budget Management & Transaction Categorization
+  - [ ] 7.1 Create budget category management system with CRUD operations
+  - [ ] 7.2 Implement monthly budget limits and spending tracking
+  - [ ] 7.3 Build automatic transaction categorization with AI assistance
+  - [ ] 7.4 Create budget alert system for spending limit notifications
+  - [ ] 7.5 Implement spending trend analysis and reporting features
+  - [ ] 7.6 Build interactive charts and visualizations using Recharts
+  - [ ] 7.7 Create budget vs actual spending comparison views
+  - [ ] 7.8 Implement transaction recategorization with user feedback
+  - [ ] 7.9 Add support for multiple currencies and exchange rates
+  - [ ] 7.10 Create recurring transaction detection and management
+  - [ ] 7.11 Implement budget goal setting and progress tracking
+  - [ ] 7.12 Add budget sharing and export capabilities
+  - [ ] 7.13 Create financial insights and recommendations system
+  - [ ] 7.14 Test budget calculations and alert accuracy
