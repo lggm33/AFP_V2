@@ -33,9 +33,14 @@ export function AuthRedirectHandler() {
           }
 
           if (session) {
-            console.log('✅ Session found, redirecting to dashboard');
-            // Clear the URL params and redirect to dashboard
-            navigate('/dashboard', { replace: true });
+            console.log('✅ Session found, processing redirect');
+            
+            // Check for intended destination in query params
+            const searchParams = new URLSearchParams(location.search);
+            const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+            
+            console.log(`🎯 Redirecting to: ${redirectTo}`);
+            navigate(redirectTo, { replace: true });
           } else {
             console.log('⚠️ No session found, redirecting to signin');
             navigate('/signin', { replace: true });

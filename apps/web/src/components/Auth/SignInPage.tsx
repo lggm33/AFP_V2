@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../../config/supabase';
 
 export function SignInPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -42,7 +43,7 @@ export function SignInPage() {
         <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
           <Link
-            to="/signup"
+            to={`/signup${location.search}`}
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             create a new account
@@ -68,7 +69,7 @@ export function SignInPage() {
             providers={['google']}
             view="sign_in"
             showLinks={false}
-            redirectTo={`${window.location.origin}/`}
+            redirectTo={`${window.location.origin}/${location.search}`}
           />
           
           <div className="mt-6">
@@ -85,7 +86,7 @@ export function SignInPage() {
             
             <div className="mt-6">
               <Link
-                to="/signup"
+                to={`/signup${location.search}`}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Create new account

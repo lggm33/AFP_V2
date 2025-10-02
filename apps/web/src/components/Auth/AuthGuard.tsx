@@ -1,5 +1,6 @@
 // Authentication Guard Component
 import React, { useEffect } from 'react';
+import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../stores/authStore';
 
 interface AuthGuardProps {
@@ -9,6 +10,7 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const { isAuthenticated, isLoading, isInitialized, initialize } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     if (!isInitialized) {
@@ -30,7 +32,11 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   // Show fallback (login page) if not authenticated
   if (!isAuthenticated) {
-    return fallback || <div>Please log in to access this page.</div>;
+    // Create redirect URL with current path as redirectTo parameter
+    const currentPath = location.pathname + location.search;
+    const redirectUrl = `/signin?redirectTo=${encodeURIComponent(currentPath)}`;
+    
+    return fallback || <Navigate to={redirectUrl} replace />;
   }
 
   // Show protected content if authenticated
