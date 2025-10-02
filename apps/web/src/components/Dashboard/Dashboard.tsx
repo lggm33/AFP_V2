@@ -1,5 +1,4 @@
 // Main Dashboard Component
-import React from 'react';
 import { useAuth } from '../../stores/authStore';
 
 export function Dashboard() {

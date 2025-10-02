@@ -1,5 +1,4 @@
 // Google Authentication Component
-import React from 'react';
 import { supabase } from '../../config/supabase';
 
 interface GoogleAuthProps {
@@ -11,7 +10,7 @@ interface GoogleAuthProps {
 export function GoogleAuth({ onSuccess, onError, className = '' }: GoogleAuthProps) {
   const handleGoogleSignIn = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`,

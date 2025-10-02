@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage } from '../Landing/LandingPage';
 import { SignInPage } from '../Auth/SignInPage';

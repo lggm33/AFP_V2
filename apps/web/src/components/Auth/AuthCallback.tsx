@@ -1,5 +1,5 @@
 // OAuth Callback Handler Component
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../config/supabase';
 
 interface AuthCallbackProps {
@@ -16,7 +16,6 @@ export function AuthCallback({ onSuccess, onError }: AuthCallbackProps) {
         // Get the URL hash parameters
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
         
         if (accessToken) {
           // Session should be automatically set by Supabase

@@ -1,5 +1,5 @@
 // Main Login Page Component
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { GoogleAuth } from './GoogleAuth';
 
 interface LoginPageProps {
@@ -21,10 +21,6 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
     setLoading(false);
   };
 
-  const handleGoogleSignIn = () => {
-    setLoading(true);
-    setError(null);
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
