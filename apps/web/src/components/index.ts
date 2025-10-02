@@ -13,6 +13,7 @@ export { SignUpPage } from './Auth/SignUpPage';
 export { GoogleAuth } from './Auth/GoogleAuth';
 export { AuthGuard } from './Auth/AuthGuard';
 export { AuthCallback } from './Auth/AuthCallback';
+export { AuthRedirectHandler } from './Auth/AuthRedirectHandler';
 
 // Landing page
 export { LandingPage } from './Landing/LandingPage';

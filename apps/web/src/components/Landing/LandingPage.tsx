@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom';
+import { AuthRedirectHandler } from '../Auth/AuthRedirectHandler';
 
 export function LandingPage() {
   return (
+    <>
+      <AuthRedirectHandler />
+      
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
@@ -95,5 +99,6 @@ export function LandingPage() {
         </div>
       </main>
     </div>
+    </>
   );
 }

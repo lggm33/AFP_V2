@@ -68,7 +68,7 @@ export function SignInPage() {
             providers={['google']}
             view="sign_in"
             showLinks={false}
-            redirectTo={`${window.location.origin}/dashboard`}
+            redirectTo={`${window.location.origin}/`}
           />
           
           <div className="mt-6">
