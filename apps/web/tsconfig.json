@@ -1,31 +1,14 @@
 {
-  // "extends": "../../tsconfig.json", // Disabled for Railway deployment
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
   "compilerOptions": {
-    // Override for Vite + React
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    // Bundler mode
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-
-    // Linting
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-
-    // React specific
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
-
-    // Path mapping
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -37,7 +20,5 @@
       "@/types/*": ["./src/types/*"],
       "@/config/*": ["./src/config/*"]
     }
-  },
-  "include": ["src", "vite.config.ts"],
-  "exclude": ["node_modules", "dist", "build", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
+  }
 }

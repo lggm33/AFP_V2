@@ -11,21 +11,24 @@ export function AuthRedirectHandler() {
       // Check if we have auth tokens in the URL (from Supabase redirect)
       const hashParams = new URLSearchParams(location.hash.substring(1));
       const searchParams = new URLSearchParams(location.search);
-      
+
       const hasAccessToken = hashParams.get('access_token');
       const hasCode = searchParams.get('code');
       const hasAuthParams = hasAccessToken || hasCode;
 
       if (hasAuthParams) {
         console.log('🔄 Auth redirect detected, processing...');
-        
+
         try {
           // Wait a bit for Supabase to process the session
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
+
           // Check if we now have a valid session
-          const { data: { session }, error } = await supabase.auth.getSession();
-          
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+
           if (error) {
             console.error('❌ Error getting session:', error);
             navigate('/signin?error=auth_failed');
@@ -34,11 +37,11 @@ export function AuthRedirectHandler() {
 
           if (session) {
             console.log('✅ Session found, processing redirect');
-            
+
             // Check for intended destination in query params
             const searchParams = new URLSearchParams(location.search);
             const redirectTo = searchParams.get('redirectTo') || '/dashboard';
-            
+
             console.log(`🎯 Redirecting to: ${redirectTo}`);
             navigate(redirectTo, { replace: true });
           } else {

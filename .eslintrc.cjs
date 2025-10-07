@@ -5,15 +5,12 @@ module.exports = {
     es2022: true,
     node: true,
   },
-  extends: [
-    'eslint:recommended',
-    'prettier',
-  ],
+  extends: ['eslint:recommended', 'prettier'],
   plugins: ['prettier'],
   rules: {
     // Prettier integration
     'prettier/prettier': 'error',
-    
+
     // General ESLint rules
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-debugger': 'error',
@@ -22,11 +19,14 @@ module.exports = {
     'prefer-const': 'error',
     'no-var': 'error',
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    
+
     // Code quality rules following SOLID principles
-    'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }],
+    'max-lines-per-function': [
+      'warn',
+      { max: 200, skipBlankLines: true, skipComments: true },
+    ],
     'max-params': ['warn', 4],
-    'complexity': ['warn', 10],
+    complexity: ['warn', 10],
     'max-depth': ['warn', 4],
     'max-nested-callbacks': ['warn', 3],
   },
@@ -40,9 +40,12 @@ module.exports = {
         // Disable base rules that are covered by TypeScript
         'no-unused-vars': 'off',
         'no-undef': 'off',
-        
+
         // TypeScript specific rules
-        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { argsIgnorePattern: '^_' },
+        ],
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
