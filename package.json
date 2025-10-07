@@ -11,6 +11,8 @@
     "build": "pnpm --filter \"@afp/shared-types\" build && pnpm --filter \"@afp/web\" --filter \"@afp/email-service\" build",
     "build:web": "pnpm --filter \"@afp/shared-types\" build && pnpm --filter \"@afp/web\" build",
     "build:api": "pnpm --filter \"@afp/shared-types\" build && pnpm --filter \"@afp/email-service\" build",
+    "start:web": "cd apps/web && pnpm start",
+    "start:api": "cd apps/email-service && pnpm start",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test --watch",
     "test:web": "pnpm --filter \"@afp/web\" test",
