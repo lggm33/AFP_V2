@@ -16,12 +16,12 @@ AFP_V2/
 
 ## Railway Configuration
 
-> **Important:** This project uses pnpm workspaces. Railway is configured to use pnpm via:
+> **Important:** This project uses pnpm workspaces. Railway (Railpack) automatically detects pnpm via:
 > - `package.json` → `"packageManager": "pnpm@8.12.0"`
-> - `nixpacks.toml` → Forces pnpm installation phase
-> - `.npmrc` → Declares pnpm as package manager
+> - `.npmrc` → `package-manager=pnpm`
+> - `engines` → `"pnpm": ">=8.0.0"`
 >
-> These files ensure Railway uses `pnpm install` instead of `npm install`.
+> Railway's Railpack builder automatically uses pnpm when these files are present.
 
 ### Service 1: Frontend (SPA)
 
