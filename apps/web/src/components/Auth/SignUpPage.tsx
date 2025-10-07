@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase } from '../../config/supabase';
+import { supabase } from '@/config/supabase';
 
 export function SignUpPage() {
   const navigate = useNavigate();

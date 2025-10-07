@@ -100,14 +100,20 @@ dev-api:
 ## Build & Test
 build:
 	@echo "$(CYAN)🔨 Building all applications...$(RESET)"
-	pnpm -r build
+	@echo "$(CYAN)📦 Building shared types first...$(RESET)"
+	pnpm --filter "@afp/shared-types" build
+	@echo "$(CYAN)🏗️ Building applications...$(RESET)"
+	pnpm --filter "@afp/web" --filter "@afp/email-service" build
+	@echo "$(GREEN)✅ Build completed!$(RESET)"
 
 build-web:
 	@echo "$(CYAN)🌐 Building frontend...$(RESET)"
+	pnpm --filter "@afp/shared-types" build
 	pnpm --filter "@afp/web" build
 
 build-api:
 	@echo "$(CYAN)⚙️ Building backend...$(RESET)"
+	pnpm --filter "@afp/shared-types" build
 	pnpm --filter "@afp/email-service" build
 
 test:

@@ -34,7 +34,8 @@
       "@/lib/*": ["./src/lib/*"],
       "@/stores/*": ["./src/stores/*"],
       "@/utils/*": ["./src/utils/*"],
-      "@/types/*": ["./src/types/*"]
+      "@/types/*": ["./src/types/*"],
+      "@/config/*": ["./src/config/*"]
     }
   },
   "include": ["src", "vite.config.ts"],

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AuthRedirectHandler } from '../Auth/AuthRedirectHandler';
+import { AuthRedirectHandler } from '@/components/Auth/AuthRedirectHandler';
 
 export function LandingPage() {
   return (

@@ -1,5 +1,5 @@
 // Google Authentication Component
-import { supabase } from '../../config/supabase';
+import { supabase } from '@/config/supabase';
 
 interface GoogleAuthProps {
   onSuccess?: () => void;

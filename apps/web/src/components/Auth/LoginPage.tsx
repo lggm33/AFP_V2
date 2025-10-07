@@ -1,6 +1,6 @@
 // Main Login Page Component
 import { useState } from 'react';
-import { GoogleAuth } from './GoogleAuth';
+import { GoogleAuth } from '@/components/Auth/GoogleAuth';
 
 interface LoginPageProps {
   onSuccess?: () => void;

@@ -1,7 +1,7 @@
 // Authentication Store using Zustand
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from '../config/supabase';
+import { supabase } from '@/config/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -22,9 +22,93 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
+// Helper function to handle auth state changes
+const handleAuthStateChange =
+  (set: (partial: Partial<AuthState>) => void) =>
+  async (_event: string, session: Session | null) => {
+    set({
+      session,
+      user: session?.user || null,
+      loading: false,
+    });
+  };
+
+// Helper function for sign out
+const createSignOut =
+  (set: (partial: Partial<AuthState>) => void) => async () => {
+    try {
+      set({ loading: true });
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      set({
+        user: null,
+        session: null,
+        loading: false,
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      set({ loading: false });
+      throw error;
+    }
+  };
+
+// Helper function for initialization
+const createInitialize =
+  (set: (partial: Partial<AuthState>) => void) => async () => {
+    try {
+      set({ loading: true });
+
+      // Get initial session
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (error) throw error;
+
+      set({
+        session,
+        user: session?.user || null,
+        loading: false,
+        initialized: true,
+      });
+
+      // Listen for auth changes
+      supabase.auth.onAuthStateChange(handleAuthStateChange(set));
+    } catch (error) {
+      console.error('Error initializing auth:', error);
+      set({
+        loading: false,
+        initialized: true,
+        user: null,
+        session: null,
+      });
+    }
+  };
+
+// Helper function for refresh session
+const createRefreshSession =
+  (set: (partial: Partial<AuthState>) => void) => async () => {
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.refreshSession();
+      if (error) throw error;
+
+      set({
+        session,
+        user: session?.user || null,
+      });
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+      throw error;
+    }
+  };
+
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    set => ({
       // State
       user: null,
       session: null,
@@ -32,99 +116,24 @@ export const useAuthStore = create<AuthStore>()(
       initialized: false,
 
       // Actions
-      setUser: (user) => set({ user }),
-      
-      setSession: (session) => {
-        set({ 
-          session, 
-          user: session?.user || null 
+      setUser: user => set({ user }),
+
+      setSession: session => {
+        set({
+          session,
+          user: session?.user || null,
         });
       },
-      
-      setLoading: (loading) => set({ loading }),
 
-      signOut: async () => {
-        try {
-          set({ loading: true });
-          const { error } = await supabase.auth.signOut();
-          if (error) throw error;
-          
-          set({ 
-            user: null, 
-            session: null, 
-            loading: false 
-          });
-        } catch (error) {
-          console.error('Error signing out:', error);
-          set({ loading: false });
-          throw error;
-        }
-      },
+      setLoading: loading => set({ loading }),
 
-      initialize: async () => {
-        try {
-          set({ loading: true });
-          
-          // Get initial session
-          const { data: { session }, error } = await supabase.auth.getSession();
-          if (error) throw error;
-
-          set({ 
-            session, 
-            user: session?.user || null,
-            loading: false,
-            initialized: true
-          });
-
-          // Listen for auth changes
-          supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state changed:', event, session?.user?.email);
-            
-            set({ 
-              session, 
-              user: session?.user || null,
-              loading: false
-            });
-
-            // Handle specific events
-            if (event === 'SIGNED_IN') {
-              console.log('User signed in:', session?.user?.email);
-            } else if (event === 'SIGNED_OUT') {
-              console.log('User signed out');
-            } else if (event === 'TOKEN_REFRESHED') {
-              console.log('Token refreshed');
-            }
-          });
-
-        } catch (error) {
-          console.error('Error initializing auth:', error);
-          set({ 
-            loading: false, 
-            initialized: true,
-            user: null,
-            session: null
-          });
-        }
-      },
-
-      refreshSession: async () => {
-        try {
-          const { data: { session }, error } = await supabase.auth.refreshSession();
-          if (error) throw error;
-          
-          set({ 
-            session, 
-            user: session?.user || null 
-          });
-        } catch (error) {
-          console.error('Error refreshing session:', error);
-          throw error;
-        }
-      },
+      signOut: createSignOut(set),
+      initialize: createInitialize(set),
+      refreshSession: createRefreshSession(set),
     }),
     {
       name: 'afp-auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         // Only persist non-sensitive data
         initialized: state.initialized,
       }),

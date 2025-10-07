@@ -1,5 +1,5 @@
 // Supabase Configuration for Web App
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseWebClient } from '@afp/shared-types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -10,19 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'afp-finance-web'
-    }
-  }
+export const supabase = createSupabaseWebClient({
+  url: supabaseUrl,
+  anonKey: supabaseAnonKey,
 });
-
-// Export for type checking
-export type Database = any; // TODO: Generate proper types from Supabase

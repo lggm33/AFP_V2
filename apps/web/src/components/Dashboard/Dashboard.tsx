@@ -1,5 +1,5 @@
 // Main Dashboard Component
-import { useAuth } from '../../stores/authStore';
+import { useAuth } from '@/stores/authStore';
 
 export function Dashboard() {
   const { user, signOut } = useAuth();

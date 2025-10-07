@@ -1,7 +1,7 @@
 // Authentication Guard Component
 import React, { useEffect } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import { useAuth } from '../../stores/authStore';
+import { useAuth } from '@/stores/authStore';
 
 interface AuthGuardProps {
   children: React.ReactNode;

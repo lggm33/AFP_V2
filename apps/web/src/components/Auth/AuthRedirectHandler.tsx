@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../../config/supabase';
+import { supabase } from '@/config/supabase';
 
 export function AuthRedirectHandler() {
   const navigate = useNavigate();

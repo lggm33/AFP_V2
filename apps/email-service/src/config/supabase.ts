@@ -1,5 +1,5 @@
 // Supabase Configuration for Email Service
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseServiceClient } from '@afp/shared-types';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -11,12 +11,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 // Use service role key for server-side operations
-export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
+export const supabase = createSupabaseServiceClient({
+  url: supabaseUrl,
+  serviceRoleKey: supabaseServiceKey,
 });
-
-// Export for type checking
-export type Database = any; // TODO: Generate proper types from Supabase

@@ -1,6 +1,6 @@
 // OAuth Callback Handler Component
 import { useEffect, useState } from 'react';
-import { supabase } from '../../config/supabase';
+import { supabase } from '@/config/supabase';
 
 interface AuthCallbackProps {
   onSuccess: () => void;
