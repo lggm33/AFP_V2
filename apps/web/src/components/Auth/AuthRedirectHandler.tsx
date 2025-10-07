@@ -1,3 +1,5 @@
+// Auth Redirect Handler for PKCE Flow
+// Handles OAuth redirect after Google authentication completes
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/config/supabase';
@@ -8,55 +10,80 @@ export function AuthRedirectHandler() {
 
   useEffect(() => {
     const handleAuthRedirect = async () => {
-      // Check if we have auth tokens in the URL (from Supabase redirect)
-      const hashParams = new URLSearchParams(location.hash.substring(1));
+      // With PKCE flow, check if we have the authorization code in query params
       const searchParams = new URLSearchParams(location.search);
+      const code = searchParams.get('code');
 
-      const hasAccessToken = hashParams.get('access_token');
-      const hasCode = searchParams.get('code');
-      const hasAuthParams = hasAccessToken || hasCode;
-
-      if (hasAuthParams) {
-        console.log('🔄 Auth redirect detected, processing...');
-
+      if (code) {
         try {
-          // Wait a bit for Supabase to process the session
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Small delay to ensure Supabase SDK has processed the URL
+          await new Promise(resolve => setTimeout(resolve, 500));
 
-          // Check if we now have a valid session
+          // Check if session already exists (SDK might have already exchanged)
           const {
-            data: { session },
-            error,
+            data: { session: existingSession },
           } = await supabase.auth.getSession();
 
-          if (error) {
-            console.error('❌ Error getting session:', error);
-            navigate('/signin?error=auth_failed');
+          if (existingSession) {
+            const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+            navigate(redirectTo, { replace: true });
             return;
           }
 
-          if (session) {
-            console.log('✅ Session found, processing redirect');
+          // If no session yet, wait for auth state change
+          let redirected = false;
 
-            // Check for intended destination in query params
-            const searchParams = new URLSearchParams(location.search);
-            const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+          const {
+            data: { subscription },
+          } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session && !redirected) {
+              redirected = true;
 
-            console.log(`🎯 Redirecting to: ${redirectTo}`);
-            navigate(redirectTo, { replace: true });
-          } else {
-            console.log('⚠️ No session found, redirecting to signin');
-            navigate('/signin', { replace: true });
-          }
+              const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+              subscription.unsubscribe();
+
+              setTimeout(() => {
+                navigate(redirectTo, { replace: true });
+              }, 100);
+            }
+          });
+
+          // Fallback: If nothing happens in 5 seconds, check manually
+          setTimeout(async () => {
+            if (redirected) return;
+
+            const {
+              data: { session },
+              error,
+            } = await supabase.auth.getSession();
+
+            subscription.unsubscribe();
+
+            if (error) {
+              console.error(
+                'Error getting session after OAuth redirect:',
+                error
+              );
+              navigate('/signin?error=auth_failed', { replace: true });
+              return;
+            }
+
+            if (session) {
+              const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+              navigate(redirectTo, { replace: true });
+            } else {
+              navigate('/signin', { replace: true });
+            }
+          }, 5000);
         } catch (error) {
-          console.error('❌ Error processing auth redirect:', error);
-          navigate('/signin?error=auth_processing_failed');
+          console.error('Error processing auth redirect:', error);
+          navigate('/signin?error=auth_processing_failed', { replace: true });
         }
       }
     };
 
-    // Only run if we're on the root path with potential auth params
-    if (location.pathname === '/' && (location.hash || location.search)) {
+    // Only run if we're on the root path with a code parameter
+    if (location.pathname === '/' && location.search.includes('code=')) {
       handleAuthRedirect();
     }
   }, [location, navigate]);

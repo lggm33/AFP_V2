@@ -20,15 +20,16 @@ export function GoogleAuth({
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
+      // Using PKCE flow (configured globally in supabase client)
+      // Google will redirect back with a temporary code that Supabase exchanges for tokens
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
           queryParams: {
             access_type: 'offline',
-            prompt: 'consent',
+            prompt: 'select_account', // Only show account selector if multiple accounts
           },
-          skipBrowserRedirect: false,
         },
       });
 

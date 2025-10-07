@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage } from '@/components/Landing/LandingPage';
 import { SignInPage } from '@/components/Auth/SignInPage';
 import { SignUpPage } from '@/components/Auth/SignUpPage';
+import { ForgotPasswordPage } from '@/components/Auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/components/Auth/ResetPasswordPage';
 import { Dashboard } from '@/components/Dashboard/Dashboard';
 import { AuthGuard } from '@/components/Auth/AuthGuard';
 
@@ -10,22 +12,24 @@ export function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/signin" element={<SignInPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        
+        <Route path='/' element={<LandingPage />} />
+        <Route path='/signin' element={<SignInPage />} />
+        <Route path='/signup' element={<SignUpPage />} />
+        <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+        <Route path='/reset-password' element={<ResetPasswordPage />} />
+
         {/* Protected routes */}
-        <Route 
-          path="/dashboard" 
+        <Route
+          path='/dashboard'
           element={
-            <AuthGuard fallback={<Navigate to="/signin" replace />}>
+            <AuthGuard fallback={<Navigate to='/signin' replace />}>
               <Dashboard />
             </AuthGuard>
-          } 
+          }
         />
-        
+
         {/* Redirect unknown routes to landing */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path='*' element={<Navigate to='/' replace />} />
       </Routes>
     </BrowserRouter>
   );

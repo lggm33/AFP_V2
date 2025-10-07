@@ -53,6 +53,9 @@ const createSignOut =
     }
   };
 
+// Track if listener has been set up
+let authListenerSetup = false;
+
 // Helper function for initialization
 const createInitialize =
   (set: (partial: Partial<AuthState>) => void) => async () => {
@@ -64,8 +67,10 @@ const createInitialize =
         data: { session },
         error,
       } = await supabase.auth.getSession();
+      
       if (error) throw error;
 
+      // Set initial state
       set({
         session,
         user: session?.user || null,
@@ -73,8 +78,11 @@ const createInitialize =
         initialized: true,
       });
 
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange(handleAuthStateChange(set));
+      // Listen for auth changes (only set up once)
+      if (!authListenerSetup) {
+        authListenerSetup = true;
+        supabase.auth.onAuthStateChange(handleAuthStateChange(set));
+      }
     } catch (error) {
       console.error('Error initializing auth:', error);
       set({
@@ -134,8 +142,8 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'afp-auth-storage',
       partialize: state => ({
-        // Only persist non-sensitive data
-        initialized: state.initialized,
+        // Don't persist anything - session is stored by Supabase
+        // We always want to re-initialize from Supabase on app load
       }),
     }
   )
@@ -144,9 +152,11 @@ export const useAuthStore = create<AuthStore>()(
 // Computed selectors
 export const useAuth = () => {
   const store = useAuthStore();
+  const isAuthenticated = !!store.user && !!store.session;
+  
   return {
     ...store,
-    isAuthenticated: !!store.user && !!store.session,
+    isAuthenticated,
     isLoading: store.loading,
     isInitialized: store.initialized,
   };

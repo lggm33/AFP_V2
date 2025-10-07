@@ -1,4 +1,5 @@
 // OAuth Callback Handler Component
+// Handles PKCE flow callback - Supabase automatically exchanges the code for tokens
 import { useEffect, useState } from 'react';
 import { supabase } from '@/config/supabase';
 
@@ -13,40 +14,24 @@ export function AuthCallback({ onSuccess, onError }: AuthCallbackProps) {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the URL hash parameters
-        const hashParams = new URLSearchParams(
-          window.location.hash.substring(1)
-        );
-        const accessToken = hashParams.get('access_token');
+        // With PKCE flow, Supabase automatically:
+        // 1. Detects the ?code parameter in the URL
+        // 2. Exchanges it for access/refresh tokens
+        // 3. Stores the session in localStorage
+        // We just need to verify the session was created successfully
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
-        if (accessToken) {
-          // Session should be automatically set by Supabase
-          const {
-            data: { session },
-            error,
-          } = await supabase.auth.getSession();
+        if (error) throw error;
 
-          if (error) throw error;
-
-          if (session) {
-            onSuccess();
-          } else {
-            throw new Error('No session found after OAuth callback');
-          }
-        } else {
-          // Check for error parameters
-          const error = hashParams.get('error');
-          const errorDescription = hashParams.get('error_description');
-
-          if (error) {
-            throw new Error(errorDescription || error);
-          }
-
-          // If no access token and no error, something went wrong
-          throw new Error(
-            'OAuth callback completed but no access token received'
-          );
+        if (!session) {
+          throw new Error('Authentication failed - no session created');
         }
+
+        // Session is ready, authentication successful
+        onSuccess();
       } catch (error) {
         console.error('Auth callback error:', error);
         onError(
