@@ -16,19 +16,25 @@ AFP_V2/
 
 ## Railway Configuration
 
+> **Important:** This project uses pnpm workspaces. Railway is configured to use pnpm via:
+> - `package.json` → `"packageManager": "pnpm@8.12.0"`
+> - `nixpacks.toml` → Forces pnpm installation phase
+> - `.npmrc` → Declares pnpm as package manager
+>
+> These files ensure Railway uses `pnpm install` instead of `npm install`.
+
 ### Service 1: Frontend (SPA)
 
 **Configuration:**
 - **Name:** `afp-web`
 - **Root Directory:** `/`
 - **Build Command:** `pnpm install && pnpm run build:web`
-- **Start Command:** `cd apps/web && pnpm start`
+- **Start Command:** `pnpm run start:web`
 - **Port:** `3000`
 
-> **Note:** Railway will automatically detect pnpm and use it. The build command will:
-> 1. Install all workspace dependencies
-> 2. Build `@afp/shared-types` package
-> 3. Build the web app
+> **Note:** Railway will automatically detect pnpm and use it. All commands run from the root:
+> - `build:web` → Compiles `@afp/shared-types` then `@afp/web`
+> - `start:web` → Serves the built static files with `serve`
 
 **Environment Variables:**
 ```bash
@@ -42,13 +48,12 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 - **Name:** `afp-email-service`
 - **Root Directory:** `/`
 - **Build Command:** `pnpm install && pnpm run build:api`
-- **Start Command:** `cd apps/email-service && pnpm start`
-- **Port:** `3001` (or configure in your service)
+- **Start Command:** `pnpm run start:api`
+- **Port:** `8080` (configured via PORT env var)
 
-> **Note:** Railway will automatically detect pnpm and use it. The build command will:
-> 1. Install all workspace dependencies
-> 2. Build `@afp/shared-types` package
-> 3. Build the email service
+> **Note:** Railway will automatically detect pnpm and use it. All commands run from the root:
+> - `build:api` → Compiles `@afp/shared-types` then `@afp/email-service`
+> - `start:api` → Runs the compiled Node.js server
 
 **Environment Variables:**
 ```bash
@@ -93,9 +98,9 @@ railway init
 ```bash
 # In Railway dashboard, create new service
 # Settings:
-# - Build Command: pnpm install && pnpm build:web
-# - Start Command: cd apps/web && pnpm start
 # - Root Directory: /
+# - Build Command: pnpm install && pnpm run build:web
+# - Start Command: pnpm run start:web
 ```
 
 ### 3. Create Email Service
