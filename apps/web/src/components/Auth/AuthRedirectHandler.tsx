@@ -9,7 +9,40 @@ export function AuthRedirectHandler() {
   const location = useLocation();
 
   useEffect(() => {
+    const checkForErrors = () => {
+      const searchParams = new URLSearchParams(location.search);
+      const hashParams = new URLSearchParams(location.hash.replace('#', ''));
+
+      const error = searchParams.get('error') || hashParams.get('error');
+      const errorCode =
+        searchParams.get('error_code') || hashParams.get('error_code');
+      const errorDescription =
+        searchParams.get('error_description') ||
+        hashParams.get('error_description');
+
+      if (error) {
+        console.error('Auth error:', { error, errorCode, errorDescription });
+
+        if (errorCode === 'otp_expired') {
+          navigate('/signin?error=link_expired', { replace: true });
+          return true;
+        }
+
+        if (error === 'access_denied') {
+          navigate('/signin?error=access_denied', { replace: true });
+          return true;
+        }
+
+        navigate('/signin?error=auth_failed', { replace: true });
+        return true;
+      }
+      return false;
+    };
+
     const handleAuthRedirect = async () => {
+      // Check for auth errors first
+      if (checkForErrors()) return;
+
       // With PKCE flow, check if we have the authorization code in query params
       const searchParams = new URLSearchParams(location.search);
       const code = searchParams.get('code');

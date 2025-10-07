@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/config/supabase';
 import { Mail, Lock } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useAuthErrors } from '@/hooks/useAuthErrors';
 import { AuthLayout } from './shared/AuthLayout';
 import { AlertMessage } from './shared/AlertMessage';
 import { AuthFormInput } from './shared/AuthFormInput';
@@ -17,6 +18,8 @@ export function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useAuthErrors(setError);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

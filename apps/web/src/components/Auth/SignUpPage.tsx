@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/config/supabase';
 import { Mail, Lock, User } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useAuthErrors } from '@/hooks/useAuthErrors';
 import { AuthLayout } from './shared/AuthLayout';
 import { AlertMessage } from './shared/AlertMessage';
 import { AuthFormInput } from './shared/AuthFormInput';
@@ -20,6 +21,8 @@ export function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  useAuthErrors(setError);
 
   const validateForm = () => {
     if (!name || !email || !password || !confirmPassword) {
