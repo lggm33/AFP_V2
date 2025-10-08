@@ -1,5 +1,4 @@
 // Basic Information Section Component
-import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -10,12 +9,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AccountTypeSelect } from './AccountTypeSelect';
-import { SUPPORTED_CURRENCIES } from '@afp/shared-types';
+import type { Database } from '@afp/shared-types';
+
+type AccountType = Database['public']['Enums']['account_type'];
 
 interface BasicInformationSectionProps {
   formData: {
     name: string;
-    account_type?: string;
+    account_type?: AccountType;
     institution_name: string;
     currency: string;
     color?: string;
@@ -23,7 +24,7 @@ interface BasicInformationSectionProps {
     exclude_from_totals: boolean;
   };
   mode: 'create' | 'edit';
-  setField: (field: string, value: any) => void;
+  setField: (field: string, value: unknown) => void;
   getFieldError: (field: string) => string | undefined;
 }
 
@@ -48,11 +49,23 @@ export function BasicInformationSection({
           placeholder='Mi Tarjeta de Crédito'
           value={formData.name}
           onChange={e => setField('name', e.target.value)}
-          className={getFieldError('name') ? 'border-red-500' : ''}
+          className={
+            getFieldError('name')
+              ? 'border-red-500'
+              : formData.name.length > 0
+                ? 'border-green-500'
+                : ''
+          }
         />
         {getFieldError('name') && (
           <p className='text-sm text-red-500'>{getFieldError('name')}</p>
         )}
+        {!getFieldError('name') && formData.name.length > 0 && (
+          <p className='text-sm text-green-600'>✓ Nombre válido</p>
+        )}
+        <p className='text-xs text-gray-500'>
+          Ingresa un nombre descriptivo para identificar este método de pago
+        </p>
       </div>
 
       {/* Account Type */}
@@ -74,13 +87,26 @@ export function BasicInformationSection({
           placeholder='Banco de América'
           value={formData.institution_name}
           onChange={e => setField('institution_name', e.target.value)}
-          className={getFieldError('institution_name') ? 'border-red-500' : ''}
+          className={
+            getFieldError('institution_name')
+              ? 'border-red-500'
+              : formData.institution_name.length > 0
+                ? 'border-green-500'
+                : ''
+          }
         />
         {getFieldError('institution_name') && (
           <p className='text-sm text-red-500'>
             {getFieldError('institution_name')}
           </p>
         )}
+        {!getFieldError('institution_name') &&
+          formData.institution_name.length > 0 && (
+            <p className='text-sm text-green-600'>✓ Institución válida</p>
+          )}
+        <p className='text-xs text-gray-500'>
+          Nombre del banco o institución financiera
+        </p>
       </div>
 
       {/* Currency */}

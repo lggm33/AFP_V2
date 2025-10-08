@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { PaymentMethodCard } from './PaymentMethodCard';
 import { PaymentMethodFormDialog } from './PaymentMethodFormDialog';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import {
   PaymentMethodsLoading,
   PaymentMethodsError,
@@ -49,6 +50,13 @@ export function PaymentMethodsList({
     handleDelete,
     handleSetPrimary,
     handleCloseForm,
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    deleteLoading,
+    handleConfirmDelete,
+    handleCancelDelete,
+    primaryError,
+    deleteError,
   } = usePaymentMethodHandlers({
     createPaymentMethod,
     updatePaymentMethod,
@@ -64,6 +72,13 @@ export function PaymentMethodsList({
 
   return (
     <div className='space-y-6'>
+      {/* Primary Error Alert */}
+      {primaryError && (
+        <div className='bg-red-50 border border-red-200 rounded-lg p-3'>
+          <p className='text-red-800 text-sm'>{primaryError}</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
@@ -109,6 +124,21 @@ export function PaymentMethodsList({
         formLoading={formLoading}
         onSubmit={handleFormSubmit}
         onCancel={handleCloseForm}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title='Eliminar Método de Pago'
+        description='¿Estás seguro de que quieres eliminar este método de pago? Esta acción no se puede deshacer.'
+        confirmText='Eliminar'
+        cancelText='Cancelar'
+        variant='destructive'
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        loading={deleteLoading}
+        error={deleteError}
       />
     </div>
   );

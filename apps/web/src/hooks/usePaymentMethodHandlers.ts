@@ -10,11 +10,11 @@ type CreditDetails =
   Database['public']['Tables']['payment_method_credit_details']['Row'];
 
 interface UsePaymentMethodHandlersProps {
-  createPaymentMethod: (data: PaymentMethodCreateInput) => Promise<any>;
+  createPaymentMethod: (data: PaymentMethodCreateInput) => Promise<unknown>;
   updatePaymentMethod: (
     id: string,
     data: PaymentMethodUpdateInput
-  ) => Promise<any>;
+  ) => Promise<unknown>;
   deletePaymentMethod: (id: string) => Promise<void>;
   setPrimary: (id: string) => Promise<void>;
   autoOpenForm?: boolean;
@@ -33,6 +33,14 @@ export function usePaymentMethodHandlers({
   >(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingPaymentMethodId, setDeletingPaymentMethodId] = useState<
+    string | null
+  >(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [primaryLoading, setPrimaryLoading] = useState(false);
+  const [primaryError, setPrimaryError] = useState<string | null>(null);
 
   const handleCreate = () => {
     setEditingPaymentMethod(null);
@@ -81,23 +89,55 @@ export function usePaymentMethodHandlers({
     }
   };
 
-  const handleDelete = async (paymentMethodId: string) => {
-    if (!confirm('Are you sure you want to delete this payment method?')) {
-      return;
-    }
+  const handleDelete = (paymentMethodId: string) => {
+    setDeletingPaymentMethodId(paymentMethodId);
+    setDeleteError(null);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingPaymentMethodId) return;
+
+    setDeleteLoading(true);
+    setDeleteError(null);
 
     try {
-      await deletePaymentMethod(paymentMethodId);
+      await deletePaymentMethod(deletingPaymentMethodId);
+      setShowDeleteConfirm(false);
+      setDeletingPaymentMethodId(null);
     } catch (err) {
-      alert('Failed to delete payment method');
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Error al eliminar el método de pago';
+      setDeleteError(errorMessage);
+      console.error('Failed to delete payment method:', err);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setDeletingPaymentMethodId(null);
+    setDeleteError(null);
+  };
+
   const handleSetPrimary = async (paymentMethodId: string) => {
+    setPrimaryLoading(true);
+    setPrimaryError(null);
+
     try {
       await setPrimary(paymentMethodId);
     } catch (err) {
-      alert('Failed to set primary payment method');
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Error al establecer método de pago principal';
+      setPrimaryError(errorMessage);
+      console.error('Failed to set primary payment method:', err);
+    } finally {
+      setPrimaryLoading(false);
     }
   };
 
@@ -119,5 +159,17 @@ export function usePaymentMethodHandlers({
     handleDelete,
     handleSetPrimary,
     handleCloseForm,
+    // Delete confirmation modal state
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    deletingPaymentMethodId,
+    deleteLoading,
+    handleConfirmDelete,
+    handleCancelDelete,
+    // Primary action state
+    primaryLoading,
+    primaryError,
+    // Delete error state
+    deleteError,
   };
 }
