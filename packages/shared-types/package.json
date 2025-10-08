@@ -26,7 +26,8 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.58.0"
+    "@supabase/supabase-js": "^2.58.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
