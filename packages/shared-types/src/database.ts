@@ -199,6 +199,273 @@ export type Database = {
         };
         Relationships: [];
       };
+      payment_method_credit_details: {
+        Row: {
+          billing_cycle_day: number | null;
+          created_at: string | null;
+          credit_limit: number;
+          grace_period_days: number | null;
+          interest_rate: number | null;
+          last_statement_balance: number | null;
+          last_statement_date: string | null;
+          metadata: Json | null;
+          minimum_payment_percentage: number | null;
+          next_payment_due_date: string | null;
+          payment_due_day: number | null;
+          payment_method_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          billing_cycle_day?: number | null;
+          created_at?: string | null;
+          credit_limit: number;
+          grace_period_days?: number | null;
+          interest_rate?: number | null;
+          last_statement_balance?: number | null;
+          last_statement_date?: string | null;
+          metadata?: Json | null;
+          minimum_payment_percentage?: number | null;
+          next_payment_due_date?: string | null;
+          payment_due_day?: number | null;
+          payment_method_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          billing_cycle_day?: number | null;
+          created_at?: string | null;
+          credit_limit?: number;
+          grace_period_days?: number | null;
+          interest_rate?: number | null;
+          last_statement_balance?: number | null;
+          last_statement_date?: string | null;
+          metadata?: Json | null;
+          minimum_payment_percentage?: number | null;
+          next_payment_due_date?: string | null;
+          payment_due_day?: number | null;
+          payment_method_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_method_credit_details_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: true;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_credit_details_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_credit_details_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      payment_methods: {
+        Row: {
+          account_number_hash: string | null;
+          account_type: Database['public']['Enums']['account_type'];
+          available_balance: number | null;
+          card_brand: Database['public']['Enums']['card_brand'] | null;
+          color: string | null;
+          created_at: string | null;
+          currency: string | null;
+          current_balance: number | null;
+          deleted_at: string | null;
+          exclude_from_totals: boolean | null;
+          icon: string | null;
+          id: string;
+          institution_name: string;
+          is_primary: boolean | null;
+          last_balance_update: string | null;
+          last_four_digits: string | null;
+          metadata: Json | null;
+          name: string;
+          status: Database['public']['Enums']['payment_method_status'] | null;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          account_number_hash?: string | null;
+          account_type: Database['public']['Enums']['account_type'];
+          available_balance?: number | null;
+          card_brand?: Database['public']['Enums']['card_brand'] | null;
+          color?: string | null;
+          created_at?: string | null;
+          currency?: string | null;
+          current_balance?: number | null;
+          deleted_at?: string | null;
+          exclude_from_totals?: boolean | null;
+          icon?: string | null;
+          id?: string;
+          institution_name: string;
+          is_primary?: boolean | null;
+          last_balance_update?: string | null;
+          last_four_digits?: string | null;
+          metadata?: Json | null;
+          name: string;
+          status?: Database['public']['Enums']['payment_method_status'] | null;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          account_number_hash?: string | null;
+          account_type?: Database['public']['Enums']['account_type'];
+          available_balance?: number | null;
+          card_brand?: Database['public']['Enums']['card_brand'] | null;
+          color?: string | null;
+          created_at?: string | null;
+          currency?: string | null;
+          current_balance?: number | null;
+          deleted_at?: string | null;
+          exclude_from_totals?: boolean | null;
+          icon?: string | null;
+          id?: string;
+          institution_name?: string;
+          is_primary?: boolean | null;
+          last_balance_update?: string | null;
+          last_four_digits?: string | null;
+          metadata?: Json | null;
+          name?: string;
+          status?: Database['public']['Enums']['payment_method_status'] | null;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_methods_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      scheduled_transactions: {
+        Row: {
+          amount: number;
+          auto_create: boolean | null;
+          category_id: string | null;
+          created_at: string | null;
+          currency: string | null;
+          custom_frequency_days: number | null;
+          deleted_at: string | null;
+          description: string;
+          end_date: string | null;
+          frequency: Database['public']['Enums']['scheduled_frequency'];
+          id: string;
+          is_active: boolean | null;
+          last_occurrence_date: string | null;
+          max_occurrences: number | null;
+          merchant_name: string | null;
+          metadata: Json | null;
+          next_occurrence_date: string;
+          notification_days_before: number | null;
+          notification_enabled: boolean | null;
+          occurrences_count: number | null;
+          payment_method_id: string | null;
+          transaction_type: Database['public']['Enums']['transaction_type'];
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          amount: number;
+          auto_create?: boolean | null;
+          category_id?: string | null;
+          created_at?: string | null;
+          currency?: string | null;
+          custom_frequency_days?: number | null;
+          deleted_at?: string | null;
+          description: string;
+          end_date?: string | null;
+          frequency: Database['public']['Enums']['scheduled_frequency'];
+          id?: string;
+          is_active?: boolean | null;
+          last_occurrence_date?: string | null;
+          max_occurrences?: number | null;
+          merchant_name?: string | null;
+          metadata?: Json | null;
+          next_occurrence_date: string;
+          notification_days_before?: number | null;
+          notification_enabled?: boolean | null;
+          occurrences_count?: number | null;
+          payment_method_id?: string | null;
+          transaction_type: Database['public']['Enums']['transaction_type'];
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          amount?: number;
+          auto_create?: boolean | null;
+          category_id?: string | null;
+          created_at?: string | null;
+          currency?: string | null;
+          custom_frequency_days?: number | null;
+          deleted_at?: string | null;
+          description?: string;
+          end_date?: string | null;
+          frequency?: Database['public']['Enums']['scheduled_frequency'];
+          id?: string;
+          is_active?: boolean | null;
+          last_occurrence_date?: string | null;
+          max_occurrences?: number | null;
+          merchant_name?: string | null;
+          metadata?: Json | null;
+          next_occurrence_date?: string;
+          notification_days_before?: number | null;
+          notification_enabled?: boolean | null;
+          occurrences_count?: number | null;
+          payment_method_id?: string | null;
+          transaction_type?: Database['public']['Enums']['transaction_type'];
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'scheduled_transactions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'transaction_categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       sync_logs: {
         Row: {
           completed_at: string | null;
@@ -236,6 +503,90 @@ export type Database = {
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      transaction_amounts: {
+        Row: {
+          authorized_amount: number | null;
+          created_at: string | null;
+          exchange_rate: number | null;
+          exchange_rate_date: string | null;
+          fees: number | null;
+          metadata: Json | null;
+          original_amount: number | null;
+          original_currency: string | null;
+          settled_amount: number | null;
+          tax: number | null;
+          tips: number | null;
+          transaction_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          authorized_amount?: number | null;
+          created_at?: string | null;
+          exchange_rate?: number | null;
+          exchange_rate_date?: string | null;
+          fees?: number | null;
+          metadata?: Json | null;
+          original_amount?: number | null;
+          original_currency?: string | null;
+          settled_amount?: number | null;
+          tax?: number | null;
+          tips?: number | null;
+          transaction_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          authorized_amount?: number | null;
+          created_at?: string | null;
+          exchange_rate?: number | null;
+          exchange_rate_date?: string | null;
+          fees?: number | null;
+          metadata?: Json | null;
+          original_amount?: number | null;
+          original_currency?: string | null;
+          settled_amount?: number | null;
+          tax?: number | null;
+          tips?: number | null;
+          transaction_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transaction_amounts_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_amounts_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transaction_amounts_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_amounts_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_amounts_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_with_details';
             referencedColumns: ['id'];
           },
         ];
@@ -294,6 +645,174 @@ export type Database = {
           },
         ];
       };
+      transaction_merchant_details: {
+        Row: {
+          cleaned_merchant_name: string | null;
+          created_at: string | null;
+          merchant_address: string | null;
+          merchant_category_code: string | null;
+          merchant_city: string | null;
+          merchant_country: string | null;
+          merchant_phone: string | null;
+          merchant_website: string | null;
+          metadata: Json | null;
+          raw_merchant_name: string | null;
+          transaction_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          cleaned_merchant_name?: string | null;
+          created_at?: string | null;
+          merchant_address?: string | null;
+          merchant_category_code?: string | null;
+          merchant_city?: string | null;
+          merchant_country?: string | null;
+          merchant_phone?: string | null;
+          merchant_website?: string | null;
+          metadata?: Json | null;
+          raw_merchant_name?: string | null;
+          transaction_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          cleaned_merchant_name?: string | null;
+          created_at?: string | null;
+          merchant_address?: string | null;
+          merchant_category_code?: string | null;
+          merchant_city?: string | null;
+          merchant_country?: string | null;
+          merchant_phone?: string | null;
+          merchant_website?: string | null;
+          metadata?: Json | null;
+          raw_merchant_name?: string | null;
+          transaction_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transaction_merchant_details_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_merchant_details_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transaction_merchant_details_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_merchant_details_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_merchant_details_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_with_details';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      transaction_metadata: {
+        Row: {
+          audit: Json | null;
+          classification: Json | null;
+          created_at: string | null;
+          external_ids: Json | null;
+          extra: Json | null;
+          ml_features: Json | null;
+          notes: string | null;
+          reconciliation: Json | null;
+          relations: Json | null;
+          source: Json | null;
+          tags: string[] | null;
+          temporal: Json | null;
+          transaction_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          audit?: Json | null;
+          classification?: Json | null;
+          created_at?: string | null;
+          external_ids?: Json | null;
+          extra?: Json | null;
+          ml_features?: Json | null;
+          notes?: string | null;
+          reconciliation?: Json | null;
+          relations?: Json | null;
+          source?: Json | null;
+          tags?: string[] | null;
+          temporal?: Json | null;
+          transaction_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          audit?: Json | null;
+          classification?: Json | null;
+          created_at?: string | null;
+          external_ids?: Json | null;
+          extra?: Json | null;
+          ml_features?: Json | null;
+          notes?: string | null;
+          reconciliation?: Json | null;
+          relations?: Json | null;
+          source?: Json | null;
+          tags?: string[] | null;
+          temporal?: Json | null;
+          transaction_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transaction_metadata_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_metadata_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transaction_metadata_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_metadata_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_metadata_transaction_id_fkey';
+            columns: ['transaction_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_transactions_with_details';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       transactions: {
         Row: {
           amount: number;
@@ -305,12 +824,23 @@ export type Database = {
           description: string;
           email_account_id: string | null;
           id: string;
+          installment_number: number | null;
+          installment_total: number | null;
           is_recurring: boolean | null;
           is_verified: boolean | null;
+          merchant_location: string | null;
           merchant_name: string | null;
           metadata: Json | null;
+          notification_received_at: string | null;
+          parent_transaction_id: string | null;
+          payment_method_id: string | null;
+          requires_review: boolean | null;
           source_email_id: string | null;
+          status: Database['public']['Enums']['transaction_status'] | null;
           transaction_date: string;
+          transaction_subtype:
+            | Database['public']['Enums']['transaction_subtype']
+            | null;
           transaction_type: Database['public']['Enums']['transaction_type'];
           updated_at: string | null;
           user_id: string;
@@ -325,12 +855,23 @@ export type Database = {
           description: string;
           email_account_id?: string | null;
           id?: string;
+          installment_number?: number | null;
+          installment_total?: number | null;
           is_recurring?: boolean | null;
           is_verified?: boolean | null;
+          merchant_location?: string | null;
           merchant_name?: string | null;
           metadata?: Json | null;
+          notification_received_at?: string | null;
+          parent_transaction_id?: string | null;
+          payment_method_id?: string | null;
+          requires_review?: boolean | null;
           source_email_id?: string | null;
+          status?: Database['public']['Enums']['transaction_status'] | null;
           transaction_date: string;
+          transaction_subtype?:
+            | Database['public']['Enums']['transaction_subtype']
+            | null;
           transaction_type: Database['public']['Enums']['transaction_type'];
           updated_at?: string | null;
           user_id: string;
@@ -345,12 +886,23 @@ export type Database = {
           description?: string;
           email_account_id?: string | null;
           id?: string;
+          installment_number?: number | null;
+          installment_total?: number | null;
           is_recurring?: boolean | null;
           is_verified?: boolean | null;
+          merchant_location?: string | null;
           merchant_name?: string | null;
           metadata?: Json | null;
+          notification_received_at?: string | null;
+          parent_transaction_id?: string | null;
+          payment_method_id?: string | null;
+          requires_review?: boolean | null;
           source_email_id?: string | null;
+          status?: Database['public']['Enums']['transaction_status'] | null;
           transaction_date?: string;
+          transaction_subtype?:
+            | Database['public']['Enums']['transaction_subtype']
+            | null;
           transaction_type?: Database['public']['Enums']['transaction_type'];
           updated_at?: string | null;
           user_id?: string;
@@ -368,6 +920,62 @@ export type Database = {
             columns: ['email_account_id'];
             isOneToOne: false;
             referencedRelation: 'email_accounts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_with_details';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
           {
@@ -420,9 +1028,667 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      v_credit_card_summary: {
+        Row: {
+          available_credit: number | null;
+          color: string | null;
+          credit_limit: number | null;
+          current_debt: number | null;
+          days_until_due: number | null;
+          id: string | null;
+          institution_name: string | null;
+          last_four_digits: string | null;
+          last_payment_amount: number | null;
+          last_payment_date: string | null;
+          last_statement_date: string | null;
+          last_statement_debt: number | null;
+          minimum_payment_due: number | null;
+          name: string | null;
+          next_payment_due_date: string | null;
+          payment_status: string | null;
+          pending_charges: number | null;
+          user_id: string | null;
+          utilization_percentage: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_methods_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_installment_purchases: {
+        Row: {
+          category_id: string | null;
+          completion_percentage: number | null;
+          description: string | null;
+          merchant_name: string | null;
+          monthly_payment: number | null;
+          next_payment_date: string | null;
+          paid_amount: number | null;
+          paid_installments: number | null;
+          payment_method_id: string | null;
+          pending_installments: number | null;
+          purchase_date: string | null;
+          purchase_id: string | null;
+          remaining_amount: number | null;
+          total_amount: number | null;
+          total_installments: number | null;
+          user_id: string | null;
+        };
+        Insert: {
+          category_id?: string | null;
+          completion_percentage?: never;
+          description?: string | null;
+          merchant_name?: string | null;
+          monthly_payment?: never;
+          next_payment_date?: never;
+          paid_amount?: never;
+          paid_installments?: never;
+          payment_method_id?: string | null;
+          pending_installments?: never;
+          purchase_date?: string | null;
+          purchase_id?: string | null;
+          remaining_amount?: never;
+          total_amount?: number | null;
+          total_installments?: number | null;
+          user_id?: string | null;
+        };
+        Update: {
+          category_id?: string | null;
+          completion_percentage?: never;
+          description?: string | null;
+          merchant_name?: string | null;
+          monthly_payment?: never;
+          next_payment_date?: never;
+          paid_amount?: never;
+          paid_installments?: never;
+          payment_method_id?: string | null;
+          pending_installments?: never;
+          purchase_date?: string | null;
+          purchase_id?: string | null;
+          remaining_amount?: never;
+          total_amount?: number | null;
+          total_installments?: number | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transactions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'transaction_categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_payment_methods_with_stats: {
+        Row: {
+          account_number_hash: string | null;
+          account_type: Database['public']['Enums']['account_type'] | null;
+          available_balance: number | null;
+          card_brand: Database['public']['Enums']['card_brand'] | null;
+          color: string | null;
+          created_at: string | null;
+          credit_limit: number | null;
+          currency: string | null;
+          current_balance: number | null;
+          deleted_at: string | null;
+          exclude_from_totals: boolean | null;
+          icon: string | null;
+          id: string | null;
+          institution_name: string | null;
+          is_primary: boolean | null;
+          last_balance_update: string | null;
+          last_four_digits: string | null;
+          last_statement_balance: number | null;
+          last_transaction_date: string | null;
+          metadata: Json | null;
+          name: string | null;
+          next_payment_due_date: string | null;
+          pending_amount: number | null;
+          status: Database['public']['Enums']['payment_method_status'] | null;
+          transaction_count: number | null;
+          updated_at: string | null;
+          user_id: string | null;
+          utilization_percentage: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_methods_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_transactions_full: {
+        Row: {
+          account_type: Database['public']['Enums']['account_type'] | null;
+          amount: number | null;
+          audit: Json | null;
+          authorized_amount: number | null;
+          category_color: string | null;
+          category_icon: string | null;
+          category_id: string | null;
+          category_name: string | null;
+          classification: Json | null;
+          cleaned_merchant_name: string | null;
+          confidence_score: number | null;
+          created_at: string | null;
+          currency: string | null;
+          deleted_at: string | null;
+          description: string | null;
+          email_account_id: string | null;
+          exchange_rate: number | null;
+          external_ids: Json | null;
+          fees: number | null;
+          id: string | null;
+          installment_number: number | null;
+          installment_total: number | null;
+          institution_name: string | null;
+          is_recurring: boolean | null;
+          is_verified: boolean | null;
+          last_four_digits: string | null;
+          merchant_address: string | null;
+          merchant_category_code: string | null;
+          merchant_city: string | null;
+          merchant_country: string | null;
+          merchant_location: string | null;
+          merchant_name: string | null;
+          metadata: Json | null;
+          notes: string | null;
+          notification_received_at: string | null;
+          original_amount: number | null;
+          original_currency: string | null;
+          parent_transaction_id: string | null;
+          payment_method_id: string | null;
+          payment_method_name: string | null;
+          raw_merchant_name: string | null;
+          reconciliation: Json | null;
+          relations: Json | null;
+          requires_review: boolean | null;
+          settled_amount: number | null;
+          source: Json | null;
+          source_email_id: string | null;
+          status: Database['public']['Enums']['transaction_status'] | null;
+          tags: string[] | null;
+          tax: number | null;
+          temporal: Json | null;
+          tips: number | null;
+          transaction_date: string | null;
+          transaction_subtype:
+            | Database['public']['Enums']['transaction_subtype']
+            | null;
+          transaction_type:
+            | Database['public']['Enums']['transaction_type']
+            | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transactions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'transaction_categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_email_account_id_fkey';
+            columns: ['email_account_id'];
+            isOneToOne: false;
+            referencedRelation: 'email_accounts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_with_details';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_transactions_requiring_review: {
+        Row: {
+          amount: number | null;
+          category_id: string | null;
+          category_name: string | null;
+          confidence_score: number | null;
+          created_at: string | null;
+          currency: string | null;
+          deleted_at: string | null;
+          description: string | null;
+          email_account_id: string | null;
+          id: string | null;
+          installment_number: number | null;
+          installment_total: number | null;
+          is_recurring: boolean | null;
+          is_verified: boolean | null;
+          merchant_location: string | null;
+          merchant_name: string | null;
+          metadata: Json | null;
+          notification_received_at: string | null;
+          parent_transaction_id: string | null;
+          payment_method_id: string | null;
+          payment_method_name: string | null;
+          requires_review: boolean | null;
+          review_reason: string | null;
+          source_email_id: string | null;
+          status: Database['public']['Enums']['transaction_status'] | null;
+          transaction_date: string | null;
+          transaction_subtype:
+            | Database['public']['Enums']['transaction_subtype']
+            | null;
+          transaction_type:
+            | Database['public']['Enums']['transaction_type']
+            | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transactions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'transaction_categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_email_account_id_fkey';
+            columns: ['email_account_id'];
+            isOneToOne: false;
+            referencedRelation: 'email_accounts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_with_details';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_transactions_with_details: {
+        Row: {
+          account_type: Database['public']['Enums']['account_type'] | null;
+          amount: number | null;
+          category_color: string | null;
+          category_icon: string | null;
+          category_id: string | null;
+          category_name: string | null;
+          confidence_score: number | null;
+          created_at: string | null;
+          currency: string | null;
+          deleted_at: string | null;
+          description: string | null;
+          email_account_id: string | null;
+          id: string | null;
+          installment_number: number | null;
+          installment_total: number | null;
+          institution_name: string | null;
+          is_recurring: boolean | null;
+          is_verified: boolean | null;
+          last_four_digits: string | null;
+          merchant_location: string | null;
+          merchant_name: string | null;
+          metadata: Json | null;
+          notification_received_at: string | null;
+          parent_transaction_id: string | null;
+          payment_method_color: string | null;
+          payment_method_id: string | null;
+          payment_method_name: string | null;
+          requires_review: boolean | null;
+          source_email_id: string | null;
+          status: Database['public']['Enums']['transaction_status'] | null;
+          transaction_date: string | null;
+          transaction_subtype:
+            | Database['public']['Enums']['transaction_subtype']
+            | null;
+          transaction_type:
+            | Database['public']['Enums']['transaction_type']
+            | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transactions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'transaction_categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_email_account_id_fkey';
+            columns: ['email_account_id'];
+            isOneToOne: false;
+            referencedRelation: 'email_accounts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_installment_purchases';
+            referencedColumns: ['purchase_id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_full';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_requiring_review';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_parent_transaction_id_fkey';
+            columns: ['parent_transaction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_transactions_with_details';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_upcoming_scheduled_transactions: {
+        Row: {
+          account_type: Database['public']['Enums']['account_type'] | null;
+          amount: number | null;
+          auto_create: boolean | null;
+          category_color: string | null;
+          category_id: string | null;
+          category_name: string | null;
+          created_at: string | null;
+          currency: string | null;
+          custom_frequency_days: number | null;
+          days_until_next: number | null;
+          deleted_at: string | null;
+          description: string | null;
+          end_date: string | null;
+          frequency: Database['public']['Enums']['scheduled_frequency'] | null;
+          id: string | null;
+          institution_name: string | null;
+          is_active: boolean | null;
+          last_occurrence_date: string | null;
+          max_occurrences: number | null;
+          merchant_name: string | null;
+          metadata: Json | null;
+          next_occurrence_date: string | null;
+          notification_days_before: number | null;
+          notification_enabled: boolean | null;
+          occurrences_count: number | null;
+          payment_method_id: string | null;
+          payment_method_name: string | null;
+          transaction_type:
+            | Database['public']['Enums']['transaction_type']
+            | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'scheduled_transactions_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'transaction_categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Functions: {
+      calculate_payment_method_balance: {
+        Args: { p_as_of_date?: string; p_payment_method_id: string };
+        Returns: {
+          available_balance: number;
+          current_balance: number;
+          last_transaction_date: string;
+          pending_amount: number;
+        }[];
+      };
+      check_duplicate_transaction: {
+        Args: {
+          p_amount: number;
+          p_external_id?: string;
+          p_merchant_name?: string;
+          p_payment_method_id?: string;
+          p_transaction_date: string;
+          p_user_id: string;
+        };
+        Returns: {
+          id: string;
+          similarity_score: number;
+        }[];
+      };
+      create_installment_transactions: {
+        Args: {
+          p_category_id?: string;
+          p_description: string;
+          p_merchant_name?: string;
+          p_number_of_installments: number;
+          p_parent_transaction_id: string;
+          p_payment_method_id: string;
+          p_start_date: string;
+          p_total_amount: number;
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
       gtrgm_compress: {
         Args: { '': unknown };
         Returns: unknown;
@@ -443,6 +1709,19 @@ export type Database = {
         Args: { '': unknown };
         Returns: unknown;
       };
+      process_due_installments: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      process_due_scheduled_transactions: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          error_message: string;
+          scheduled_id: string;
+          success: boolean;
+          transaction_id: string;
+        }[];
+      };
       set_limit: {
         Args: { '': number };
         Returns: number;
@@ -455,20 +1734,80 @@ export type Database = {
         Args: { '': string };
         Returns: string[];
       };
+      update_payment_method_balances: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
     };
     Enums: {
+      account_type:
+        | 'credit_card'
+        | 'debit_card'
+        | 'checking_account'
+        | 'savings_account'
+        | 'cash'
+        | 'digital_wallet'
+        | 'investment_account'
+        | 'other';
       alert_type: 'approaching_limit' | 'exceeded_limit' | 'monthly_summary';
       budget_status:
         | 'under_budget'
         | 'on_track'
         | 'approaching_limit'
         | 'over_budget';
+      card_brand: 'visa' | 'mastercard' | 'amex' | 'discover' | 'other';
       feedback_type:
         | 'correct'
         | 'incorrect_amount'
         | 'incorrect_category'
         | 'incorrect_merchant';
+      payment_method_status:
+        | 'active'
+        | 'inactive'
+        | 'expired'
+        | 'blocked'
+        | 'closed';
+      scheduled_frequency:
+        | 'daily'
+        | 'weekly'
+        | 'biweekly'
+        | 'monthly'
+        | 'bimonthly'
+        | 'quarterly'
+        | 'semiannual'
+        | 'annual'
+        | 'custom';
       sync_status: 'pending' | 'in_progress' | 'completed' | 'failed';
+      transaction_status:
+        | 'pending'
+        | 'authorized'
+        | 'posted'
+        | 'completed'
+        | 'reversed'
+        | 'failed'
+        | 'under_review';
+      transaction_subtype:
+        | 'purchase'
+        | 'payment'
+        | 'transfer_in'
+        | 'transfer_out'
+        | 'fee'
+        | 'interest_charge'
+        | 'interest_earned'
+        | 'refund'
+        | 'adjustment'
+        | 'cash_advance'
+        | 'reversal'
+        | 'chargeback'
+        | 'cashback'
+        | 'dividend'
+        | 'salary'
+        | 'deposit'
+        | 'withdrawal'
+        | 'bill_payment'
+        | 'subscription'
+        | 'installment'
+        | 'other';
       transaction_type: 'income' | 'expense' | 'transfer';
     };
     CompositeTypes: {
@@ -600,6 +1939,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: [
+        'credit_card',
+        'debit_card',
+        'checking_account',
+        'savings_account',
+        'cash',
+        'digital_wallet',
+        'investment_account',
+        'other',
+      ],
       alert_type: ['approaching_limit', 'exceeded_limit', 'monthly_summary'],
       budget_status: [
         'under_budget',
@@ -607,13 +1956,64 @@ export const Constants = {
         'approaching_limit',
         'over_budget',
       ],
+      card_brand: ['visa', 'mastercard', 'amex', 'discover', 'other'],
       feedback_type: [
         'correct',
         'incorrect_amount',
         'incorrect_category',
         'incorrect_merchant',
       ],
+      payment_method_status: [
+        'active',
+        'inactive',
+        'expired',
+        'blocked',
+        'closed',
+      ],
+      scheduled_frequency: [
+        'daily',
+        'weekly',
+        'biweekly',
+        'monthly',
+        'bimonthly',
+        'quarterly',
+        'semiannual',
+        'annual',
+        'custom',
+      ],
       sync_status: ['pending', 'in_progress', 'completed', 'failed'],
+      transaction_status: [
+        'pending',
+        'authorized',
+        'posted',
+        'completed',
+        'reversed',
+        'failed',
+        'under_review',
+      ],
+      transaction_subtype: [
+        'purchase',
+        'payment',
+        'transfer_in',
+        'transfer_out',
+        'fee',
+        'interest_charge',
+        'interest_earned',
+        'refund',
+        'adjustment',
+        'cash_advance',
+        'reversal',
+        'chargeback',
+        'cashback',
+        'dividend',
+        'salary',
+        'deposit',
+        'withdrawal',
+        'bill_payment',
+        'subscription',
+        'installment',
+        'other',
+      ],
       transaction_type: ['income', 'expense', 'transfer'],
     },
   },

@@ -1,16 +1,21 @@
-// Export all types and utilities
+// Main Export File for AFP Shared Types
+
+// =====================================================================================
+// DATABASE TYPES (Auto-generated from Supabase)
+// =====================================================================================
 export * from './database';
+
+// =====================================================================================
+// API TYPES (Organized by domain)
+// =====================================================================================
 export * from './api';
-export {
-  SupabaseQueries,
-  SupabaseSubscriptions,
-  createSupabaseWebClient,
-  createSupabaseServiceClient,
-  formatCurrency,
-  formatDate,
-  getMonthKey,
-  getFirstDayOfMonth,
-  isValidEmail,
-  generateTransactionId,
-  handleSupabaseError,
-} from './supabase';
+
+// =====================================================================================
+// CONSTANTS AND HELPERS
+// =====================================================================================
+export * from './constants';
+
+// =====================================================================================
+// SUPABASE UTILITIES
+// =====================================================================================
+export * from './supabase';
