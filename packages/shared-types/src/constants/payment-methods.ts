@@ -1,30 +1,35 @@
 // Payment Method Constants and Helpers
-import type { AccountType, CardBrand, PaymentMethodStatus } from '../api/payment-methods';
+import type {
+  AccountType,
+  CardBrand,
+  PaymentMethodStatus,
+} from '../api/payment-methods';
 
 // =====================================================================================
 // ACCOUNT TYPE LABELS
 // =====================================================================================
 
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
-  credit_card: 'Credit Card',
-  debit_card: 'Debit Card',
-  checking_account: 'Checking Account',
-  savings_account: 'Savings Account',
-  cash: 'Cash',
-  digital_wallet: 'Digital Wallet',
-  investment_account: 'Investment Account',
-  other: 'Other',
+  credit_card: 'Tarjeta de Crédito',
+  debit_card: 'Tarjeta de Débito',
+  checking_account: 'Cuenta Corriente',
+  savings_account: 'Cuenta de Ahorro',
+  cash: 'Efectivo',
+  digital_wallet: 'Billetera Digital',
+  investment_account: 'Cuenta de Inversión',
+  other: 'Otro',
 };
 
 export const ACCOUNT_TYPE_DESCRIPTIONS: Record<AccountType, string> = {
-  credit_card: 'Credit cards with credit limits and billing cycles',
-  debit_card: 'Debit cards linked to bank accounts',
-  checking_account: 'Day-to-day transaction accounts',
-  savings_account: 'Savings and interest-bearing accounts',
-  cash: 'Physical cash on hand',
-  digital_wallet: 'PayPal, Venmo, Apple Pay, etc.',
-  investment_account: 'Brokerage and investment accounts',
-  other: 'Other types of payment methods',
+  credit_card:
+    'Tarjetas de crédito con límites de crédito y ciclos de facturación',
+  debit_card: 'Tarjetas de débito vinculadas a cuentas bancarias',
+  checking_account: 'Cuentas corrientes para transacciones diarias',
+  savings_account: 'Cuentas de ahorro y con interés',
+  cash: 'Efectivo físico en mano',
+  digital_wallet: 'PayPal, Venmo, Apple Pay, etcétera',
+  investment_account: 'Cuentas de inversión y de bolsa',
+  other: 'Otros tipos de métodos de pago',
 };
 
 // =====================================================================================
@@ -51,7 +56,7 @@ export const CARD_BRAND_LABELS: Record<CardBrand, string> = {
   mastercard: 'Mastercard',
   amex: 'American Express',
   discover: 'Discover',
-  other: 'Other',
+  other: 'Otro',
 };
 
 // =====================================================================================
@@ -70,21 +75,23 @@ export const CARD_BRAND_ICONS: Record<CardBrand, string> = {
 // PAYMENT METHOD STATUS LABELS
 // =====================================================================================
 
-export const PAYMENT_METHOD_STATUS_LABELS: Record<PaymentMethodStatus, string> = {
-  active: 'Active',
-  inactive: 'Inactive',
-  expired: 'Expired',
-  blocked: 'Blocked',
-  closed: 'Closed',
-};
+export const PAYMENT_METHOD_STATUS_LABELS: Record<PaymentMethodStatus, string> =
+  {
+    active: 'Activo',
+    inactive: 'Inactivo',
+    expired: 'Expirado',
+    blocked: 'Bloqueado',
+    closed: 'Cerrado',
+  };
 
-export const PAYMENT_METHOD_STATUS_COLORS: Record<PaymentMethodStatus, string> = {
-  active: '#10B981', // green
-  inactive: '#6B7280', // gray
-  expired: '#F59E0B', // yellow
-  blocked: '#EF4444', // red
-  closed: '#6B7280', // gray
-};
+export const PAYMENT_METHOD_STATUS_COLORS: Record<PaymentMethodStatus, string> =
+  {
+    active: '#10B981', // green
+    inactive: '#6B7280', // gray
+    expired: '#F59E0B', // yellow
+    blocked: '#EF4444', // red
+    closed: '#6B7280', // gray
+  };
 
 // =====================================================================================
 // DEFAULT COLORS
@@ -154,6 +161,20 @@ export function getCardBrandLabel(cardBrand: CardBrand): string {
  */
 export function requiresCardDetails(accountType: AccountType): boolean {
   return accountType === 'credit_card' || accountType === 'debit_card';
+}
+
+/**
+ * Check if an account type requires account identifier (last 4 digits)
+ */
+export function requiresAccountIdentifier(accountType: AccountType): boolean {
+  return (
+    accountType === 'credit_card' ||
+    accountType === 'debit_card' ||
+    accountType === 'checking_account' ||
+    accountType === 'savings_account' ||
+    accountType === 'digital_wallet' ||
+    accountType === 'investment_account'
+  );
 }
 
 /**

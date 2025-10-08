@@ -5,6 +5,7 @@
 // =====================================================================================
 
 export const SUPPORTED_CURRENCIES = [
+  'CRC', // Costa Rican Colón
   'USD', // US Dollar
   'EUR', // Euro
   'GBP', // British Pound
@@ -19,7 +20,6 @@ export const SUPPORTED_CURRENCIES = [
   'COP', // Colombian Peso
   'CLP', // Chilean Peso
   'PEN', // Peruvian Sol
-  'CRC', // Costa Rican Colón
 ] as const;
 
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];

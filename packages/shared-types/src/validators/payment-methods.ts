@@ -1,6 +1,9 @@
 // Payment Method Validators using Zod
 import { z } from 'zod';
-import { PAYMENT_METHOD_VALIDATION } from '../constants/payment-methods';
+import {
+  PAYMENT_METHOD_VALIDATION,
+  requiresAccountIdentifier,
+} from '../constants/payment-methods';
 import { SUPPORTED_CURRENCIES } from '../constants/currencies';
 
 // =====================================================================================
@@ -13,19 +16,19 @@ import { SUPPORTED_CURRENCIES } from '../constants/currencies';
 export const creditDetailsSchema = z
   .object({
     credit_limit: z
-      .number({ message: 'Credit limit must be a number' })
-      .positive('Credit limit must be greater than 0'),
+      .number({ message: 'Límite de crédito debe ser un número' })
+      .positive('Límite de crédito debe ser mayor que 0'),
 
     billing_cycle_day: z
       .number()
       .int()
       .min(
         PAYMENT_METHOD_VALIDATION.BILLING_CYCLE_DAY_MIN,
-        `Billing cycle day must be at least ${PAYMENT_METHOD_VALIDATION.BILLING_CYCLE_DAY_MIN}`
+        `Día de facturación debe ser al menos ${PAYMENT_METHOD_VALIDATION.BILLING_CYCLE_DAY_MIN}`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.BILLING_CYCLE_DAY_MAX,
-        `Billing cycle day must be at most ${PAYMENT_METHOD_VALIDATION.BILLING_CYCLE_DAY_MAX}`
+        `Día de facturación debe ser a lo más ${PAYMENT_METHOD_VALIDATION.BILLING_CYCLE_DAY_MAX}`
       )
       .optional(),
 
@@ -34,11 +37,11 @@ export const creditDetailsSchema = z
       .int()
       .min(
         PAYMENT_METHOD_VALIDATION.PAYMENT_DUE_DAY_MIN,
-        `Payment due day must be at least ${PAYMENT_METHOD_VALIDATION.PAYMENT_DUE_DAY_MIN}`
+        `Día de vencimiento de pago debe ser al menos ${PAYMENT_METHOD_VALIDATION.PAYMENT_DUE_DAY_MIN}`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.PAYMENT_DUE_DAY_MAX,
-        `Payment due day must be at most ${PAYMENT_METHOD_VALIDATION.PAYMENT_DUE_DAY_MAX}`
+        `Día de vencimiento de pago debe ser a lo más ${PAYMENT_METHOD_VALIDATION.PAYMENT_DUE_DAY_MAX}`
       )
       .optional(),
 
@@ -46,11 +49,11 @@ export const creditDetailsSchema = z
       .number()
       .min(
         PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MIN,
-        `Minimum payment percentage must be at least ${PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MIN}`
+        `Porcentaje mínimo de pago debe ser al menos ${PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MIN}`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MAX,
-        `Minimum payment percentage must be at most ${PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MAX}`
+        `Porcentaje mínimo de pago debe ser a lo más ${PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MAX}`
       )
       .optional(),
 
@@ -58,11 +61,11 @@ export const creditDetailsSchema = z
       .number()
       .min(
         PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MIN,
-        `Interest rate must be at least ${PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MIN}`
+        `Tasa de interés debe ser al menos ${PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MIN}`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MAX,
-        `Interest rate must be at most ${PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MAX}`
+        `Tasa de interés debe ser a lo más ${PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MAX}`
       )
       .optional(),
 
@@ -71,11 +74,11 @@ export const creditDetailsSchema = z
       .int()
       .min(
         PAYMENT_METHOD_VALIDATION.GRACE_PERIOD_DAYS_MIN,
-        `Grace period must be at least ${PAYMENT_METHOD_VALIDATION.GRACE_PERIOD_DAYS_MIN} days`
+        `Periodo de gracia debe ser al menos ${PAYMENT_METHOD_VALIDATION.GRACE_PERIOD_DAYS_MIN} días`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.GRACE_PERIOD_DAYS_MAX,
-        `Grace period must be at most ${PAYMENT_METHOD_VALIDATION.GRACE_PERIOD_DAYS_MAX} days`
+        `Periodo de gracia debe ser a lo más ${PAYMENT_METHOD_VALIDATION.GRACE_PERIOD_DAYS_MAX} días`
       )
       .optional(),
 
@@ -92,7 +95,8 @@ export const creditDetailsSchema = z
       return true;
     },
     {
-      message: 'Payment due day must be after billing cycle day',
+      message:
+        'Día de vencimiento de pago debe ser después del día de facturación',
       path: ['payment_due_day'],
     }
   );
@@ -107,11 +111,11 @@ export const paymentMethodCreateSchema = z
       .string({ message: 'Name is required' })
       .min(
         PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH,
-        `Name must be at least ${PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH} character`
+        `Nombre debe ser al menos ${PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH} carácter`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH,
-        `Name must be less than ${PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH} characters`
+        `Nombre debe ser menos de ${PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH} caracteres`
       )
       .trim(),
 
@@ -126,32 +130,32 @@ export const paymentMethodCreateSchema = z
         'investment_account',
         'other',
       ],
-      { message: 'Account type is required' }
+      { message: 'Tipo de cuenta es requerido' }
     ),
 
     institution_name: z
-      .string({ message: 'Institution name is required' })
+      .string({ message: 'Nombre de la institución es requerido' })
       .min(
         PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH,
-        `Institution name must be at least ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH} character`
+        `Nombre de la institución debe ser al menos ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH} carácter`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH,
-        `Institution name must be less than ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH} characters`
+        `Nombre de la institución debe ser menos de ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH} caracteres`
       )
       .trim(),
 
     // Optional fields
     currency: z
       .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]], {
-        message: 'Currency is not supported',
+        message: 'Moneda no soportada',
       })
       .optional()
       .default('USD'),
 
     color: z
       .string()
-      .regex(/^#[0-9A-F]{6}$/i, 'Invalid color format')
+      .regex(/^#[0-9A-F]{6}$/i, 'Formato de color inválido')
       .optional(),
 
     icon: z.string().optional(),
@@ -163,12 +167,12 @@ export const paymentMethodCreateSchema = z
     // Card specific fields
     last_four_digits: z
       .string()
-      .regex(/^\d{4}$/, 'Last four digits must be exactly 4 numbers')
+      .regex(/^\d{4}$/, 'Últimos 4 dígitos deben ser exactamente 4 números')
       .optional(),
 
     card_brand: z
       .enum(['visa', 'mastercard', 'amex', 'discover', 'other'], {
-        message: 'Invalid card brand',
+        message: 'Marca de tarjeta inválida',
       })
       .optional(),
 
@@ -177,7 +181,7 @@ export const paymentMethodCreateSchema = z
 
     available_balance: z
       .number()
-      .nonnegative('Available balance cannot be negative')
+      .nonnegative('Saldo disponible no puede ser negativo')
       .optional(),
 
     // Account number hash
@@ -198,10 +202,14 @@ export const paymentMethodCreateSchema = z
       ) {
         return !!data.last_four_digits && !!data.card_brand;
       }
+      // Other account types that require identifier
+      if (requiresAccountIdentifier(data.account_type)) {
+        return !!data.last_four_digits;
+      }
       return true;
     },
     {
-      message: 'Last four digits and card brand are required for cards',
+      message: 'Últimos 4 dígitos son requeridos para este tipo de cuenta',
       path: ['last_four_digits'],
     }
   )
@@ -214,7 +222,8 @@ export const paymentMethodCreateSchema = z
       return true;
     },
     {
-      message: 'Credit card details are required for credit cards',
+      message:
+        'Detalles de la tarjeta de crédito son requeridos para tarjetas de crédito',
       path: ['credit_details'],
     }
   )
@@ -227,7 +236,7 @@ export const paymentMethodCreateSchema = z
       return true;
     },
     {
-      message: 'Balance cannot be negative for this account type',
+      message: 'El saldo no puede ser negativo para este tipo de cuenta',
       path: ['current_balance'],
     }
   );
@@ -241,11 +250,11 @@ export const paymentMethodUpdateSchema = z
       .string()
       .min(
         PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH,
-        `Name must be at least ${PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH} character`
+        `Nombre debe ser al menos ${PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH} carácter`
       )
       .max(
         PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH,
-        `Name must be less than ${PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH} characters`
+        `Nombre debe ser menos de ${PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH} caracteres`
       )
       .trim()
       .optional(),
@@ -256,13 +265,13 @@ export const paymentMethodUpdateSchema = z
 
     currency: z
       .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]], {
-        message: 'Currency is not supported',
+        message: 'Moneda no soportada',
       })
       .optional(),
 
     color: z
       .string()
-      .regex(/^#[0-9A-F]{6}$/i, 'Invalid color format')
+      .regex(/^#[0-9A-F]{6}$/i, 'Formato de color inválido')
       .optional(),
 
     icon: z.string().optional(),
@@ -275,7 +284,7 @@ export const paymentMethodUpdateSchema = z
 
     available_balance: z
       .number()
-      .nonnegative('Available balance cannot be negative')
+      .nonnegative('Saldo disponible no puede ser negativo')
       .optional(),
 
     credit_details: creditDetailsSchema.optional(),
@@ -352,9 +361,9 @@ export function isDuplicatePaymentMethod(
  */
 export function getValidationErrorMessage(error: z.ZodError): string {
   const errors = error.issues;
-  if (errors.length === 0) return 'Validation error';
+  if (errors.length === 0) return 'Error de validación';
   if (errors.length === 1) return errors[0].message;
-  return `${errors.length} validation errors: ${errors.map(e => e.message).join(', ')}`;
+  return `${errors.length} errores de validación: ${errors.map(e => e.message).join(', ')}`;
 }
 
 /**

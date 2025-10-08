@@ -35,17 +35,17 @@ export function BasicInformationSection({
 }: BasicInformationSectionProps) {
   return (
     <div className='space-y-4'>
-      <h3 className='font-medium text-lg'>Basic Information</h3>
+      <h3 className='font-medium text-lg'>Información Básica</h3>
 
       {/* Name */}
       <div className='space-y-2'>
         <Label htmlFor='name'>
-          Name <span className='text-red-500'>*</span>
+          Nombre <span className='text-red-500'>*</span>
         </Label>
         <Input
           id='name'
           type='text'
-          placeholder='My Credit Card'
+          placeholder='Mi Tarjeta de Crédito'
           value={formData.name}
           onChange={e => setField('name', e.target.value)}
           className={getFieldError('name') ? 'border-red-500' : ''}
@@ -66,12 +66,12 @@ export function BasicInformationSection({
       {/* Institution Name */}
       <div className='space-y-2'>
         <Label htmlFor='institution_name'>
-          Institution Name <span className='text-red-500'>*</span>
+          Nombre de la Institución <span className='text-red-500'>*</span>
         </Label>
         <Input
           id='institution_name'
           type='text'
-          placeholder='Bank of America'
+          placeholder='Banco de América'
           value={formData.institution_name}
           onChange={e => setField('institution_name', e.target.value)}
           className={getFieldError('institution_name') ? 'border-red-500' : ''}
@@ -85,27 +85,25 @@ export function BasicInformationSection({
 
       {/* Currency */}
       <div className='space-y-2'>
-        <Label htmlFor='currency'>Currency</Label>
+        <Label htmlFor='currency'>Moneda</Label>
         <Select
           value={formData.currency}
           onValueChange={value => setField('currency', value)}
         >
           <SelectTrigger id='currency'>
-            <SelectValue placeholder='Select currency' />
+            <SelectValue placeholder='Seleccionar moneda' />
           </SelectTrigger>
           <SelectContent>
-            {SUPPORTED_CURRENCIES.map(curr => (
-              <SelectItem key={curr} value={curr}>
-                {curr}
-              </SelectItem>
-            ))}
+            <SelectItem value='CRC'>CRC (Colón Costarricense)</SelectItem>
+            <SelectItem value='USD'>USD (Dólar Estadounidense)</SelectItem>
+            <SelectItem value='EUR'>EUR (Euro)</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Color */}
       <div className='space-y-2'>
-        <Label htmlFor='color'>Color</Label>
+        <Label htmlFor='color'>Color del Método de Pago</Label>
         <Input
           id='color'
           type='color'
@@ -123,7 +121,9 @@ export function BasicInformationSection({
             onChange={e => setField('is_primary', e.target.checked)}
             className='w-4 h-4'
           />
-          <span className='text-sm'>Set as primary payment method</span>
+          <span className='text-sm'>
+            Establecer como método de pago principal
+          </span>
         </label>
 
         <label className='flex items-center gap-2'>
@@ -133,7 +133,7 @@ export function BasicInformationSection({
             onChange={e => setField('exclude_from_totals', e.target.checked)}
             className='w-4 h-4'
           />
-          <span className='text-sm'>Exclude from total calculations</span>
+          <span className='text-sm'>Excluir de los cálculos totales</span>
         </label>
       </div>
     </div>

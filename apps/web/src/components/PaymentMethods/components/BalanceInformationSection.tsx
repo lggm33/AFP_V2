@@ -1,5 +1,4 @@
 // Balance Information Section Component
-import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -39,7 +38,9 @@ export function BalanceInformationSection({
           step='0.01'
           placeholder='0.00'
           value={formData.current_balance || ''}
-          onChange={e => setField('current_balance', parseFloat(e.target.value))}
+          onChange={e =>
+            setField('current_balance', parseFloat(e.target.value))
+          }
           className={getFieldError('current_balance') ? 'border-red-500' : ''}
         />
         {getFieldError('current_balance') && (

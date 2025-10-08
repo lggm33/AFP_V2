@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 // Payment Method Form Component
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { BasicInformationSection } from './components/BasicInformationSection';
 import { CardDetailsSection } from './components/CardDetailsSection';
@@ -47,59 +47,44 @@ export function PaymentMethodForm({
 }: PaymentMethodFormProps) {
   const mode = paymentMethod ? 'edit' : 'create';
 
-  const {
-    formData,
-    errors,
-    isDirty,
-    setField,
-    validate,
-    reset,
-    getFieldError,
-  } = usePaymentMethodForm({
-    initialData: paymentMethod
-      ? {
-          name: paymentMethod.name,
-          account_type: paymentMethod.account_type,
-          institution_name: paymentMethod.institution_name,
-          currency: paymentMethod.currency || 'USD',
-          color: paymentMethod.color || undefined,
-          is_primary: paymentMethod.is_primary ?? false,
-          exclude_from_totals: paymentMethod.exclude_from_totals ?? false,
-          last_four_digits: paymentMethod.last_four_digits || undefined,
-          card_brand: paymentMethod.card_brand || undefined,
-          current_balance: paymentMethod.current_balance || undefined,
-          available_balance: paymentMethod.available_balance || undefined,
-          credit_details: paymentMethod.credit_details
-            ? {
-                credit_limit: paymentMethod.credit_details.credit_limit,
-                billing_cycle_day:
-                  paymentMethod.credit_details.billing_cycle_day || undefined,
-                payment_due_day:
-                  paymentMethod.credit_details.payment_due_day || undefined,
-                interest_rate:
-                  paymentMethod.credit_details.interest_rate || undefined,
-                minimum_payment_percentage:
-                  paymentMethod.credit_details.minimum_payment_percentage ||
-                  undefined,
-                grace_period_days:
-                  paymentMethod.credit_details.grace_period_days || undefined,
-              }
-            : undefined,
-        }
-      : undefined,
-    mode,
-  });
+  const { formData, errors, isDirty, setField, validate, getFieldError } =
+    usePaymentMethodForm({
+      initialData: paymentMethod
+        ? {
+            name: paymentMethod.name,
+            account_type: paymentMethod.account_type,
+            institution_name: paymentMethod.institution_name,
+            currency: paymentMethod.currency || 'CRC',
+            color: paymentMethod.color || undefined,
+            is_primary: paymentMethod.is_primary ?? false,
+            exclude_from_totals: paymentMethod.exclude_from_totals ?? false,
+            last_four_digits: paymentMethod.last_four_digits || undefined,
+            card_brand: paymentMethod.card_brand || undefined,
+            current_balance: paymentMethod.current_balance || undefined,
+            available_balance: paymentMethod.available_balance || undefined,
+            credit_details: paymentMethod.credit_details
+              ? {
+                  credit_limit: paymentMethod.credit_details.credit_limit,
+                  billing_cycle_day:
+                    paymentMethod.credit_details.billing_cycle_day || undefined,
+                  payment_due_day:
+                    paymentMethod.credit_details.payment_due_day || undefined,
+                  interest_rate:
+                    paymentMethod.credit_details.interest_rate || undefined,
+                  minimum_payment_percentage:
+                    paymentMethod.credit_details.minimum_payment_percentage ||
+                    undefined,
+                  grace_period_days:
+                    paymentMethod.credit_details.grace_period_days || undefined,
+                }
+              : undefined,
+          }
+        : undefined,
+      mode,
+    });
 
-  const { needsCardDetails, needsCreditDetails } = useAccountTypeValidation(
-    formData.account_type
-  );
-
-  // Reset form when paymentMethod changes
-  useEffect(() => {
-    if (paymentMethod) {
-      reset();
-    }
-  }, [paymentMethod, reset]);
+  const { needsCardDetails, needsAccountIdentifier, needsCreditDetails } =
+    useAccountTypeValidation(formData.account_type);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,6 +117,16 @@ export function PaymentMethodForm({
           formData={formData}
           setField={handleSetField}
           getFieldError={getFieldError}
+        />
+      )}
+
+      {/* Account Identifier (if not card but needs identifier) */}
+      {needsAccountIdentifier && !needsCardDetails && (
+        <CardDetailsSection
+          formData={formData}
+          setField={handleSetField}
+          getFieldError={getFieldError}
+          accountType={formData.account_type}
         />
       )}
 

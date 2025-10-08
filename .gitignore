@@ -128,3 +128,5 @@ public/workbox-*.js
 # Local development
 .local
 .cache/
+
+.cursor/

@@ -1,7 +1,5 @@
 // Credit Details Form Component
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FormField } from './FormField';
 import type { CreditDetailsInput } from '@afp/shared-types';
 
 // =====================================================================================
@@ -23,167 +21,94 @@ export function CreditDetailsForm({
   onChange,
   errors = {},
 }: CreditDetailsFormProps) {
-  const handleFieldChange = (field: keyof CreditDetailsInput, value: any) => {
+  const handleFieldChange = (
+    field: keyof CreditDetailsInput,
+    value: string | number
+  ) => {
     onChange({ ...creditDetails, [field]: value });
   };
 
   return (
     <div className='space-y-4 border-t pt-4 mt-4'>
-      <h3 className='font-medium text-lg'>Credit Card Details</h3>
+      <h3 className='font-medium text-lg'>Detalles de Tarjeta de Crédito</h3>
 
-      {/* Credit Limit */}
-      <div className='space-y-2'>
-        <Label htmlFor='credit_limit'>
-          Credit Limit <span className='text-red-500'>*</span>
-        </Label>
-        <Input
-          id='credit_limit'
-          type='number'
-          step='0.01'
-          min='0'
-          placeholder='0.00'
-          value={creditDetails.credit_limit || ''}
-          onChange={e =>
-            handleFieldChange('credit_limit', parseFloat(e.target.value))
-          }
-          className={
-            errors['credit_details.credit_limit'] ? 'border-red-500' : ''
-          }
-        />
-        {errors['credit_details.credit_limit'] && (
-          <p className='text-sm text-red-500'>
-            {errors['credit_details.credit_limit']}
-          </p>
-        )}
-      </div>
+      <FormField
+        id='credit_limit'
+        label='Límite de Crédito'
+        type='number'
+        required
+        step='0.01'
+        min='0'
+        placeholder='0.00'
+        value={creditDetails.credit_limit || ''}
+        onChange={value => handleFieldChange('credit_limit', value)}
+        error={errors['credit_details.credit_limit']}
+      />
 
-      {/* Billing Cycle Day */}
-      <div className='space-y-2'>
-        <Label htmlFor='billing_cycle_day'>Billing Cycle Day (1-31)</Label>
-        <Input
-          id='billing_cycle_day'
-          type='number'
-          min='1'
-          max='31'
-          placeholder='15'
-          value={creditDetails.billing_cycle_day || ''}
-          onChange={e =>
-            handleFieldChange('billing_cycle_day', parseInt(e.target.value))
-          }
-          className={
-            errors['credit_details.billing_cycle_day'] ? 'border-red-500' : ''
-          }
-        />
-        {errors['credit_details.billing_cycle_day'] && (
-          <p className='text-sm text-red-500'>
-            {errors['credit_details.billing_cycle_day']}
-          </p>
-        )}
-      </div>
+      <FormField
+        id='billing_cycle_day'
+        label='Día del Ciclo de Facturación (1-31)'
+        type='number'
+        min='1'
+        max='31'
+        placeholder='15'
+        value={creditDetails.billing_cycle_day || ''}
+        onChange={value => handleFieldChange('billing_cycle_day', value)}
+        error={errors['credit_details.billing_cycle_day']}
+      />
 
-      {/* Payment Due Day */}
-      <div className='space-y-2'>
-        <Label htmlFor='payment_due_day'>Payment Due Day (1-31)</Label>
-        <Input
-          id='payment_due_day'
-          type='number'
-          min='1'
-          max='31'
-          placeholder='25'
-          value={creditDetails.payment_due_day || ''}
-          onChange={e =>
-            handleFieldChange('payment_due_day', parseInt(e.target.value))
-          }
-          className={
-            errors['credit_details.payment_due_day'] ? 'border-red-500' : ''
-          }
-        />
-        {errors['credit_details.payment_due_day'] && (
-          <p className='text-sm text-red-500'>
-            {errors['credit_details.payment_due_day']}
-          </p>
-        )}
-        <p className='text-xs text-gray-500'>Must be after billing cycle day</p>
-      </div>
+      <FormField
+        id='payment_due_day'
+        label='Día de Vencimiento de Pago (1-31)'
+        type='number'
+        min='1'
+        max='31'
+        placeholder='25'
+        value={creditDetails.payment_due_day || ''}
+        onChange={value => handleFieldChange('payment_due_day', value)}
+        error={errors['credit_details.payment_due_day']}
+        helpText='Debe ser después del día del ciclo de facturación'
+      />
 
-      {/* Interest Rate */}
-      <div className='space-y-2'>
-        <Label htmlFor='interest_rate'>Interest Rate (%)</Label>
-        <Input
-          id='interest_rate'
-          type='number'
-          step='0.01'
-          min='0'
-          max='100'
-          placeholder='19.99'
-          value={creditDetails.interest_rate || ''}
-          onChange={e =>
-            handleFieldChange('interest_rate', parseFloat(e.target.value))
-          }
-          className={
-            errors['credit_details.interest_rate'] ? 'border-red-500' : ''
-          }
-        />
-        {errors['credit_details.interest_rate'] && (
-          <p className='text-sm text-red-500'>
-            {errors['credit_details.interest_rate']}
-          </p>
-        )}
-      </div>
+      <FormField
+        id='interest_rate'
+        label='Tasa de Interés (%)'
+        type='number'
+        step='0.01'
+        min='0'
+        max='100'
+        placeholder='19.99'
+        value={creditDetails.interest_rate || ''}
+        onChange={value => handleFieldChange('interest_rate', value)}
+        error={errors['credit_details.interest_rate']}
+      />
 
-      {/* Minimum Payment Percentage */}
-      <div className='space-y-2'>
-        <Label htmlFor='minimum_payment_percentage'>Minimum Payment (%)</Label>
-        <Input
-          id='minimum_payment_percentage'
-          type='number'
-          step='0.01'
-          min='0'
-          max='100'
-          placeholder='5'
-          value={creditDetails.minimum_payment_percentage || ''}
-          onChange={e =>
-            handleFieldChange(
-              'minimum_payment_percentage',
-              parseFloat(e.target.value)
-            )
-          }
-          className={
-            errors['credit_details.minimum_payment_percentage']
-              ? 'border-red-500'
-              : ''
-          }
-        />
-        {errors['credit_details.minimum_payment_percentage'] && (
-          <p className='text-sm text-red-500'>
-            {errors['credit_details.minimum_payment_percentage']}
-          </p>
-        )}
-      </div>
+      <FormField
+        id='minimum_payment_percentage'
+        label='Pago Mínimo (%)'
+        type='number'
+        step='0.01'
+        min='0'
+        max='100'
+        placeholder='5'
+        value={creditDetails.minimum_payment_percentage || ''}
+        onChange={value =>
+          handleFieldChange('minimum_payment_percentage', value)
+        }
+        error={errors['credit_details.minimum_payment_percentage']}
+      />
 
-      {/* Grace Period Days */}
-      <div className='space-y-2'>
-        <Label htmlFor='grace_period_days'>Grace Period (days)</Label>
-        <Input
-          id='grace_period_days'
-          type='number'
-          min='0'
-          max='90'
-          placeholder='25'
-          value={creditDetails.grace_period_days || ''}
-          onChange={e =>
-            handleFieldChange('grace_period_days', parseInt(e.target.value))
-          }
-          className={
-            errors['credit_details.grace_period_days'] ? 'border-red-500' : ''
-          }
-        />
-        {errors['credit_details.grace_period_days'] && (
-          <p className='text-sm text-red-500'>
-            {errors['credit_details.grace_period_days']}
-          </p>
-        )}
-      </div>
+      <FormField
+        id='grace_period_days'
+        label='Período de Gracia (días)'
+        type='number'
+        min='0'
+        max='90'
+        placeholder='25'
+        value={creditDetails.grace_period_days || ''}
+        onChange={value => handleFieldChange('grace_period_days', value)}
+        error={errors['credit_details.grace_period_days']}
+      />
     </div>
   );
 }

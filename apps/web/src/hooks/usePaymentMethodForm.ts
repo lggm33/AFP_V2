@@ -8,6 +8,7 @@ import {
   validatePaymentMethodUpdate,
   getValidationErrors,
   requiresCardDetails,
+  requiresAccountIdentifier,
   requiresCreditDetails,
   getRandomPaymentMethodColor,
 } from '@afp/shared-types';
@@ -51,7 +52,7 @@ const defaultFormData: PaymentMethodCreateInput = {
   name: '',
   account_type: 'debit_card',
   institution_name: '',
-  currency: 'USD',
+  currency: 'CRC',
   color: getRandomPaymentMethodColor(),
   is_primary: false,
   exclude_from_totals: false,
@@ -180,15 +181,19 @@ export function usePaymentMethodForm(
  */
 export function useAccountTypeValidation(accountType: AccountType) {
   const needsCardDetails = requiresCardDetails(accountType);
+  const needsAccountIdentifier = requiresAccountIdentifier(accountType);
   const needsCreditDetails = requiresCreditDetails(accountType);
 
   return {
     needsCardDetails,
+    needsAccountIdentifier,
     needsCreditDetails,
     isCreditCard: accountType === 'credit_card',
     isDebitCard: accountType === 'debit_card',
     isBankAccount:
       accountType === 'checking_account' || accountType === 'savings_account',
+    isDigitalWallet: accountType === 'digital_wallet',
+    isInvestmentAccount: accountType === 'investment_account',
     isCash: accountType === 'cash',
   };
 }

@@ -1,19 +1,18 @@
 // Overview Page - Dashboard Home
 import { DashboardLayout } from '../DashboardLayout';
+import { useNavigate } from 'react-router-dom';
 
 export function OverviewPage() {
+  const navigate = useNavigate();
+
+  const handleAddPaymentMethod = () => {
+    navigate('/dashboard/payment-methods?openForm=true');
+  };
+
   return (
     <DashboardLayout>
       <div className='space-y-6'>
         {/* Welcome Card */}
-        <div className='bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-xl p-8 text-white'>
-          <h2 className='text-3xl font-bold mb-2'>
-            Welcome to your Financial Dashboard!
-          </h2>
-          <p className='text-lg opacity-90'>
-            Your AI-powered personal finance management system is ready.
-          </p>
-        </div>
 
         {/* Stats Grid */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
@@ -26,14 +25,16 @@ export function OverviewPage() {
               </div>
               <div className='ml-4'>
                 <h3 className='text-lg font-semibold text-gray-900'>
-                  Transactions
+                  Transacciones
                 </h3>
-                <p className='text-sm text-gray-500'>AI-powered email analysis</p>
+                <p className='text-sm text-gray-500'>
+                  Análisis de email AI-powered
+                </p>
               </div>
             </div>
             <div className='mt-4'>
               <p className='text-2xl font-bold text-gray-900'>0</p>
-              <p className='text-xs text-gray-500'>Total transactions</p>
+              <p className='text-xs text-gray-500'>Total de transacciones</p>
             </div>
           </div>
 
@@ -45,13 +46,17 @@ export function OverviewPage() {
                 </div>
               </div>
               <div className='ml-4'>
-                <h3 className='text-lg font-semibold text-gray-900'>Budget</h3>
-                <p className='text-sm text-gray-500'>Smart budget tracking</p>
+                <h3 className='text-lg font-semibold text-gray-900'>
+                  Presupuesto
+                </h3>
+                <p className='text-sm text-gray-500'>
+                  Rastreo de presupuesto inteligente
+                </p>
               </div>
             </div>
             <div className='mt-4'>
               <p className='text-2xl font-bold text-gray-900'>$0.00</p>
-              <p className='text-xs text-gray-500'>Total budget</p>
+              <p className='text-xs text-gray-500'>Total de presupuesto</p>
             </div>
           </div>
 
@@ -63,46 +68,57 @@ export function OverviewPage() {
                 </div>
               </div>
               <div className='ml-4'>
-                <h3 className='text-lg font-semibold text-gray-900'>Accounts</h3>
-                <p className='text-sm text-gray-500'>Connected accounts</p>
+                <h3 className='text-lg font-semibold text-gray-900'>Cuentas</h3>
+                <p className='text-sm text-gray-500'>Cuentas conectadas</p>
               </div>
             </div>
             <div className='mt-4'>
               <p className='text-2xl font-bold text-gray-900'>0</p>
-              <p className='text-xs text-gray-500'>Payment methods</p>
+              <p className='text-xs text-gray-500'>Métodos de pago</p>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className='bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-gray-200'>
-          <h3 className='text-xl font-bold text-gray-900 mb-4'>Quick Actions</h3>
+          <h3 className='text-xl font-bold text-gray-900 mb-4'>
+            Acciones rápidas
+          </h3>
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-            <button className='p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group'>
+            <button
+              onClick={handleAddPaymentMethod}
+              className='p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group'
+            >
               <div className='text-3xl mb-2 group-hover:scale-110 transition-transform'>
                 💳
               </div>
               <p className='text-sm font-medium text-gray-700'>
-                Add Payment Method
+                Agregar método de pago
               </p>
             </button>
             <button className='p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group'>
               <div className='text-3xl mb-2 group-hover:scale-110 transition-transform'>
                 📧
               </div>
-              <p className='text-sm font-medium text-gray-700'>Connect Email</p>
+              <p className='text-sm font-medium text-gray-700'>
+                Conectar email
+              </p>
             </button>
             <button className='p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group'>
               <div className='text-3xl mb-2 group-hover:scale-110 transition-transform'>
                 💸
               </div>
-              <p className='text-sm font-medium text-gray-700'>Add Transaction</p>
+              <p className='text-sm font-medium text-gray-700'>
+                Agregar transacción
+              </p>
             </button>
             <button className='p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group'>
               <div className='text-3xl mb-2 group-hover:scale-110 transition-transform'>
                 🎯
               </div>
-              <p className='text-sm font-medium text-gray-700'>Create Budget</p>
+              <p className='text-sm font-medium text-gray-700'>
+                Crear presupuesto
+              </p>
             </button>
           </div>
         </div>
@@ -115,23 +131,25 @@ export function OverviewPage() {
             </div>
             <div className='ml-4'>
               <h4 className='text-lg font-semibold text-blue-900 mb-2'>
-                Getting Started
+                Empezar
               </h4>
               <p className='text-sm text-blue-800 mb-4'>
-                Welcome to AFP Finance! Here are some steps to get you started:
+                Bienvenido a AFP Finance! Aquí hay algunos pasos para empezar:
               </p>
               <ul className='space-y-2 text-sm text-blue-700'>
                 <li className='flex items-center'>
                   <span className='mr-2'>✓</span>
-                  Add your payment methods (credit cards, bank accounts)
+                  Agrega tus métodos de pago (tarjetas de crédito, cuentas
+                  bancarias)
                 </li>
                 <li className='flex items-center'>
                   <span className='mr-2'>✓</span>
-                  Connect your email accounts to auto-import transactions
+                  Conecta tus cuentas de email para importar transacciones
+                  automáticamente
                 </li>
                 <li className='flex items-center'>
                   <span className='mr-2'>✓</span>
-                  Set up budgets to track your spending
+                  Configura presupuestos para rastrear tu gasto
                 </li>
               </ul>
             </div>

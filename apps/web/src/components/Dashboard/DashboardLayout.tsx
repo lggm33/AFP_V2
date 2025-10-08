@@ -21,37 +21,37 @@ type NavigationSection = {
 const NAVIGATION_SECTIONS: NavigationSection[] = [
   {
     id: 'overview',
-    name: 'Overview',
+    name: 'Resumen',
     icon: '📊',
-    description: 'Dashboard overview',
+    description: 'Resumen del dashboard',
     path: '/dashboard/overview',
   },
   {
     id: 'payment-methods',
-    name: 'Payment Methods',
+    name: 'Métodos de Pago',
     icon: '💳',
-    description: 'Manage your accounts and cards',
+    description: 'Gestiona tus cuentas y tarjetas',
     path: '/dashboard/payment-methods',
   },
   {
     id: 'transactions',
-    name: 'Transactions',
+    name: 'Transacciones',
     icon: '💸',
-    description: 'View all transactions',
+    description: 'Ver todas las transacciones',
     path: '/dashboard/transactions',
   },
   {
     id: 'budgets',
-    name: 'Budgets',
+    name: 'Presupuestos',
     icon: '🎯',
-    description: 'Track your budget',
+    description: 'Rastrea tus presupuestos',
     path: '/dashboard/budgets',
   },
   {
     id: 'email-accounts',
-    name: 'Email Accounts',
+    name: 'Cuentas de Email',
     icon: '📧',
-    description: 'Connected email accounts',
+    description: 'Cuentas de email conectadas',
     path: '/dashboard/email-accounts',
   },
 ];
@@ -85,10 +85,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               <div className='ml-4'>
                 <h1 className='text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'>
-                  AFP Finance
+                  AFP Finanzas
                 </h1>
                 <p className='text-xs text-gray-500'>
-                  Personal Finance Manager
+                  Asistente de Finanzas Personales
                 </p>
               </div>
             </div>
@@ -110,7 +110,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={handleSignOut}
                 className='bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md'
               >
-                Sign Out
+                Cerrar Sesión
               </button>
             </div>
           </div>
@@ -136,7 +136,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
 export function DashboardNavigation() {
   const location = useLocation();
-  
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -146,7 +146,7 @@ export function DashboardNavigation() {
       <div className='grid grid-cols-2 md:grid-cols-5 gap-2'>
         {NAVIGATION_SECTIONS.map(section => {
           const active = isActive(section.path);
-          
+
           return (
             <Link
               key={section.id}

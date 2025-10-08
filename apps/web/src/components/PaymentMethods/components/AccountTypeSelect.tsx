@@ -16,7 +16,7 @@ type AccountType = Database['public']['Enums']['account_type'];
 // =====================================================================================
 
 interface AccountTypeSelectProps {
-  value: AccountType;
+  value: AccountType | undefined;
   onChange: (value: AccountType) => void;
   error?: string;
   disabled?: boolean;
@@ -46,14 +46,14 @@ export function AccountTypeSelect({
   return (
     <div className='space-y-2'>
       <Label htmlFor='account_type'>
-        Account Type <span className='text-red-500'>*</span>
+        Tipo de Cuenta <span className='text-red-500'>*</span>
       </Label>
       <Select value={value || ''} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
           id='account_type'
           className={error ? 'border-red-500' : ''}
         >
-          <SelectValue placeholder='Select account type' />
+          <SelectValue placeholder='Seleccionar tipo de cuenta' />
         </SelectTrigger>
         <SelectContent>
           {accountTypes.map(type => (
