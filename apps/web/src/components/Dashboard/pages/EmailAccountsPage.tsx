@@ -22,7 +22,9 @@ export function EmailAccountsPage() {
         <div className='bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-12 border border-gray-200'>
           <div className='text-center'>
             <div className='text-6xl mb-4'>📧</div>
-            <h3 className='text-2xl font-bold text-gray-900 mb-2'>Coming Soon</h3>
+            <h3 className='text-2xl font-bold text-gray-900 mb-2'>
+              Coming Soon
+            </h3>
             <p className='text-gray-600'>
               This feature is currently under development
             </p>

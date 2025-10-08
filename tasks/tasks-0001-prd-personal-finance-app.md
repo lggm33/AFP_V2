@@ -82,16 +82,15 @@
     - Go to railway.app and connect GitHub account
     - Deploy from GitHub repo (AFP_V2)
     - Configure services for /apps/web and /apps/email-service
-  - [X] 1.7 Configure Railway environment variables and deployment settings
+  - [x] 1.7 Configure Railway environment variables and deployment settings
     - Set up environment variables for both services
     - Configure build and start commands if needed
     - Set up custom domains (optional)
   - [x] 1.8 Create Makefile with automation tasks for development, testing, and deployment
-  - [x] 1.9 Test initial deployment pipeline with hello world apps
-    ✅ Email service deployed successfully to Railway
-    ✅ Web app deployed successfully to Railway  
-    ✅ Both apps have working health endpoints
-    ✅ Deployment pipeline is functional (takes ~10 minutes)
+  - [x] 1.9 Test initial deployment pipeline with hello world apps ✅ Email service deployed
+        successfully to Railway ✅ Web app deployed successfully to Railway  
+        ✅ Both apps have working health endpoints ✅ Deployment pipeline is functional (takes ~10
+        minutes)
 
 - [ ] 2.0 Supabase Setup & Basic Authentication Configuration
   - [x] 2.1 Create Supabase project and configure basic settings

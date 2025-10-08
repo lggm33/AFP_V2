@@ -1,7 +1,13 @@
 // Charts Components
 
+export interface ChartDataItem {
+  name: string;
+  value: number;
+  [key: string]: string | number;
+}
+
 export interface ChartProps {
-  data: any[];
+  data: ChartDataItem[];
   width?: number;
   height?: number;
   className?: string;

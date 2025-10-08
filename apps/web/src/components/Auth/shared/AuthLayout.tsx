@@ -9,7 +9,12 @@ interface AuthLayoutProps {
   footer?: ReactNode;
 }
 
-export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+  footer,
+}: AuthLayoutProps) {
   return (
     <div className='min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
       <div className='sm:mx-auto sm:w-full sm:max-w-md'>
@@ -18,7 +23,9 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
             <TrendingUp className='h-8 w-8 text-white' />
           </div>
         </Link>
-        <h2 className='mt-8 text-center text-4xl font-bold text-gray-900'>{title}</h2>
+        <h2 className='mt-8 text-center text-4xl font-bold text-gray-900'>
+          {title}
+        </h2>
         <p className='mt-3 text-center text-lg text-gray-600'>{subtitle}</p>
       </div>
 

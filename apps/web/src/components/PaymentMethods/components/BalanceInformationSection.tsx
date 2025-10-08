@@ -8,7 +8,7 @@ interface BalanceInformationSectionProps {
     available_balance?: number;
   };
   needsCreditDetails: boolean;
-  setField: (field: string, value: any) => void;
+  setField: (field: string, value: string | number | boolean) => void;
   getFieldError: (field: string) => string | undefined;
 }
 
@@ -20,15 +20,15 @@ export function BalanceInformationSection({
 }: BalanceInformationSectionProps) {
   return (
     <div className='space-y-4 border-t pt-4'>
-      <h3 className='font-medium text-lg'>Balance Information</h3>
+      <h3 className='font-medium text-lg'>Información de Balance</h3>
 
       {/* Current Balance */}
       <div className='space-y-2'>
         <Label htmlFor='current_balance'>
-          Current Balance
+          Balance Actual
           {needsCreditDetails && (
             <span className='text-xs text-gray-500 ml-2'>
-              (negative for credit cards)
+              (negativo para tarjetas de crédito)
             </span>
           )}
         </Label>
@@ -53,7 +53,7 @@ export function BalanceInformationSection({
       {/* Available Balance */}
       {!needsCreditDetails && (
         <div className='space-y-2'>
-          <Label htmlFor='available_balance'>Available Balance</Label>
+          <Label htmlFor='available_balance'>Balance Disponible</Label>
           <Input
             id='available_balance'
             type='number'

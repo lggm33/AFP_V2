@@ -11,6 +11,75 @@ import {
 import { AccountTypeSelect } from './AccountTypeSelect';
 import type { Database } from '@afp/shared-types';
 
+// Helper function to get input class based on validation state
+const getInputClassName = (value: string, error?: string) => {
+  if (error) return 'border-red-500';
+  if (value.length > 0) return 'border-green-500';
+  return '';
+};
+
+// Helper function to render validation message
+const ValidationMessage = ({
+  value,
+  error,
+  successMessage,
+}: {
+  value: string;
+  error?: string;
+  successMessage: string;
+}) => {
+  if (error) {
+    return <p className='text-sm text-red-500'>{error}</p>;
+  }
+  if (value.length > 0) {
+    return <p className='text-sm text-green-600'>✓ {successMessage}</p>;
+  }
+  return null;
+};
+
+// Helper component for form fields
+const FormField = ({
+  id,
+  label,
+  required = false,
+  value,
+  onChange,
+  placeholder,
+  error,
+  successMessage,
+  helpText,
+}: {
+  id: string;
+  label: string;
+  required?: boolean;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  error?: string;
+  successMessage: string;
+  helpText: string;
+}) => (
+  <div className='space-y-2'>
+    <Label htmlFor={id}>
+      {label} {required && <span className='text-red-500'>*</span>}
+    </Label>
+    <Input
+      id={id}
+      type='text'
+      placeholder={placeholder}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className={getInputClassName(value, error)}
+    />
+    <ValidationMessage
+      value={value}
+      error={error}
+      successMessage={successMessage}
+    />
+    <p className='text-xs text-gray-500'>{helpText}</p>
+  </div>
+);
+
 type AccountType = Database['public']['Enums']['account_type'];
 
 interface BasicInformationSectionProps {
@@ -34,41 +103,30 @@ export function BasicInformationSection({
   setField,
   getFieldError,
 }: BasicInformationSectionProps) {
+  const handleFieldChange = (field: string) => (value: string) => {
+    setField(field, value);
+  };
+
+  const handleCheckboxChange = (field: string) => (checked: boolean) => {
+    setField(field, checked);
+  };
+
   return (
     <div className='space-y-4'>
       <h3 className='font-medium text-lg'>Información Básica</h3>
 
-      {/* Name */}
-      <div className='space-y-2'>
-        <Label htmlFor='name'>
-          Nombre <span className='text-red-500'>*</span>
-        </Label>
-        <Input
-          id='name'
-          type='text'
-          placeholder='Mi Tarjeta de Crédito'
-          value={formData.name}
-          onChange={e => setField('name', e.target.value)}
-          className={
-            getFieldError('name')
-              ? 'border-red-500'
-              : formData.name.length > 0
-                ? 'border-green-500'
-                : ''
-          }
-        />
-        {getFieldError('name') && (
-          <p className='text-sm text-red-500'>{getFieldError('name')}</p>
-        )}
-        {!getFieldError('name') && formData.name.length > 0 && (
-          <p className='text-sm text-green-600'>✓ Nombre válido</p>
-        )}
-        <p className='text-xs text-gray-500'>
-          Ingresa un nombre descriptivo para identificar este método de pago
-        </p>
-      </div>
+      <FormField
+        id='name'
+        label='Nombre'
+        required
+        value={formData.name}
+        onChange={handleFieldChange('name')}
+        placeholder='Mi Tarjeta de Crédito'
+        error={getFieldError('name')}
+        successMessage='Nombre válido'
+        helpText='Ingresa un nombre descriptivo para identificar este método de pago'
+      />
 
-      {/* Account Type */}
       <AccountTypeSelect
         value={formData.account_type}
         onChange={value => setField('account_type', value)}
@@ -76,40 +134,18 @@ export function BasicInformationSection({
         disabled={mode === 'edit'}
       />
 
-      {/* Institution Name */}
-      <div className='space-y-2'>
-        <Label htmlFor='institution_name'>
-          Nombre de la Institución <span className='text-red-500'>*</span>
-        </Label>
-        <Input
-          id='institution_name'
-          type='text'
-          placeholder='Banco de América'
-          value={formData.institution_name}
-          onChange={e => setField('institution_name', e.target.value)}
-          className={
-            getFieldError('institution_name')
-              ? 'border-red-500'
-              : formData.institution_name.length > 0
-                ? 'border-green-500'
-                : ''
-          }
-        />
-        {getFieldError('institution_name') && (
-          <p className='text-sm text-red-500'>
-            {getFieldError('institution_name')}
-          </p>
-        )}
-        {!getFieldError('institution_name') &&
-          formData.institution_name.length > 0 && (
-            <p className='text-sm text-green-600'>✓ Institución válida</p>
-          )}
-        <p className='text-xs text-gray-500'>
-          Nombre del banco o institución financiera
-        </p>
-      </div>
+      <FormField
+        id='institution_name'
+        label='Nombre de la Institución'
+        required
+        value={formData.institution_name}
+        onChange={handleFieldChange('institution_name')}
+        placeholder='Banco de América'
+        error={getFieldError('institution_name')}
+        successMessage='Institución válida'
+        helpText='Nombre del banco o institución financiera'
+      />
 
-      {/* Currency */}
       <div className='space-y-2'>
         <Label htmlFor='currency'>Moneda</Label>
         <Select
@@ -127,7 +163,6 @@ export function BasicInformationSection({
         </Select>
       </div>
 
-      {/* Color */}
       <div className='space-y-2'>
         <Label htmlFor='color'>Color del Método de Pago</Label>
         <Input
@@ -138,13 +173,12 @@ export function BasicInformationSection({
         />
       </div>
 
-      {/* Flags */}
       <div className='space-y-2'>
         <label className='flex items-center gap-2'>
           <input
             type='checkbox'
             checked={formData.is_primary}
-            onChange={e => setField('is_primary', e.target.checked)}
+            onChange={e => handleCheckboxChange('is_primary')(e.target.checked)}
             className='w-4 h-4'
           />
           <span className='text-sm'>
@@ -156,7 +190,9 @@ export function BasicInformationSection({
           <input
             type='checkbox'
             checked={formData.exclude_from_totals}
-            onChange={e => setField('exclude_from_totals', e.target.checked)}
+            onChange={e =>
+              handleCheckboxChange('exclude_from_totals')(e.target.checked)
+            }
             className='w-4 h-4'
           />
           <span className='text-sm'>Excluir de los cálculos totales</span>

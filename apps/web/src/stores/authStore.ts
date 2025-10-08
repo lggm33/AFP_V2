@@ -67,7 +67,7 @@ const createInitialize =
         data: { session },
         error,
       } = await supabase.auth.getSession();
-      
+
       if (error) throw error;
 
       // Set initial state
@@ -141,7 +141,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'afp-auth-storage',
-      partialize: state => ({
+      partialize: _state => ({
         // Don't persist anything - session is stored by Supabase
         // We always want to re-initialize from Supabase on app load
       }),
@@ -153,7 +153,7 @@ export const useAuthStore = create<AuthStore>()(
 export const useAuth = () => {
   const store = useAuthStore();
   const isAuthenticated = !!store.user && !!store.session;
-  
+
   return {
     ...store,
     isAuthenticated,

@@ -1,11 +1,14 @@
 # Transaction System Requirements
 
 ## Document Purpose
-This document defines the comprehensive requirements for the transaction system in AFP Finance App. It serves as the foundation for database design and business logic implementation.
+
+This document defines the comprehensive requirements for the transaction system in AFP Finance App.
+It serves as the foundation for database design and business logic implementation.
 
 ---
 
 ## Table of Contents
+
 1. [Core Actions by Account Type](#core-actions-by-account-type)
 2. [Edge Cases](#edge-cases)
 3. [Transaction Data Requirements](#transaction-data-requirements)
@@ -19,6 +22,7 @@ This document defines the comprehensive requirements for the transaction system 
 ### Credit Card Actions
 
 #### Normal Operations
+
 1. **Purchase/Charge** - Regular spending at merchants
 2. **Full Payment** - Pay complete card balance
 3. **Partial Payment** - Pay portion of balance
@@ -31,6 +35,7 @@ This document defines the comprehensive requirements for the transaction system 
 10. **Interest Charges** - For unpaid balances
 
 #### Credit Card Edge Cases
+
 - **Pending charge** - Transaction made but not yet posted to statement
 - **Pre-authorization** - Hotel/gas station reserves amount, adjusts later
 - **Foreign currency charge** - Exchange rate determined days later
@@ -54,6 +59,7 @@ This document defines the comprehensive requirements for the transaction system 
 ### Debit Card Actions
 
 #### Normal Operations
+
 1. **Purchase** - Direct spending from account
 2. **ATM Withdrawal** - Cash withdrawal
 3. **ATM Deposit** - Cash deposit
@@ -62,6 +68,7 @@ This document defines the comprehensive requirements for the transaction system 
 6. **Transaction Fee** - Some banks charge per transaction
 
 #### Debit Card Edge Cases
+
 - **Pending charge** - Immediately blocks funds
 - **Gas station pre-authorization** - Blocks $100 but only uses $50
 - **Purchase without sufficient funds** - Some banks temporarily allow
@@ -76,6 +83,7 @@ This document defines the comprehensive requirements for the transaction system 
 ### Bank Account Actions (Checking/Savings)
 
 #### Normal Operations
+
 1. **Outgoing Transfer (SPEI/Wire/ACH)** - Send money to another account
 2. **Incoming Transfer** - Receive money
 3. **Cash Deposit** - Physical money deposit
@@ -90,6 +98,7 @@ This document defines the comprehensive requirements for the transaction system 
 12. **Transfer Between Own Accounts** - Same bank or interbank
 
 #### Bank Account Edge Cases
+
 - **Bounced check** - Deposited check rejected for insufficient funds
 - **Transfer reversal** - Transaction cancelled/reversed
 - **Pending transfer** - Sent but not arrived yet (weekends)
@@ -116,6 +125,7 @@ This document defines the comprehensive requirements for the transaction system 
 ## Edge Cases
 
 ### Timing and State
+
 1. **Pending transaction** - Made but not reflected
 2. **Processing transaction** - In approval process
 3. **Completed transaction** - Finalized
@@ -126,6 +136,7 @@ This document defines the comprehensive requirements for the transaction system 
 8. **Recurring transaction** - Automatically repeats
 
 ### Amounts and Adjustments
+
 9. **Tip added later** - Restaurant authorizes $100, with tip becomes $120
 10. **Quantity adjustment** - Uber estimates $50 but ride costs $45
 11. **Taxes calculated later** - International purchases, taxes arrive weeks later
@@ -134,6 +145,7 @@ This document defines the comprehensive requirements for the transaction system 
 14. **Partial amount** - Purchase of $100 but only $80 authorized
 
 ### Multiple Entities
+
 15. **Transfer between own accounts** - Not real income or expense
 16. **Own credit card payment** - Moves money but not expense
 17. **Loan between own accounts** - Move money temporarily
@@ -141,6 +153,7 @@ This document defines the comprehensive requirements for the transaction system 
 19. **Investment withdrawal** - Money returns but not income
 
 ### Difficult Categorization
+
 20. **Work expense reimbursement** - Spent but will be returned
 21. **Shared expenses** - Paid $100 but owed $50
 22. **Personal debt payment** - Lending to friend
@@ -149,6 +162,7 @@ This document defines the comprehensive requirements for the transaction system 
 25. **Reimbursable medical expenses** - Insurance will reimburse later
 
 ### Fraud and Errors
+
 26. **Fraudulent charge** - Theft/unauthorized use
 27. **Merchant error charge** - Merchant overcharged
 28. **Phantom charge** - Appears and disappears on its own
@@ -156,6 +170,7 @@ This document defines the comprehensive requirements for the transaction system 
 30. **Authorization without charge** - Card verified but not charged
 
 ### Regional Special Cases (Mexico/LATAM)
+
 31. **CoDi** - Digital collections in Mexico
 32. **Shared ATM with fee** - Using another network's ATM
 33. **Interbank transfer fee** - SPEI has cost at some banks
@@ -163,6 +178,7 @@ This document defines the comprehensive requirements for the transaction system 
 35. **Reference at OXXO/convenience store** - Pay with capture line
 
 ### Subscriptions and Recurring
+
 36. **Subscription initiated** - First charge
 37. **Subscription renewed** - Monthly/annual charge
 38. **Subscription cancelled** - No longer charged
@@ -172,12 +188,14 @@ This document defines the comprehensive requirements for the transaction system 
 42. **Subscription paused** - Pay less or don't pay temporarily
 
 ### Taxes and Regulations
+
 43. **ISR withholding** - On bank interest
 44. **Itemized IVA** - Invoice where taxes need separation
 45. **IVA refund** - If business recovers VAT
 46. **Cash deposit tax (IDE)** - Mexico tax on large cash deposits
 
 ### Investments and Savings
+
 47. **Automatic savings** - Money moved to savings automatically
 48. **Purchase roundup** - Spend $10.50, rounds to $11, $0.50 saved
 49. **Cashback deposited** - Reward money arrives to account
@@ -188,6 +206,7 @@ This document defines the comprehensive requirements for the transaction system 
 ## Transaction Data Requirements
 
 ### 1. Unique Identification
+
 **Purpose:** Detect duplicates and reconcile across sources
 
 ```typescript
@@ -204,6 +223,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Why:** Need to identify when different emails/notifications reference the same transaction
 
 ### 2. Amount Details
+
 **Purpose:** Track all money amounts and their changes
 
 ```typescript
@@ -226,6 +246,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Why:** Hotel authorizes $1000, spend $850, charged $850 + $100 tip = $950. Need all these numbers.
 
 ### 3. Temporal Data
+
 **Purpose:** Understand timeline and transaction state
 
 ```typescript
@@ -242,9 +263,11 @@ This document defines the comprehensive requirements for the transaction system 
 }
 ```
 
-**Why:** Purchase in Japan Jan 1 at 11pm = Dec 31 in Mexico. Email arrives 2 days later. Charge posts 5 days later.
+**Why:** Purchase in Japan Jan 1 at 11pm = Dec 31 in Mexico. Email arrives 2 days later. Charge
+posts 5 days later.
 
 ### 4. Merchant/Vendor Data
+
 **Purpose:** Categorize and understand where money was spent
 
 ```typescript
@@ -259,9 +282,11 @@ This document defines the comprehensive requirements for the transaction system 
 }
 ```
 
-**Why:** "AMZN Mktp US*2X4BC3" vs "Amazon.com" vs "Amazon Prime" - need raw text to clean and normalize later.
+**Why:** "AMZN Mktp US\*2X4BC3" vs "Amazon.com" vs "Amazon Prime" - need raw text to clean and
+normalize later.
 
 ### 5. Source Data (Email/Notification)
+
 **Purpose:** Complete context of where transaction came from
 
 ```typescript
@@ -277,11 +302,14 @@ This document defines the comprehensive requirements for the transaction system 
 }
 ```
 
-**Why:** If initial analysis is wrong, can retrieve original email and re-process with improved logic.
+**Why:** If initial analysis is wrong, can retrieve original email and re-process with improved
+logic.
 
-**Decision:** Store only parsed data + email ID. Full email can be retrieved via email API when needed.
+**Decision:** Store only parsed data + email ID. Full email can be retrieved via email API when
+needed.
 
 ### 6. Payment Method Information
+
 **Purpose:** Track which account/card was used
 
 ```typescript
@@ -293,9 +321,10 @@ This document defines the comprehensive requirements for the transaction system 
 }
 ```
 
-**Why:** Email says "your card *1234" - need to match with which of your cards.
+**Why:** Email says "your card \*1234" - need to match with which of your cards.
 
 ### 7. Classification (Inferred)
+
 **Purpose:** Best guess of what this transaction is
 
 ```typescript
@@ -314,6 +343,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Decision:** Store only the most probable interpretation with confidence score.
 
 ### 8. State and Flow
+
 **Purpose:** Track transaction lifecycle
 
 ```typescript
@@ -327,9 +357,11 @@ This document defines the comprehensive requirements for the transaction system 
 }
 ```
 
-**Why:** Email 1: "Pending charge $100". Email 2: "Charge posted $95". Same transaction, changed state.
+**Why:** Email 1: "Pending charge $100". Email 2: "Charge posted $95". Same transaction, changed
+state.
 
 ### 9. Relations to Other Transactions
+
 **Purpose:** Link related transactions
 
 ```typescript
@@ -346,6 +378,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Why:** MSI purchase generates 1 initial charge + 11 future charges. Need to know they're related.
 
 ### 10. Balance Tracking
+
 **Purpose:** Maintain consistent balances
 
 ```typescript
@@ -362,6 +395,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Decision:** Calculate on read, not stored. Allows recalculation if logic changes.
 
 ### 11. Metadata and Free Context
+
 **Purpose:** Everything else that doesn't fit structured fields
 
 ```typescript
@@ -396,6 +430,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Why:** Can't predict what future information will be needed. Flexible JSONB saves the day.
 
 ### 12. Machine Learning Features
+
 **Purpose:** Features for training models
 
 ```typescript
@@ -417,6 +452,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Decision:** Calculate on read when needed for ML, don't store.
 
 ### 13. Audit Data
+
 **Purpose:** Debugging and compliance
 
 ```typescript
@@ -443,6 +479,7 @@ This document defines the comprehensive requirements for the transaction system 
 **Decision:** Store change history in JSONB array within the transaction record.
 
 ### 14. Reconciliation Data
+
 **Purpose:** Match with bank statements
 
 ```typescript
@@ -462,45 +499,53 @@ This document defines the comprehensive requirements for the transaction system 
 ## System Decisions
 
 ### Decision 1: Email Storage
+
 **Question:** Store full email or only parsed data?
 
 **Decision:** Store only parsed data + email ID (source_email_id)
 
 **Rationale:**
+
 - Can retrieve full email via Gmail API when needed
 - More storage efficient
 - Keeps sensitive data in original secure location
 - Still maintains ability to re-process with improved logic
 
 ### Decision 2: Transaction Versions
+
 **Question:** Create new records for each version or maintain change history?
 
 **Decision:** Maintain change history in JSONB field
 
 **Rationale:**
+
 - Single source of truth (one record per transaction)
 - Easier queries (don't need to filter latest version)
 - Complete audit trail in `changeHistory` array
 - Can reconstruct transaction state at any point in time
 
 ### Decision 3: Data Normalization
+
 **Question:** Normalize on write or on read?
 
 **Decision:** Normalize on read
 
 **Rationale:**
+
 - Store raw data as received
 - Preserve original information
 - Can improve normalization logic without losing data
 - Historical data automatically benefits from improved algorithms
-- Example: Store "AMZN Mktp US*2X4BC3" raw, clean to "Amazon" when reading
+- Example: Store "AMZN Mktp US\*2X4BC3" raw, clean to "Amazon" when reading
 
 ### Decision 4: Uncertainty Handling
+
 **Question:** Store multiple interpretations or only most probable?
 
 **Decision:** Store only most probable with confidence score
 
 **Rationale:**
+
 - Simpler data model
 - Can flag low-confidence transactions for review (`requiresReview` flag)
 - Confidence score indicates reliability
@@ -512,12 +557,16 @@ This document defines the comprehensive requirements for the transaction system 
 ## Business Rules
 
 ### Rule 1: Transaction Uniqueness
-- Transactions are unique per (sourceReference, externalTransactionId, transactionDate, amount, paymentMethodId)
+
+- Transactions are unique per (sourceReference, externalTransactionId, transactionDate, amount,
+  paymentMethodId)
 - Duplicate detection must check across all these fields
 - Email-service should check for duplicates before creating transactions
 
 ### Rule 2: Status Transitions
+
 Valid status transitions:
+
 - `pending` → `authorized` → `posted` → `completed`
 - `pending` → `failed`
 - `authorized` → `reversed`
@@ -526,6 +575,7 @@ Valid status transitions:
 Any status can move to `under_review` for manual verification.
 
 ### Rule 3: Balance Calculations
+
 - Balances are calculated, not stored
 - Current balance = sum of all completed transactions
 - Available balance considers pending transactions
@@ -533,21 +583,27 @@ Any status can move to `under_review` for manual verification.
 - For bank accounts: available = current_balance - pending_debits
 
 ### Rule 4: Internal Transfers
+
 Transfers between user's own accounts must:
+
 - Create 2 linked transactions (one debit, one credit)
 - Link via `relatedTransactionIds`
 - NOT count toward income/expense totals
 - Maintain zero-sum balance (amount out = amount in, minus fees)
 
 ### Rule 5: Credit Card Payments
+
 Credit card payments must:
+
 - Create transaction on credit card (increases available credit)
 - Create transaction on bank account (decreases balance)
 - Link both via `relatedTransactionIds`
 - Type: `transfer` with subtype `credit_card_payment`
 
 ### Rule 6: Installments (MSI)
+
 Installment purchases must:
+
 - Create parent transaction with full amount
 - Create N child transactions (one per installment)
 - Each child references parent via `parentTransactionId`
@@ -555,36 +611,42 @@ Installment purchases must:
 - Only children affect monthly spending totals
 
 ### Rule 7: Refunds and Reversals
+
 - Refunds reference original transaction via `reversalOfTransactionId`
 - Partial refunds create new transaction with partial amount
 - Full reversals may update original transaction status
 - Refunds don't delete original transaction (audit trail)
 
 ### Rule 8: Foreign Currency
+
 - Always store both original and local currency amounts
 - Store exchange rate and date rate was applied
 - Display amounts in user's preferred currency
 - Allow drill-down to see original currency
 
 ### Rule 9: Confidence Thresholds
+
 - confidence >= 0.9: Auto-verify
 - confidence 0.7-0.89: Auto-create but flag for review
 - confidence < 0.7: Hold for manual verification
 - User verification always overrides automatic classification
 
 ### Rule 10: Data Immutability
+
 - Original parsed data is immutable (stored in changeHistory)
 - Changes create new entry in changeHistory array
 - version number increments on each change
 - Can rollback to previous version if needed
 
 ### Rule 11: Soft Deletes
+
 - Transactions are never hard-deleted
 - Use `deletedAt` timestamp for soft delete
 - Deleted transactions excluded from balance calculations
 - Maintain in database for audit purposes
 
 ### Rule 12: Reconciliation
+
 - Unreconciled transactions older than 7 days trigger alert
 - User can mark as reconciled manually
 - Auto-reconcile when matching bank statement found
@@ -606,7 +668,6 @@ Installment purchases must:
 
 ## Document Version History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-10-07 | System | Initial comprehensive requirements document |
-
+| Version | Date       | Author | Changes                                     |
+| ------- | ---------- | ------ | ------------------------------------------- |
+| 1.0     | 2025-10-07 | System | Initial comprehensive requirements document |

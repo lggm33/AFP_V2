@@ -4,7 +4,11 @@ interface GoogleSignInButtonProps {
   disabled?: boolean;
 }
 
-export function GoogleSignInButton({ onClick, loading, disabled = false }: GoogleSignInButtonProps) {
+export function GoogleSignInButton({
+  onClick,
+  loading,
+  disabled = false,
+}: GoogleSignInButtonProps) {
   return (
     <button
       onClick={onClick}

@@ -82,7 +82,7 @@ export interface DashboardSummary {
     approaching: number;
     exceeded: number;
   };
-  recentTransactions: any[]; // Will be imported from transactions
+  recentTransactions: unknown[]; // Will be imported from transactions
   alerts: BudgetAlert[];
 }
 

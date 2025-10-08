@@ -15,7 +15,7 @@ export interface WebhookPayload {
     | 'payment_method_created'
     | 'payment_method_updated';
   userId: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -26,7 +26,7 @@ export interface WebhookPayload {
 export interface TransactionCreatedPayload extends WebhookPayload {
   type: 'transaction_created';
   data: {
-    transaction: any; // TransactionWithRelations
+    transaction: unknown; // TransactionWithRelations
     isAutomatic: boolean;
     confidence?: number;
   };
@@ -36,7 +36,7 @@ export interface TransactionUpdatedPayload extends WebhookPayload {
   type: 'transaction_updated';
   data: {
     transactionId: string;
-    changes: Record<string, any>;
+    changes: Record<string, unknown>;
   };
 }
 
@@ -100,6 +100,6 @@ export interface PaymentMethodUpdatedPayload extends WebhookPayload {
   type: 'payment_method_updated';
   data: {
     paymentMethodId: string;
-    changes: Record<string, any>;
+    changes: Record<string, unknown>;
   };
 }

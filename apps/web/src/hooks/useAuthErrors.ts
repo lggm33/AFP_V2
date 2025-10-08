@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export function useAuthErrors(
-  setError: (error: string | null) => void
-) {
+export function useAuthErrors(setError: (error: string | null) => void) {
   const location = useLocation();
 
   useEffect(() => {

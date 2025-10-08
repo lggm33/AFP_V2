@@ -7,30 +7,30 @@ const fastify = Fastify({
 
 // Health check endpoint
 fastify.get('/health', async () => {
-  return { 
-    status: 'ok', 
+  return {
+    status: 'ok',
     service: 'email-service',
     version: '1.0.0',
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
   };
 });
 
 // Simple hello endpoint
 fastify.get('/', async () => {
-  return { 
+  return {
     message: 'AFP Email Service is running!',
     version: '1.0.0',
-    endpoints: ['/health', '/']
+    endpoints: ['/health', '/'],
   };
 });
 
 // Simple test endpoint (no complex types)
-fastify.post('/test', async (request) => {
+fastify.post('/test', async request => {
   return {
     success: true,
     message: 'Email service is working!',
     received: request.body,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 });
 

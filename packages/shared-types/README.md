@@ -5,6 +5,7 @@ Shared TypeScript types for the AFP Finance App monorepo.
 ## Purpose
 
 This package provides a single source of truth for:
+
 - Supabase database types (auto-generated)
 - API request/response interfaces
 - Supabase client configuration helpers
@@ -64,6 +65,7 @@ pnpm dev
 ## Exports
 
 ### Database Types
+
 - `Database` - Full database schema type
 - `Tables<T>` - Extract table row type
 - `TablesInsert<T>` - Extract insert type
@@ -71,12 +73,14 @@ pnpm dev
 - `Enums<T>` - Extract enum type
 
 ### API Types
+
 - `ApiResponse<T>` - Standard API response wrapper
 - `ProcessEmailsRequest` - Email processing request
 - `ProcessEmailsResponse` - Email processing response
 - `HealthCheckResponse` - Health check response
 
 ### Client Helpers
+
 - `createSupabaseWebClient()` - Create web client
 - `createSupabaseServiceClient()` - Create service client
 - `SupabaseClient` - Client type

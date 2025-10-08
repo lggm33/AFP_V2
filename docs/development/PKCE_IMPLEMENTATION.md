@@ -1,11 +1,14 @@
 # PKCE Flow Implementation
 
 ## Overview
-Successfully migrated from Implicit Flow to PKCE (Proof Key for Code Exchange) flow for OAuth authentication with Google.
+
+Successfully migrated from Implicit Flow to PKCE (Proof Key for Code Exchange) flow for OAuth
+authentication with Google.
 
 ## What is PKCE?
 
 PKCE is a more secure OAuth 2.0 flow that:
+
 - **Prevents token interception**: Tokens never appear in URLs
 - **Uses temporary codes**: Authorization codes are exchanged for tokens server-side
 - **Better browser history**: Only harmless codes appear in browser history, not actual tokens
@@ -14,6 +17,7 @@ PKCE is a more secure OAuth 2.0 flow that:
 ## Authentication Flow
 
 ### Before (Implicit Flow)
+
 ```
 1. User clicks "Sign in with Google"
 2. Redirects to Google → User authenticates
@@ -23,6 +27,7 @@ PKCE is a more secure OAuth 2.0 flow that:
 ```
 
 ### After (PKCE Flow)
+
 ```
 1. User clicks "Sign in with Google"
 2. App generates code_verifier and code_challenge
@@ -35,7 +40,9 @@ PKCE is a more secure OAuth 2.0 flow that:
 ## Changes Made
 
 ### 1. Configuration (Already in place)
+
 **File**: `packages/shared-types/src/supabase.ts`
+
 ```typescript
 export function createSupabaseWebClient(config: SupabaseConfig): SupabaseClientType {
   return createClient<Database>(config.url, config.anonKey, {
@@ -51,42 +58,50 @@ export function createSupabaseWebClient(config: SupabaseConfig): SupabaseClientT
 ```
 
 ### 2. Simplified AuthCallback Component
+
 **File**: `apps/web/src/components/Auth/AuthCallback.tsx`
 
-**Before**: ~60 lines with manual URL fragment parsing
-**After**: ~46 lines with automatic handling
+**Before**: ~60 lines with manual URL fragment parsing **After**: ~46 lines with automatic handling
 
 Key changes:
+
 - ❌ Removed manual hash fragment parsing
 - ❌ Removed `URLSearchParams(window.location.hash.substring(1))`
 - ✅ Supabase automatically detects `?code` and exchanges it
 - ✅ Simple call to `supabase.auth.getSession()`
 
 ### 3. Updated GoogleAuth Component
+
 **File**: `apps/web/src/components/Auth/GoogleAuth.tsx`
 
 Changes:
+
 - ❌ Removed `skipBrowserRedirect: false` (redundant)
 - ✅ Added documentation comments about PKCE flow
 - ✅ Cleaner, more maintainable code
 
 ### 4. Updated SignIn and SignUp Pages
-**Files**: 
+
+**Files**:
+
 - `apps/web/src/components/Auth/SignInPage.tsx`
 - `apps/web/src/components/Auth/SignUpPage.tsx`
 
 Changes:
+
 - ❌ Removed `skipBrowserRedirect: false` (redundant)
 - ✅ Added PKCE flow documentation
 - ✅ Consistent with other auth components
 
 ### 5. Simplified AuthRedirectHandler
+
 **File**: `apps/web/src/components/Auth/AuthRedirectHandler.tsx`
 
-**Before**: Handled both implicit flow (hash) and PKCE (code)
-**After**: Only handles PKCE flow (query params)
+**Before**: Handled both implicit flow (hash) and PKCE (code) **After**: Only handles PKCE flow
+(query params)
 
 Key changes:
+
 - ❌ Removed hash fragment handling
 - ❌ Removed implicit flow compatibility
 - ✅ Only checks for `?code` parameter
@@ -95,19 +110,20 @@ Key changes:
 
 ## Security Benefits
 
-| Aspect | Implicit Flow | PKCE Flow |
-|--------|---------------|-----------|
-| Tokens in URL | ✅ Yes (fragment) | ❌ No |
-| Browser History | ⚠️ Tokens visible | ✅ Only temporary code |
-| Interception Risk | ⚠️ Higher | ✅ Lower (code useless without verifier) |
-| Code Complexity | ⚠️ Manual parsing | ✅ Automatic handling |
-| SSR Compatible | ❌ No (fragments don't reach server) | ✅ Yes (query params) |
+| Aspect            | Implicit Flow                        | PKCE Flow                                |
+| ----------------- | ------------------------------------ | ---------------------------------------- |
+| Tokens in URL     | ✅ Yes (fragment)                    | ❌ No                                    |
+| Browser History   | ⚠️ Tokens visible                    | ✅ Only temporary code                   |
+| Interception Risk | ⚠️ Higher                            | ✅ Lower (code useless without verifier) |
+| Code Complexity   | ⚠️ Manual parsing                    | ✅ Automatic handling                    |
+| SSR Compatible    | ❌ No (fragments don't reach server) | ✅ Yes (query params)                    |
 
 ## Testing
 
 To test the PKCE implementation:
 
 1. **Start the development server**
+
    ```bash
    cd apps/web
    pnpm dev
@@ -170,8 +186,9 @@ For even better security, consider:
 - [Supabase PKCE Flow Guide](https://supabase.com/docs/guides/auth/auth-helpers/auth-ui#authentication-flow)
 
 ## Migration Date
+
 October 7, 2025
 
 ## Status
-✅ Complete - All authentication components migrated to PKCE flow
 
+✅ Complete - All authentication components migrated to PKCE flow

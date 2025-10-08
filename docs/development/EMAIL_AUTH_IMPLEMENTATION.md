@@ -1,14 +1,18 @@
 # Email/Password Authentication Implementation
 
 ## Overview
-Successfully implemented complete email/password authentication alongside existing Google OAuth, including password recovery functionality.
+
+Successfully implemented complete email/password authentication alongside existing Google OAuth,
+including password recovery functionality.
 
 ## Features Implemented
 
 ### 1. **Sign In with Email/Password**
+
 **File**: `apps/web/src/components/Auth/SignInPage.tsx`
 
 Features:
+
 - ✅ Email and password input fields with validation
 - ✅ Password visibility toggle
 - ✅ "Forgot password?" link
@@ -18,14 +22,17 @@ Features:
 - ✅ Loading states and disabled inputs during submission
 
 Error Messages:
+
 - Invalid credentials
 - Email not confirmed
 - General authentication errors
 
 ### 2. **Sign Up with Email/Password**
+
 **File**: `apps/web/src/components/Auth/SignUpPage.tsx`
 
 Features:
+
 - ✅ Full name, email, password, and confirm password fields
 - ✅ Password visibility toggles for both password fields
 - ✅ Client-side validation:
@@ -38,6 +45,7 @@ Features:
 - ✅ User metadata (full_name) stored during signup
 
 Error Messages:
+
 - Missing fields
 - Password too short
 - Passwords don't match
@@ -45,9 +53,11 @@ Error Messages:
 - Password security requirements not met
 
 ### 3. **Forgot Password**
+
 **File**: `apps/web/src/components/Auth/ForgotPasswordPage.tsx`
 
 Features:
+
 - ✅ Email input for password recovery
 - ✅ Sends recovery email via Supabase
 - ✅ Success state with instructions
@@ -56,15 +66,18 @@ Features:
 - ✅ Links back to sign in and sign up
 
 Flow:
+
 1. User enters email
 2. System sends recovery email with secure link
 3. Success message displayed
 4. User clicks link in email → redirected to reset password page
 
 ### 4. **Reset Password**
+
 **File**: `apps/web/src/components/Auth/ResetPasswordPage.tsx`
 
 Features:
+
 - ✅ Validates recovery session on page load
 - ✅ New password and confirm password fields
 - ✅ Password visibility toggles
@@ -77,6 +90,7 @@ Features:
 - ✅ Handles expired/invalid recovery links
 
 Error Messages:
+
 - Invalid/expired recovery link
 - Passwords don't match
 - Password too short
@@ -84,9 +98,11 @@ Error Messages:
 - Security requirements not met
 
 ### 5. **Router Updates**
+
 **File**: `apps/web/src/components/Router/AppRouter.tsx`
 
 New Routes:
+
 ```typescript
 /signin              → SignInPage (email/password + Google)
 /signup              → SignUpPage (email/password + Google)
@@ -99,6 +115,7 @@ New Routes:
 ### Authentication Flow
 
 #### Sign Up Flow
+
 ```
 1. User fills form → Validation
 2. Supabase.auth.signUp() with email/password + metadata
@@ -108,6 +125,7 @@ New Routes:
 ```
 
 #### Sign In Flow
+
 ```
 1. User fills form → Validation
 2. Supabase.auth.signInWithPassword()
@@ -116,6 +134,7 @@ New Routes:
 ```
 
 #### Password Recovery Flow
+
 ```
 1. User requests reset → Enters email
 2. Supabase.auth.resetPasswordForEmail()
@@ -135,25 +154,25 @@ await supabase.auth.signUp({
   password: string,
   options: {
     data: {
-      full_name: string
-    }
-  }
+      full_name: string,
+    },
+  },
 });
 
 // Sign In
 await supabase.auth.signInWithPassword({
   email: string,
-  password: string
+  password: string,
 });
 
 // Request Password Reset
 await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: string
+  redirectTo: string,
 });
 
 // Update Password
 await supabase.auth.updateUser({
-  password: string
+  password: string,
 });
 ```
 
@@ -189,16 +208,19 @@ await supabase.auth.updateUser({
 ## Validation Rules
 
 ### Email
+
 - Must be valid email format (handled by input type="email")
 - Required field
 
 ### Password
+
 - Minimum 6 characters
 - Required field
 - Must match confirmation password (on signup/reset)
 - Supabase may have additional server-side rules
 
 ### Name (Sign Up only)
+
 - Required field
 - Stored as `full_name` in user metadata
 
@@ -206,17 +228,17 @@ await supabase.auth.updateUser({
 
 All error messages are user-friendly in Spanish:
 
-| Error Type | User Message |
-|-----------|--------------|
-| Invalid credentials | Email o contraseña incorrectos |
-| Email not confirmed | Por favor, confirma tu email antes de iniciar sesión |
-| Missing fields | Por favor, completa todos los campos |
-| Password too short | La contraseña debe tener al menos 6 caracteres |
-| Passwords don't match | Las contraseñas no coinciden |
-| Email already exists | Este email ya está registrado. Intenta iniciar sesión |
-| Rate limited | Demasiados intentos. Por favor, espera unos minutos |
-| Invalid recovery link | Enlace de recuperación inválido o expirado |
-| Password same as old | La nueva contraseña debe ser diferente a la anterior |
+| Error Type            | User Message                                          |
+| --------------------- | ----------------------------------------------------- |
+| Invalid credentials   | Email o contraseña incorrectos                        |
+| Email not confirmed   | Por favor, confirma tu email antes de iniciar sesión  |
+| Missing fields        | Por favor, completa todos los campos                  |
+| Password too short    | La contraseña debe tener al menos 6 caracteres        |
+| Passwords don't match | Las contraseñas no coinciden                          |
+| Email already exists  | Este email ya está registrado. Intenta iniciar sesión |
+| Rate limited          | Demasiados intentos. Por favor, espera unos minutos   |
+| Invalid recovery link | Enlace de recuperación inválido o expirado            |
+| Password same as old  | La nueva contraseña debe ser diferente a la anterior  |
 
 ## Security Features
 
@@ -270,6 +292,7 @@ All error messages are user-friendly in Spanish:
 ## Testing Checklist
 
 ### Sign Up
+
 - [ ] Can create account with valid email/password
 - [ ] Validation works (password length, matching passwords)
 - [ ] Success message shown
@@ -278,6 +301,7 @@ All error messages are user-friendly in Spanish:
 - [ ] Error messages display correctly
 
 ### Sign In
+
 - [ ] Can sign in with confirmed account
 - [ ] Error shown for invalid credentials
 - [ ] Error shown for unconfirmed email
@@ -285,6 +309,7 @@ All error messages are user-friendly in Spanish:
 - [ ] onAuthStateChange triggers correctly
 
 ### Password Recovery
+
 - [ ] Can request password reset
 - [ ] Recovery email received
 - [ ] Link redirects to reset page
@@ -294,6 +319,7 @@ All error messages are user-friendly in Spanish:
 - [ ] Expired link shows error
 
 ### Integration
+
 - [ ] Google OAuth still works
 - [ ] Can switch between email and Google auth
 - [ ] Session persists across page refreshes
@@ -303,11 +329,13 @@ All error messages are user-friendly in Spanish:
 ## Files Modified/Created
 
 ### Created
+
 - ✅ `apps/web/src/components/Auth/ForgotPasswordPage.tsx`
 - ✅ `apps/web/src/components/Auth/ResetPasswordPage.tsx`
 - ✅ `docs/development/EMAIL_AUTH_IMPLEMENTATION.md`
 
 ### Modified
+
 - ✅ `apps/web/src/components/Auth/SignInPage.tsx`
 - ✅ `apps/web/src/components/Auth/SignUpPage.tsx`
 - ✅ `apps/web/src/components/Router/AppRouter.tsx`
@@ -315,6 +343,7 @@ All error messages are user-friendly in Spanish:
 ## Environment Variables
 
 No additional environment variables required. Uses existing Supabase configuration:
+
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -342,8 +371,9 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    - Add security audit logging
 
 ## Migration Date
+
 October 7, 2025
 
 ## Status
-✅ Complete - Full email/password authentication implemented with recovery flow
 
+✅ Complete - Full email/password authentication implemented with recovery flow

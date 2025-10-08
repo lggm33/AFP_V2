@@ -95,10 +95,19 @@ export function usePaymentMethodForm(
         return updated;
       });
       setIsDirty(true);
-      // Clear error for this field
+
+      // Clear error for this field and related fields
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[field as string];
+
+        // Clear related errors when account type changes
+        if (field === 'account_type') {
+          delete newErrors['last_four_digits'];
+          delete newErrors['card_brand'];
+          delete newErrors['credit_details'];
+        }
+
         return newErrors;
       });
     },
@@ -130,6 +139,7 @@ export function usePaymentMethodForm(
     }
 
     const validationErrors = getValidationErrors(validation.error);
+
     const errorMap: FormErrors = {};
     validationErrors.forEach(err => {
       errorMap[err.field] = err.message;

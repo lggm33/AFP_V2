@@ -1,7 +1,9 @@
 # Database Migrations
 
 ## Overview
-This directory contains SQL migrations for the AFP Finance App transaction system using **Pragmatic Domain Separation (Level 2)** design.
+
+This directory contains SQL migrations for the AFP Finance App transaction system using **Pragmatic
+Domain Separation (Level 2)** design.
 
 ## Migration Order
 
@@ -80,6 +82,7 @@ npm run migrate:up
 ## Rollback
 
 Migrations are designed to be idempotent (can run multiple times safely):
+
 - ENUMs use DO blocks with exception handling
 - Tables use `IF NOT EXISTS`
 - Indexes use `IF NOT EXISTS`
@@ -87,6 +90,7 @@ Migrations are designed to be idempotent (can run multiple times safely):
 - Views use `CREATE OR REPLACE`
 
 To rollback:
+
 1. Drop the created tables/views/functions manually
 2. Or restore from database backup
 
@@ -96,8 +100,8 @@ After running migrations, verify:
 
 ```sql
 -- Check all tables exist
-SELECT table_name 
-FROM information_schema.tables 
+SELECT table_name
+FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_name IN (
     'payment_methods',
@@ -109,8 +113,8 @@ WHERE table_schema = 'public'
   );
 
 -- Check ENUMs
-SELECT typname 
-FROM pg_type 
+SELECT typname
+FROM pg_type
 WHERE typname IN (
   'account_type',
   'card_brand',
@@ -121,20 +125,20 @@ WHERE typname IN (
 );
 
 -- Check functions
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_schema = 'public'
-  AND routine_name LIKE '%payment_method%' 
+  AND routine_name LIKE '%payment_method%'
   OR routine_name LIKE '%installment%';
 
 -- Check views
-SELECT table_name 
-FROM information_schema.views 
+SELECT table_name
+FROM information_schema.views
 WHERE table_schema = 'public'
   AND table_name LIKE 'v_%';
 
 -- Check data migration
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM payment_methods WHERE deleted_at IS NULL) as payment_methods_count,
   (SELECT COUNT(*) FROM transactions WHERE payment_method_id IS NOT NULL) as linked_transactions,
   (SELECT COUNT(*) FROM transaction_metadata) as metadata_records;
@@ -143,6 +147,7 @@ SELECT
 ## Schema Documentation
 
 See `/docs/development/` for detailed documentation:
+
 - `TRANSACTION_REQUIREMENTS.md` - Requirements and use cases
 - `DATABASE_DESIGN_V2.md` - Complete schema design
 - `SCHEMA_VALIDATION.md` - Validation of all 35+ scenarios
@@ -158,6 +163,7 @@ See `/docs/development/` for detailed documentation:
 ## Support
 
 If you encounter issues:
+
 1. Check Supabase logs
 2. Review migration file comments
 3. Consult schema documentation

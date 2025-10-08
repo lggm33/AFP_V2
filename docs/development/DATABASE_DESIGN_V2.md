@@ -1,11 +1,15 @@
 # Database Design - Transaction System V2
 
 ## Document Purpose
-This document defines the complete database schema for the AFP Finance App transaction system using **Pragmatic Domain Separation (Level 2)**, based on the requirements defined in `TRANSACTION_REQUIREMENTS.md`.
+
+This document defines the complete database schema for the AFP Finance App transaction system using
+**Pragmatic Domain Separation (Level 2)**, based on the requirements defined in
+`TRANSACTION_REQUIREMENTS.md`.
 
 ---
 
 ## Table of Contents
+
 1. [Design Strategy](#design-strategy)
 2. [Schema Overview](#schema-overview)
 3. [Core Tables](#core-tables)
@@ -24,6 +28,7 @@ This document defines the complete database schema for the AFP Finance App trans
 **Core Principle:** Separate frequently-accessed data from infrequently-accessed details
 
 **Structure:**
+
 ```
 transactions (CORE)
   - 18 essential fields
@@ -52,17 +57,19 @@ transaction_metadata (JSONB)
 ✅ **Maintainability:** Logical separation by domain  
 ✅ **Flexibility:** Easy to add fields to specific domains  
 ✅ **Simplicity:** Only 1-2 JOINs when needed, not 8-10  
-✅ **Cost:** Smaller indexes, better cache utilization  
+✅ **Cost:** Smaller indexes, better cache utilization
 
 ### When to JOIN
 
 **DON'T JOIN for:**
+
 - Dashboard lists
 - Transaction summaries
 - Quick searches
 - Mobile APIs
 
 **DO JOIN for:**
+
 - Transaction detail view
 - Export/reports
 - Analysis/ML
@@ -97,7 +104,7 @@ transactions (CORE)      -- Essential transaction data
 ```sql
 CREATE TYPE account_type AS ENUM (
   'credit_card',
-  'debit_card', 
+  'debit_card',
   'checking_account',
   'savings_account',
   'cash',
@@ -126,7 +133,7 @@ CREATE TABLE payment_methods (
   -- Primary Key
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
+
   -- Identification
   name text NOT NULL,                              -- "BBVA Azul Credit Card"
   account_type account_type NOT NULL,
@@ -134,12 +141,12 @@ CREATE TABLE payment_methods (
   last_four_digits text,                           -- "1234"
   card_brand card_brand,                           -- Only for cards
   account_number_hash text,                        -- Hashed full number for matching
-  
+
   -- Balance tracking (updated by triggers/functions)
   current_balance decimal(15,2) DEFAULT 0,
   available_balance decimal(15,2),
   last_balance_update timestamptz,
-  
+
   -- Configuration
   currency text DEFAULT 'USD',
   color text DEFAULT '#6B7280',
@@ -147,42 +154,42 @@ CREATE TABLE payment_methods (
   is_primary boolean DEFAULT false,
   exclude_from_totals boolean DEFAULT false,
   status payment_method_status DEFAULT 'active',
-  
+
   -- Metadata (bank-specific data, API credentials, etc.)
   metadata jsonb DEFAULT '{}',
-  
+
   -- Timestamps
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   deleted_at timestamptz,
-  
+
   -- Constraints
   UNIQUE(user_id, institution_name, last_four_digits, deleted_at)
 );
 
 -- Indexes
-CREATE INDEX idx_payment_methods_user_active 
-  ON payment_methods(user_id, status) 
+CREATE INDEX idx_payment_methods_user_active
+  ON payment_methods(user_id, status)
   WHERE deleted_at IS NULL;
-  
-CREATE INDEX idx_payment_methods_institution 
-  ON payment_methods(institution_name) 
+
+CREATE INDEX idx_payment_methods_institution
+  ON payment_methods(institution_name)
   WHERE deleted_at IS NULL;
-  
-CREATE INDEX idx_payment_methods_hash 
-  ON payment_methods(account_number_hash) 
+
+CREATE INDEX idx_payment_methods_hash
+  ON payment_methods(account_number_hash)
   WHERE deleted_at IS NULL;
 
 -- RLS
 ALTER TABLE payment_methods ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage own payment methods" 
-  ON payment_methods FOR ALL 
+CREATE POLICY "Users can manage own payment methods"
+  ON payment_methods FOR ALL
   USING (auth.uid() = user_id);
 
 -- Trigger
-CREATE TRIGGER update_payment_methods_updated_at 
-  BEFORE UPDATE ON payment_methods 
-  FOR EACH ROW 
+CREATE TRIGGER update_payment_methods_updated_at
+  BEFORE UPDATE ON payment_methods
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -193,7 +200,7 @@ CREATE TRIGGER update_payment_methods_updated_at
 ```sql
 CREATE TABLE payment_method_credit_details (
   payment_method_id uuid PRIMARY KEY REFERENCES payment_methods(id) ON DELETE CASCADE,
-  
+
   -- Credit card specifics
   credit_limit decimal(15,2) NOT NULL,
   billing_cycle_day integer CHECK (billing_cycle_day >= 1 AND billing_cycle_day <= 31),
@@ -201,41 +208,41 @@ CREATE TABLE payment_method_credit_details (
   minimum_payment_percentage decimal(5,2) DEFAULT 5.00,
   interest_rate decimal(5,2),                      -- Annual percentage rate
   grace_period_days integer DEFAULT 25,
-  
+
   -- Statement tracking
   last_statement_balance decimal(15,2),
   last_statement_date date,
   next_payment_due_date date,
-  
+
   -- Metadata
   metadata jsonb DEFAULT '{}',
-  
+
   -- Timestamps
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 -- Index
-CREATE INDEX idx_credit_details_next_payment 
-  ON payment_method_credit_details(next_payment_due_date) 
+CREATE INDEX idx_credit_details_next_payment
+  ON payment_method_credit_details(next_payment_due_date)
   WHERE next_payment_due_date IS NOT NULL;
 
 -- RLS
 ALTER TABLE payment_method_credit_details ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage own credit details" 
-  ON payment_method_credit_details FOR ALL 
+CREATE POLICY "Users can manage own credit details"
+  ON payment_method_credit_details FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM payment_methods pm 
-      WHERE pm.id = payment_method_id 
+      SELECT 1 FROM payment_methods pm
+      WHERE pm.id = payment_method_id
       AND pm.user_id = auth.uid()
     )
   );
 
 -- Trigger
-CREATE TRIGGER update_credit_details_updated_at 
-  BEFORE UPDATE ON payment_method_credit_details 
-  FOR EACH ROW 
+CREATE TRIGGER update_credit_details_updated_at
+  BEFORE UPDATE ON payment_method_credit_details
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -246,7 +253,7 @@ CREATE TRIGGER update_credit_details_updated_at
 ```sql
 CREATE TYPE scheduled_frequency AS ENUM (
   'daily',
-  'weekly', 
+  'weekly',
   'biweekly',
   'monthly',
   'bimonthly',
@@ -261,14 +268,14 @@ CREATE TABLE scheduled_transactions (
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   payment_method_id uuid REFERENCES payment_methods(id) ON DELETE SET NULL,
   category_id uuid REFERENCES transaction_categories(id) ON DELETE SET NULL,
-  
+
   -- Transaction details
   amount decimal(15,2) NOT NULL,
   currency text DEFAULT 'USD',
   description text NOT NULL,
   merchant_name text,
   transaction_type transaction_type NOT NULL,
-  
+
   -- Schedule
   frequency scheduled_frequency NOT NULL,
   custom_frequency_days integer,                   -- If frequency = 'custom'
@@ -277,21 +284,21 @@ CREATE TABLE scheduled_transactions (
   end_date date,
   max_occurrences integer,
   occurrences_count integer DEFAULT 0,
-  
+
   -- Behavior
   auto_create boolean DEFAULT false,               -- Auto-create transaction on date
   notification_enabled boolean DEFAULT true,
   notification_days_before integer DEFAULT 3,
-  
+
   -- Metadata
   metadata jsonb DEFAULT '{}',
-  
+
   -- Status
   is_active boolean DEFAULT true,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   deleted_at timestamptz,
-  
+
   -- Constraints
   CHECK (
     (frequency = 'custom' AND custom_frequency_days IS NOT NULL) OR
@@ -300,28 +307,28 @@ CREATE TABLE scheduled_transactions (
 );
 
 -- Indexes
-CREATE INDEX idx_scheduled_transactions_user 
-  ON scheduled_transactions(user_id) 
+CREATE INDEX idx_scheduled_transactions_user
+  ON scheduled_transactions(user_id)
   WHERE deleted_at IS NULL AND is_active = true;
-  
-CREATE INDEX idx_scheduled_transactions_next_date 
-  ON scheduled_transactions(next_occurrence_date) 
+
+CREATE INDEX idx_scheduled_transactions_next_date
+  ON scheduled_transactions(next_occurrence_date)
   WHERE deleted_at IS NULL AND is_active = true;
-  
-CREATE INDEX idx_scheduled_transactions_payment_method 
-  ON scheduled_transactions(payment_method_id) 
+
+CREATE INDEX idx_scheduled_transactions_payment_method
+  ON scheduled_transactions(payment_method_id)
   WHERE deleted_at IS NULL;
 
 -- RLS
 ALTER TABLE scheduled_transactions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage own scheduled transactions" 
-  ON scheduled_transactions FOR ALL 
+CREATE POLICY "Users can manage own scheduled transactions"
+  ON scheduled_transactions FOR ALL
   USING (auth.uid() = user_id);
 
 -- Trigger
-CREATE TRIGGER update_scheduled_transactions_updated_at 
-  BEFORE UPDATE ON scheduled_transactions 
-  FOR EACH ROW 
+CREATE TRIGGER update_scheduled_transactions_updated_at
+  BEFORE UPDATE ON scheduled_transactions
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -334,7 +341,7 @@ CREATE TYPE transaction_subtype AS ENUM (
   'purchase',
   'payment',
   'transfer_in',
-  'transfer_out', 
+  'transfer_out',
   'fee',
   'interest_charge',
   'interest_earned',
@@ -356,7 +363,7 @@ CREATE TYPE transaction_subtype AS ENUM (
 
 CREATE TYPE transaction_status AS ENUM (
   'pending',
-  'authorized', 
+  'authorized',
   'posted',
   'completed',
   'reversed',
@@ -365,9 +372,9 @@ CREATE TYPE transaction_status AS ENUM (
 );
 
 -- Modify existing transactions table
-ALTER TABLE transactions 
+ALTER TABLE transactions
 -- Core fields (already exist, just documenting)
--- id, user_id, amount, currency, transaction_type, 
+-- id, user_id, amount, currency, transaction_type,
 -- description, transaction_date, category_id
 
 -- Add new core fields
@@ -397,37 +404,38 @@ ADD COLUMN IF NOT EXISTS notification_received_at timestamptz DEFAULT now();
 ALTER TABLE transactions
 ADD CONSTRAINT IF NOT EXISTS check_installment_valid CHECK (
   (installment_number IS NULL AND installment_total IS NULL) OR
-  (installment_number IS NOT NULL AND installment_total IS NOT NULL AND 
+  (installment_number IS NOT NULL AND installment_total IS NOT NULL AND
    installment_number > 0 AND installment_number <= installment_total)
 );
 
 -- Indexes (in addition to existing ones)
-CREATE INDEX IF NOT EXISTS idx_transactions_payment_method 
-  ON transactions(payment_method_id) 
+CREATE INDEX IF NOT EXISTS idx_transactions_payment_method
+  ON transactions(payment_method_id)
   WHERE deleted_at IS NULL;
-  
-CREATE INDEX IF NOT EXISTS idx_transactions_status 
-  ON transactions(user_id, status, transaction_date DESC) 
+
+CREATE INDEX IF NOT EXISTS idx_transactions_status
+  ON transactions(user_id, status, transaction_date DESC)
   WHERE deleted_at IS NULL;
-  
-CREATE INDEX IF NOT EXISTS idx_transactions_subtype 
-  ON transactions(transaction_subtype) 
+
+CREATE INDEX IF NOT EXISTS idx_transactions_subtype
+  ON transactions(transaction_subtype)
   WHERE deleted_at IS NULL;
-  
-CREATE INDEX IF NOT EXISTS idx_transactions_parent 
-  ON transactions(parent_transaction_id) 
+
+CREATE INDEX IF NOT EXISTS idx_transactions_parent
+  ON transactions(parent_transaction_id)
   WHERE deleted_at IS NULL;
-  
-CREATE INDEX IF NOT EXISTS idx_transactions_requires_review 
-  ON transactions(user_id, requires_review, transaction_date DESC) 
+
+CREATE INDEX IF NOT EXISTS idx_transactions_requires_review
+  ON transactions(user_id, requires_review, transaction_date DESC)
   WHERE deleted_at IS NULL AND requires_review = true;
-  
-CREATE INDEX IF NOT EXISTS idx_transactions_user_method_date 
-  ON transactions(user_id, payment_method_id, transaction_date DESC) 
+
+CREATE INDEX IF NOT EXISTS idx_transactions_user_method_date
+  ON transactions(user_id, payment_method_id, transaction_date DESC)
   WHERE deleted_at IS NULL;
 ```
 
 **Core Table Summary:**
+
 - ~18-20 fields total
 - Covers all dashboard/list views
 - Fast queries without JOINs
@@ -444,51 +452,51 @@ CREATE INDEX IF NOT EXISTS idx_transactions_user_method_date
 ```sql
 CREATE TABLE transaction_amounts (
   transaction_id uuid PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  
+
   -- Amount breakdown
   original_amount decimal(15,2),                   -- First amount seen
   authorized_amount decimal(15,2),                 -- Amount authorized
   settled_amount decimal(15,2),                    -- Amount actually charged
-  
+
   -- Currency conversion
   original_currency text,                          -- Merchant's currency
   exchange_rate decimal(15,8),
   exchange_rate_date date,
-  
+
   -- Itemization
   fees decimal(15,2),                              -- Separate fees
   tips decimal(15,2),                              -- Tips/gratuity
   tax decimal(15,2),                               -- Tax amount
-  
+
   -- Metadata
   metadata jsonb DEFAULT '{}',                     -- Additional amount details
-  
+
   -- Timestamps
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 -- Index
-CREATE INDEX idx_transaction_amounts_currency 
-  ON transaction_amounts(original_currency) 
+CREATE INDEX idx_transaction_amounts_currency
+  ON transaction_amounts(original_currency)
   WHERE original_currency IS NOT NULL;
 
 -- RLS
 ALTER TABLE transaction_amounts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can access own transaction amounts" 
-  ON transaction_amounts FOR ALL 
+CREATE POLICY "Users can access own transaction amounts"
+  ON transaction_amounts FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM transactions t 
-      WHERE t.id = transaction_id 
+      SELECT 1 FROM transactions t
+      WHERE t.id = transaction_id
       AND t.user_id = auth.uid()
     )
   );
 
 -- Trigger
-CREATE TRIGGER update_transaction_amounts_updated_at 
-  BEFORE UPDATE ON transaction_amounts 
-  FOR EACH ROW 
+CREATE TRIGGER update_transaction_amounts_updated_at
+  BEFORE UPDATE ON transaction_amounts
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -499,58 +507,58 @@ CREATE TRIGGER update_transaction_amounts_updated_at
 ```sql
 CREATE TABLE transaction_merchant_details (
   transaction_id uuid PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  
+
   -- Merchant identification
   raw_merchant_name text,                          -- Exactly as in email
   cleaned_merchant_name text,                      -- Normalized name
   merchant_category_code text,                     -- MCC if available
-  
+
   -- Location
   merchant_address text,
   merchant_city text,
   merchant_country text,
-  
+
   -- Contact
   merchant_website text,
   merchant_phone text,
-  
+
   -- Metadata
   metadata jsonb DEFAULT '{}',                     -- Brand detection, etc.
-  
+
   -- Timestamps
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 -- Indexes
-CREATE INDEX idx_merchant_details_raw_name_gin 
-  ON transaction_merchant_details 
+CREATE INDEX idx_merchant_details_raw_name_gin
+  ON transaction_merchant_details
   USING gin(to_tsvector('english', COALESCE(raw_merchant_name, '')));
-  
-CREATE INDEX idx_merchant_details_cleaned_name 
-  ON transaction_merchant_details(cleaned_merchant_name) 
+
+CREATE INDEX idx_merchant_details_cleaned_name
+  ON transaction_merchant_details(cleaned_merchant_name)
   WHERE cleaned_merchant_name IS NOT NULL;
-  
-CREATE INDEX idx_merchant_details_mcc 
-  ON transaction_merchant_details(merchant_category_code) 
+
+CREATE INDEX idx_merchant_details_mcc
+  ON transaction_merchant_details(merchant_category_code)
   WHERE merchant_category_code IS NOT NULL;
 
 -- RLS
 ALTER TABLE transaction_merchant_details ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can access own merchant details" 
-  ON transaction_merchant_details FOR ALL 
+CREATE POLICY "Users can access own merchant details"
+  ON transaction_merchant_details FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM transactions t 
-      WHERE t.id = transaction_id 
+      SELECT 1 FROM transactions t
+      WHERE t.id = transaction_id
       AND t.user_id = auth.uid()
     )
   );
 
 -- Trigger
-CREATE TRIGGER update_merchant_details_updated_at 
-  BEFORE UPDATE ON transaction_merchant_details 
-  FOR EACH ROW 
+CREATE TRIGGER update_merchant_details_updated_at
+  BEFORE UPDATE ON transaction_merchant_details
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -561,7 +569,7 @@ CREATE TRIGGER update_merchant_details_updated_at
 ```sql
 CREATE TABLE transaction_metadata (
   transaction_id uuid PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  
+
   -- Source information (email/SMS/manual)
   source jsonb DEFAULT '{}'::jsonb,
   /*
@@ -577,7 +585,7 @@ CREATE TABLE transaction_metadata (
     "parsingConfidence": 0.95
   }
   */
-  
+
   -- Temporal details (multiple timestamps)
   temporal jsonb DEFAULT '{}'::jsonb,
   /*
@@ -594,7 +602,7 @@ CREATE TABLE transaction_metadata (
     "timeOfDay": "morning"
   }
   */
-  
+
   -- External IDs for matching
   external_ids jsonb DEFAULT '{}'::jsonb,
   /*
@@ -606,7 +614,7 @@ CREATE TABLE transaction_metadata (
     "merchantTransactionId": "MERCH_XYZ"
   }
   */
-  
+
   -- Relations to other transactions
   relations jsonb DEFAULT '{}'::jsonb,
   /*
@@ -617,7 +625,7 @@ CREATE TABLE transaction_metadata (
     "adjustmentOfTransactionId": "uuid4"
   }
   */
-  
+
   -- Classification details
   classification jsonb DEFAULT '{}'::jsonb,
   /*
@@ -631,7 +639,7 @@ CREATE TABLE transaction_metadata (
     "alternativeCategories": [...]
   }
   */
-  
+
   -- Audit trail
   audit jsonb DEFAULT '{}'::jsonb,
   /*
@@ -654,7 +662,7 @@ CREATE TABLE transaction_metadata (
     ]
   }
   */
-  
+
   -- Reconciliation
   reconciliation jsonb DEFAULT '{}'::jsonb,
   /*
@@ -667,7 +675,7 @@ CREATE TABLE transaction_metadata (
     "differencesFound": []
   }
   */
-  
+
   -- ML features (calculated on demand, cached here)
   ml_features jsonb DEFAULT '{}'::jsonb,
   /*
@@ -680,62 +688,62 @@ CREATE TABLE transaction_metadata (
     "fraudProbability": 0.02
   }
   */
-  
+
   -- Freeform notes and tags
   notes text,
   tags text[],
-  
+
   -- Extra metadata (anything else)
   extra jsonb DEFAULT '{}'::jsonb,
-  
+
   -- Timestamps
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 -- Indexes
-CREATE INDEX idx_transaction_metadata_source_type 
+CREATE INDEX idx_transaction_metadata_source_type
   ON transaction_metadata((source->>'type'));
-  
-CREATE INDEX idx_transaction_metadata_source_email_id 
-  ON transaction_metadata((source->>'emailId')) 
+
+CREATE INDEX idx_transaction_metadata_source_email_id
+  ON transaction_metadata((source->>'emailId'))
   WHERE source->>'emailId' IS NOT NULL;
-  
-CREATE INDEX idx_transaction_metadata_external_id 
-  ON transaction_metadata((external_ids->>'externalTransactionId')) 
+
+CREATE INDEX idx_transaction_metadata_external_id
+  ON transaction_metadata((external_ids->>'externalTransactionId'))
   WHERE external_ids->>'externalTransactionId' IS NOT NULL;
-  
-CREATE INDEX idx_transaction_metadata_reconciled 
-  ON transaction_metadata((reconciliation->>'reconciled')::boolean) 
+
+CREATE INDEX idx_transaction_metadata_reconciled
+  ON transaction_metadata((reconciliation->>'reconciled')::boolean)
   WHERE (reconciliation->>'reconciled')::boolean = false;
-  
-CREATE INDEX idx_transaction_metadata_tags 
-  ON transaction_metadata USING gin(tags) 
+
+CREATE INDEX idx_transaction_metadata_tags
+  ON transaction_metadata USING gin(tags)
   WHERE tags IS NOT NULL;
-  
+
 -- Full GIN index for flexible querying
-CREATE INDEX idx_transaction_metadata_source_gin 
+CREATE INDEX idx_transaction_metadata_source_gin
   ON transaction_metadata USING gin(source);
-  
-CREATE INDEX idx_transaction_metadata_audit_gin 
+
+CREATE INDEX idx_transaction_metadata_audit_gin
   ON transaction_metadata USING gin(audit);
 
 -- RLS
 ALTER TABLE transaction_metadata ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can access own transaction metadata" 
-  ON transaction_metadata FOR ALL 
+CREATE POLICY "Users can access own transaction metadata"
+  ON transaction_metadata FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM transactions t 
-      WHERE t.id = transaction_id 
+      SELECT 1 FROM transactions t
+      WHERE t.id = transaction_id
       AND t.user_id = auth.uid()
     )
   );
 
 -- Trigger
-CREATE TRIGGER update_transaction_metadata_updated_at 
-  BEFORE UPDATE ON transaction_metadata 
-  FOR EACH ROW 
+CREATE TRIGGER update_transaction_metadata_updated_at
+  BEFORE UPDATE ON transaction_metadata
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -756,7 +764,7 @@ CREATE TRIGGER update_transaction_metadata_updated_at
 DO $$ BEGIN
   CREATE TYPE account_type AS ENUM (
     'credit_card',
-    'debit_card', 
+    'debit_card',
     'checking_account',
     'savings_account',
     'cash',
@@ -797,7 +805,7 @@ DO $$ BEGIN
     'purchase',
     'payment',
     'transfer_in',
-    'transfer_out', 
+    'transfer_out',
     'fee',
     'interest_charge',
     'interest_earned',
@@ -823,7 +831,7 @@ END $$;
 DO $$ BEGIN
   CREATE TYPE transaction_status AS ENUM (
     'pending',
-    'authorized', 
+    'authorized',
     'posted',
     'completed',
     'reversed',
@@ -837,7 +845,7 @@ END $$;
 DO $$ BEGIN
   CREATE TYPE scheduled_frequency AS ENUM (
     'daily',
-    'weekly', 
+    'weekly',
     'biweekly',
     'monthly',
     'bimonthly',
@@ -857,50 +865,50 @@ END $$;
 CREATE TABLE IF NOT EXISTS payment_methods (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
+
   name text NOT NULL,
   account_type account_type NOT NULL,
   institution_name text NOT NULL,
   last_four_digits text,
   card_brand card_brand,
   account_number_hash text,
-  
+
   current_balance decimal(15,2) DEFAULT 0,
   available_balance decimal(15,2),
   last_balance_update timestamptz,
-  
+
   currency text DEFAULT 'USD',
   color text DEFAULT '#6B7280',
   icon text,
   is_primary boolean DEFAULT false,
   exclude_from_totals boolean DEFAULT false,
   status payment_method_status DEFAULT 'active',
-  
+
   metadata jsonb DEFAULT '{}',
-  
+
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   deleted_at timestamptz,
-  
+
   UNIQUE(user_id, institution_name, last_four_digits, deleted_at)
 );
 
 CREATE TABLE IF NOT EXISTS payment_method_credit_details (
   payment_method_id uuid PRIMARY KEY REFERENCES payment_methods(id) ON DELETE CASCADE,
-  
+
   credit_limit decimal(15,2) NOT NULL,
   billing_cycle_day integer CHECK (billing_cycle_day >= 1 AND billing_cycle_day <= 31),
   payment_due_day integer CHECK (payment_due_day >= 1 AND payment_due_day <= 31),
   minimum_payment_percentage decimal(5,2) DEFAULT 5.00,
   interest_rate decimal(5,2),
   grace_period_days integer DEFAULT 25,
-  
+
   last_statement_balance decimal(15,2),
   last_statement_date date,
   next_payment_due_date date,
-  
+
   metadata jsonb DEFAULT '{}',
-  
+
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -914,13 +922,13 @@ CREATE TABLE IF NOT EXISTS scheduled_transactions (
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   payment_method_id uuid REFERENCES payment_methods(id) ON DELETE SET NULL,
   category_id uuid REFERENCES transaction_categories(id) ON DELETE SET NULL,
-  
+
   amount decimal(15,2) NOT NULL,
   currency text DEFAULT 'USD',
   description text NOT NULL,
   merchant_name text,
   transaction_type transaction_type NOT NULL,
-  
+
   frequency scheduled_frequency NOT NULL,
   custom_frequency_days integer,
   next_occurrence_date date NOT NULL,
@@ -928,18 +936,18 @@ CREATE TABLE IF NOT EXISTS scheduled_transactions (
   end_date date,
   max_occurrences integer,
   occurrences_count integer DEFAULT 0,
-  
+
   auto_create boolean DEFAULT false,
   notification_enabled boolean DEFAULT true,
   notification_days_before integer DEFAULT 3,
-  
+
   metadata jsonb DEFAULT '{}',
-  
+
   is_active boolean DEFAULT true,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   deleted_at timestamptz,
-  
+
   CHECK (
     (frequency = 'custom' AND custom_frequency_days IS NOT NULL) OR
     (frequency != 'custom')
@@ -950,7 +958,7 @@ CREATE TABLE IF NOT EXISTS scheduled_transactions (
 -- STEP 4: ENHANCE TRANSACTIONS TABLE (CORE)
 -- =====================================================================================
 
-ALTER TABLE transactions 
+ALTER TABLE transactions
 ADD COLUMN IF NOT EXISTS payment_method_id uuid REFERENCES payment_methods(id) ON DELETE SET NULL,
 ADD COLUMN IF NOT EXISTS transaction_subtype transaction_subtype,
 ADD COLUMN IF NOT EXISTS status transaction_status DEFAULT 'completed',
@@ -966,7 +974,7 @@ DO $$ BEGIN
   ALTER TABLE transactions
   ADD CONSTRAINT check_installment_valid CHECK (
     (installment_number IS NULL AND installment_total IS NULL) OR
-    (installment_number IS NOT NULL AND installment_total IS NOT NULL AND 
+    (installment_number IS NOT NULL AND installment_total IS NOT NULL AND
      installment_number > 0 AND installment_number <= installment_total)
   );
 EXCEPTION
@@ -979,48 +987,48 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS transaction_amounts (
   transaction_id uuid PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  
+
   original_amount decimal(15,2),
   authorized_amount decimal(15,2),
   settled_amount decimal(15,2),
-  
+
   original_currency text,
   exchange_rate decimal(15,8),
   exchange_rate_date date,
-  
+
   fees decimal(15,2),
   tips decimal(15,2),
   tax decimal(15,2),
-  
+
   metadata jsonb DEFAULT '{}',
-  
+
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS transaction_merchant_details (
   transaction_id uuid PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  
+
   raw_merchant_name text,
   cleaned_merchant_name text,
   merchant_category_code text,
-  
+
   merchant_address text,
   merchant_city text,
   merchant_country text,
-  
+
   merchant_website text,
   merchant_phone text,
-  
+
   metadata jsonb DEFAULT '{}',
-  
+
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS transaction_metadata (
   transaction_id uuid PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  
+
   source jsonb DEFAULT '{}'::jsonb,
   temporal jsonb DEFAULT '{}'::jsonb,
   external_ids jsonb DEFAULT '{}'::jsonb,
@@ -1029,11 +1037,11 @@ CREATE TABLE IF NOT EXISTS transaction_metadata (
   audit jsonb DEFAULT '{}'::jsonb,
   reconciliation jsonb DEFAULT '{}'::jsonb,
   ml_features jsonb DEFAULT '{}'::jsonb,
-  
+
   notes text,
   tags text[],
   extra jsonb DEFAULT '{}'::jsonb,
-  
+
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -1043,76 +1051,76 @@ CREATE TABLE IF NOT EXISTS transaction_metadata (
 -- =====================================================================================
 
 -- Payment Methods
-CREATE INDEX IF NOT EXISTS idx_payment_methods_user_active 
+CREATE INDEX IF NOT EXISTS idx_payment_methods_user_active
   ON payment_methods(user_id, status) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_payment_methods_institution 
+CREATE INDEX IF NOT EXISTS idx_payment_methods_institution
   ON payment_methods(institution_name) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_payment_methods_hash 
+CREATE INDEX IF NOT EXISTS idx_payment_methods_hash
   ON payment_methods(account_number_hash) WHERE deleted_at IS NULL;
 
 -- Credit Details
-CREATE INDEX IF NOT EXISTS idx_credit_details_next_payment 
-  ON payment_method_credit_details(next_payment_due_date) 
+CREATE INDEX IF NOT EXISTS idx_credit_details_next_payment
+  ON payment_method_credit_details(next_payment_due_date)
   WHERE next_payment_due_date IS NOT NULL;
 
 -- Scheduled Transactions
-CREATE INDEX IF NOT EXISTS idx_scheduled_transactions_user 
-  ON scheduled_transactions(user_id) 
+CREATE INDEX IF NOT EXISTS idx_scheduled_transactions_user
+  ON scheduled_transactions(user_id)
   WHERE deleted_at IS NULL AND is_active = true;
-CREATE INDEX IF NOT EXISTS idx_scheduled_transactions_next_date 
-  ON scheduled_transactions(next_occurrence_date) 
+CREATE INDEX IF NOT EXISTS idx_scheduled_transactions_next_date
+  ON scheduled_transactions(next_occurrence_date)
   WHERE deleted_at IS NULL AND is_active = true;
-CREATE INDEX IF NOT EXISTS idx_scheduled_transactions_payment_method 
+CREATE INDEX IF NOT EXISTS idx_scheduled_transactions_payment_method
   ON scheduled_transactions(payment_method_id) WHERE deleted_at IS NULL;
 
 -- Transactions (Core)
-CREATE INDEX IF NOT EXISTS idx_transactions_payment_method 
+CREATE INDEX IF NOT EXISTS idx_transactions_payment_method
   ON transactions(payment_method_id) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_transactions_status 
+CREATE INDEX IF NOT EXISTS idx_transactions_status
   ON transactions(user_id, status, transaction_date DESC) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_transactions_subtype 
+CREATE INDEX IF NOT EXISTS idx_transactions_subtype
   ON transactions(transaction_subtype) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_transactions_parent 
+CREATE INDEX IF NOT EXISTS idx_transactions_parent
   ON transactions(parent_transaction_id) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_transactions_requires_review 
-  ON transactions(user_id, requires_review, transaction_date DESC) 
+CREATE INDEX IF NOT EXISTS idx_transactions_requires_review
+  ON transactions(user_id, requires_review, transaction_date DESC)
   WHERE deleted_at IS NULL AND requires_review = true;
-CREATE INDEX IF NOT EXISTS idx_transactions_user_method_date 
-  ON transactions(user_id, payment_method_id, transaction_date DESC) 
+CREATE INDEX IF NOT EXISTS idx_transactions_user_method_date
+  ON transactions(user_id, payment_method_id, transaction_date DESC)
   WHERE deleted_at IS NULL;
 
 -- Transaction Amounts
-CREATE INDEX IF NOT EXISTS idx_transaction_amounts_currency 
+CREATE INDEX IF NOT EXISTS idx_transaction_amounts_currency
   ON transaction_amounts(original_currency) WHERE original_currency IS NOT NULL;
 
 -- Transaction Merchant Details
-CREATE INDEX IF NOT EXISTS idx_merchant_details_raw_name_gin 
-  ON transaction_merchant_details 
+CREATE INDEX IF NOT EXISTS idx_merchant_details_raw_name_gin
+  ON transaction_merchant_details
   USING gin(to_tsvector('english', COALESCE(raw_merchant_name, '')));
-CREATE INDEX IF NOT EXISTS idx_merchant_details_cleaned_name 
-  ON transaction_merchant_details(cleaned_merchant_name) 
+CREATE INDEX IF NOT EXISTS idx_merchant_details_cleaned_name
+  ON transaction_merchant_details(cleaned_merchant_name)
   WHERE cleaned_merchant_name IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_merchant_details_mcc 
-  ON transaction_merchant_details(merchant_category_code) 
+CREATE INDEX IF NOT EXISTS idx_merchant_details_mcc
+  ON transaction_merchant_details(merchant_category_code)
   WHERE merchant_category_code IS NOT NULL;
 
 -- Transaction Metadata
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_source_type 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_source_type
   ON transaction_metadata((source->>'type'));
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_source_email_id 
-  ON transaction_metadata((source->>'emailId')) 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_source_email_id
+  ON transaction_metadata((source->>'emailId'))
   WHERE source->>'emailId' IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_external_id 
-  ON transaction_metadata((external_ids->>'externalTransactionId')) 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_external_id
+  ON transaction_metadata((external_ids->>'externalTransactionId'))
   WHERE external_ids->>'externalTransactionId' IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_reconciled 
-  ON transaction_metadata(((reconciliation->>'reconciled')::boolean)) 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_reconciled
+  ON transaction_metadata(((reconciliation->>'reconciled')::boolean))
   WHERE (reconciliation->>'reconciled')::boolean = false;
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_tags 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_tags
   ON transaction_metadata USING gin(tags) WHERE tags IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_source_gin 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_source_gin
   ON transaction_metadata USING gin(source);
-CREATE INDEX IF NOT EXISTS idx_transaction_metadata_audit_gin 
+CREATE INDEX IF NOT EXISTS idx_transaction_metadata_audit_gin
   ON transaction_metadata USING gin(audit);
 
 -- =====================================================================================
@@ -1128,56 +1136,56 @@ ALTER TABLE transaction_metadata ENABLE ROW LEVEL SECURITY;
 
 -- Payment Methods
 DROP POLICY IF EXISTS "Users can manage own payment methods" ON payment_methods;
-CREATE POLICY "Users can manage own payment methods" 
-  ON payment_methods FOR ALL 
+CREATE POLICY "Users can manage own payment methods"
+  ON payment_methods FOR ALL
   USING (auth.uid() = user_id);
 
 -- Credit Details
 DROP POLICY IF EXISTS "Users can manage own credit details" ON payment_method_credit_details;
-CREATE POLICY "Users can manage own credit details" 
-  ON payment_method_credit_details FOR ALL 
+CREATE POLICY "Users can manage own credit details"
+  ON payment_method_credit_details FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM payment_methods pm 
+      SELECT 1 FROM payment_methods pm
       WHERE pm.id = payment_method_id AND pm.user_id = auth.uid()
     )
   );
 
 -- Scheduled Transactions
 DROP POLICY IF EXISTS "Users can manage own scheduled transactions" ON scheduled_transactions;
-CREATE POLICY "Users can manage own scheduled transactions" 
-  ON scheduled_transactions FOR ALL 
+CREATE POLICY "Users can manage own scheduled transactions"
+  ON scheduled_transactions FOR ALL
   USING (auth.uid() = user_id);
 
 -- Transaction Amounts
 DROP POLICY IF EXISTS "Users can access own transaction amounts" ON transaction_amounts;
-CREATE POLICY "Users can access own transaction amounts" 
-  ON transaction_amounts FOR ALL 
+CREATE POLICY "Users can access own transaction amounts"
+  ON transaction_amounts FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM transactions t 
+      SELECT 1 FROM transactions t
       WHERE t.id = transaction_id AND t.user_id = auth.uid()
     )
   );
 
 -- Merchant Details
 DROP POLICY IF EXISTS "Users can access own merchant details" ON transaction_merchant_details;
-CREATE POLICY "Users can access own merchant details" 
-  ON transaction_merchant_details FOR ALL 
+CREATE POLICY "Users can access own merchant details"
+  ON transaction_merchant_details FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM transactions t 
+      SELECT 1 FROM transactions t
       WHERE t.id = transaction_id AND t.user_id = auth.uid()
     )
   );
 
 -- Transaction Metadata
 DROP POLICY IF EXISTS "Users can access own transaction metadata" ON transaction_metadata;
-CREATE POLICY "Users can access own transaction metadata" 
-  ON transaction_metadata FOR ALL 
+CREATE POLICY "Users can access own transaction metadata"
+  ON transaction_metadata FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM transactions t 
+      SELECT 1 FROM transactions t
       WHERE t.id = transaction_id AND t.user_id = auth.uid()
     )
   );
@@ -1186,34 +1194,34 @@ CREATE POLICY "Users can access own transaction metadata"
 -- STEP 8: CREATE TRIGGERS
 -- =====================================================================================
 
-CREATE TRIGGER update_payment_methods_updated_at 
-  BEFORE UPDATE ON payment_methods 
-  FOR EACH ROW 
+CREATE TRIGGER update_payment_methods_updated_at
+  BEFORE UPDATE ON payment_methods
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_credit_details_updated_at 
-  BEFORE UPDATE ON payment_method_credit_details 
-  FOR EACH ROW 
+CREATE TRIGGER update_credit_details_updated_at
+  BEFORE UPDATE ON payment_method_credit_details
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_scheduled_transactions_updated_at 
-  BEFORE UPDATE ON scheduled_transactions 
-  FOR EACH ROW 
+CREATE TRIGGER update_scheduled_transactions_updated_at
+  BEFORE UPDATE ON scheduled_transactions
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_transaction_amounts_updated_at 
-  BEFORE UPDATE ON transaction_amounts 
-  FOR EACH ROW 
+CREATE TRIGGER update_transaction_amounts_updated_at
+  BEFORE UPDATE ON transaction_amounts
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_merchant_details_updated_at 
-  BEFORE UPDATE ON transaction_merchant_details 
-  FOR EACH ROW 
+CREATE TRIGGER update_merchant_details_updated_at
+  BEFORE UPDATE ON transaction_merchant_details
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_transaction_metadata_updated_at 
-  BEFORE UPDATE ON transaction_metadata 
-  FOR EACH ROW 
+CREATE TRIGGER update_transaction_metadata_updated_at
+  BEFORE UPDATE ON transaction_metadata
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
@@ -1226,7 +1234,7 @@ CREATE TRIGGER update_transaction_metadata_updated_at
 ```sql
 -- View: Transactions with all common details (1 JOIN)
 CREATE OR REPLACE VIEW v_transactions_with_details AS
-SELECT 
+SELECT
   t.*,
   pm.name as payment_method_name,
   pm.account_type,
@@ -1242,7 +1250,7 @@ WHERE t.deleted_at IS NULL;
 
 -- View: Full transaction details (all JOINs)
 CREATE OR REPLACE VIEW v_transactions_full AS
-SELECT 
+SELECT
   t.*,
   pm.name as payment_method_name,
   pm.account_type,
@@ -1260,21 +1268,21 @@ WHERE t.deleted_at IS NULL;
 
 -- View: Active payment methods with stats
 CREATE OR REPLACE VIEW v_payment_methods_with_stats AS
-SELECT 
+SELECT
   pm.*,
   COUNT(t.id) as transaction_count,
   MAX(t.transaction_date) as last_transaction_date,
-  SUM(CASE WHEN t.status IN ('pending', 'authorized') 
+  SUM(CASE WHEN t.status IN ('pending', 'authorized')
       THEN t.amount ELSE 0 END) as pending_amount
 FROM payment_methods pm
-LEFT JOIN transactions t ON t.payment_method_id = pm.id 
+LEFT JOIN transactions t ON t.payment_method_id = pm.id
   AND t.deleted_at IS NULL
 WHERE pm.deleted_at IS NULL
 GROUP BY pm.id;
 
 -- View: Transactions requiring review
 CREATE OR REPLACE VIEW v_transactions_requiring_review AS
-SELECT 
+SELECT
   t.*,
   pm.name as payment_method_name,
   tc.name as category_name
@@ -1307,18 +1315,18 @@ BEGIN
   RETURN QUERY
   WITH transaction_summary AS (
     SELECT
-      SUM(CASE 
+      SUM(CASE
         WHEN status IN ('completed', 'posted') THEN
-          CASE 
+          CASE
             WHEN transaction_type = 'income' THEN amount
             WHEN transaction_type = 'expense' THEN -amount
             ELSE 0
           END
         ELSE 0
       END) as completed_balance,
-      SUM(CASE 
+      SUM(CASE
         WHEN status IN ('pending', 'authorized') THEN
-          CASE 
+          CASE
             WHEN transaction_type = 'expense' THEN amount
             ELSE 0
           END
@@ -1352,28 +1360,28 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     t.id,
     (
       CASE WHEN ABS(t.amount - p_amount) < 0.01 THEN 0.4 ELSE 0 END +
       CASE WHEN t.transaction_date = p_transaction_date THEN 0.3 ELSE 0 END +
       CASE WHEN t.payment_method_id = p_payment_method_id THEN 0.2 ELSE 0 END +
-      CASE WHEN p_merchant_name IS NOT NULL AND 
-        similarity(COALESCE(t.merchant_name, ''), p_merchant_name) > 0.6 
+      CASE WHEN p_merchant_name IS NOT NULL AND
+        similarity(COALESCE(t.merchant_name, ''), p_merchant_name) > 0.6
         THEN 0.1 ELSE 0 END
     )::decimal as similarity_score
   FROM transactions t
   WHERE t.user_id = p_user_id
     AND t.deleted_at IS NULL
     AND ABS(t.amount - p_amount) < 1.00
-    AND t.transaction_date BETWEEN p_transaction_date - interval '3 days' 
+    AND t.transaction_date BETWEEN p_transaction_date - interval '3 days'
       AND p_transaction_date + interval '3 days'
   HAVING (
     CASE WHEN ABS(t.amount - p_amount) < 0.01 THEN 0.4 ELSE 0 END +
     CASE WHEN t.transaction_date = p_transaction_date THEN 0.3 ELSE 0 END +
     CASE WHEN t.payment_method_id = p_payment_method_id THEN 0.2 ELSE 0 END +
-    CASE WHEN p_merchant_name IS NOT NULL AND 
-      similarity(COALESCE(t.merchant_name, ''), p_merchant_name) > 0.6 
+    CASE WHEN p_merchant_name IS NOT NULL AND
+      similarity(COALESCE(t.merchant_name, ''), p_merchant_name) > 0.6
       THEN 0.1 ELSE 0 END
   ) >= 0.7
   ORDER BY similarity_score DESC
@@ -1386,30 +1394,30 @@ CREATE OR REPLACE FUNCTION update_payment_method_balances()
 RETURNS void AS $$
 BEGIN
   UPDATE payment_methods pm
-  SET 
+  SET
     current_balance = calc.current_balance,
-    available_balance = CASE 
+    available_balance = CASE
       WHEN pm.account_type = 'credit_card' THEN
         COALESCE(pmcd.credit_limit, 0) - ABS(calc.current_balance) - ABS(calc.pending_amount)
-      ELSE 
+      ELSE
         calc.current_balance - calc.pending_amount
     END,
     last_balance_update = now()
   FROM (
-    SELECT 
+    SELECT
       payment_method_id,
-      SUM(CASE 
+      SUM(CASE
         WHEN status IN ('completed', 'posted') THEN
-          CASE 
+          CASE
             WHEN transaction_type = 'income' THEN amount
             WHEN transaction_type = 'expense' THEN -amount
             ELSE 0
           END
         ELSE 0
       END) as current_balance,
-      SUM(CASE 
+      SUM(CASE
         WHEN status IN ('pending', 'authorized') THEN
-          CASE 
+          CASE
             WHEN transaction_type = 'expense' THEN amount
             ELSE 0
           END
@@ -1420,7 +1428,7 @@ BEGIN
       AND payment_method_id IS NOT NULL
     GROUP BY payment_method_id
   ) calc
-  LEFT JOIN payment_method_credit_details pmcd 
+  LEFT JOIN payment_method_credit_details pmcd
     ON pmcd.payment_method_id = calc.payment_method_id
   WHERE pm.id = calc.payment_method_id;
 END;
@@ -1432,6 +1440,7 @@ $$ LANGUAGE plpgsql;
 ## Migration Plan
 
 ### Phase 1: Create New Structure (Non-Breaking)
+
 **Duration:** 1 day  
 **Risk:** Low
 
@@ -1443,6 +1452,7 @@ $$ LANGUAGE plpgsql;
 6. Deploy - No impact on existing functionality
 
 ### Phase 2: Migrate Existing Data
+
 **Duration:** 1-2 days  
 **Risk:** Low
 
@@ -1474,6 +1484,7 @@ WHERE status IS NULL;
 ```
 
 ### Phase 3: Update Application Code
+
 **Duration:** 3-5 days  
 **Risk:** Medium
 
@@ -1485,6 +1496,7 @@ WHERE status IS NULL;
 6. Test thoroughly
 
 ### Phase 4: Deploy and Monitor
+
 **Duration:** Ongoing  
 **Risk:** Low
 
@@ -1501,18 +1513,20 @@ WHERE status IS NULL;
 ### Query 1: Dashboard (Last 20 transactions)
 
 **Before (Monolithic):**
+
 ```sql
-SELECT * FROM transactions 
-WHERE user_id = ? 
+SELECT * FROM transactions
+WHERE user_id = ?
 ORDER BY transaction_date DESC LIMIT 20;
 -- Reads: ~70 columns × 20 rows = ~40KB
 -- Time: ~15ms
 ```
 
 **After (Separated):**
+
 ```sql
-SELECT * FROM v_transactions_with_details 
-WHERE user_id = ? 
+SELECT * FROM v_transactions_with_details
+WHERE user_id = ?
 ORDER BY transaction_date DESC LIMIT 20;
 -- Reads: ~25 columns × 20 rows = ~12KB
 -- Time: ~5ms (with 1 JOIN)
@@ -1523,6 +1537,7 @@ ORDER BY transaction_date DESC LIMIT 20;
 ### Query 2: Transaction Detail
 
 **Before:**
+
 ```sql
 SELECT * FROM transactions WHERE id = ?;
 -- All 70 fields in one query
@@ -1530,6 +1545,7 @@ SELECT * FROM transactions WHERE id = ?;
 ```
 
 **After:**
+
 ```sql
 SELECT * FROM v_transactions_full WHERE id = ?;
 -- 4 JOINs but only when needed
@@ -1541,16 +1557,18 @@ SELECT * FROM v_transactions_full WHERE id = ?;
 ### Query 3: Search by Merchant
 
 **Before:**
+
 ```sql
-SELECT * FROM transactions 
+SELECT * FROM transactions
 WHERE merchant_name ILIKE '%amazon%';
 -- Full table scan of huge table
 -- Time: ~200ms
 ```
 
 **After:**
+
 ```sql
-SELECT t.* 
+SELECT t.*
 FROM transactions t
 JOIN transaction_merchant_details tmd ON tmd.transaction_id = t.id
 WHERE to_tsvector('english', tmd.raw_merchant_name) @@ to_tsquery('amazon');
@@ -1577,7 +1595,7 @@ WHERE to_tsvector('english', tmd.raw_merchant_name) @@ to_tsquery('amazon');
 
 ## Document Version
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 2.0 | 2025-10-07 | Pragmatic domain separation design (Level 2) |
-| 1.0 | 2025-10-07 | Initial monolithic design |
+| Version | Date       | Changes                                      |
+| ------- | ---------- | -------------------------------------------- |
+| 2.0     | 2025-10-07 | Pragmatic domain separation design (Level 2) |
+| 1.0     | 2025-10-07 | Initial monolithic design                    |

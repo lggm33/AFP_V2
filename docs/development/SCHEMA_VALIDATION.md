@@ -1,7 +1,9 @@
 # Schema Validation - Can We Handle All Cases?
 
 ## Document Purpose
-Validate that our database design (Level 2 - Pragmatic Separation) can handle all transaction scenarios defined in `TRANSACTION_REQUIREMENTS.md`.
+
+Validate that our database design (Level 2 - Pragmatic Separation) can handle all transaction
+scenarios defined in `TRANSACTION_REQUIREMENTS.md`.
 
 ---
 
@@ -74,6 +76,7 @@ scheduled_transactions
 ## CREDIT CARD Cases
 
 ### ✅ 1. Regular Purchase
+
 ```
 transactions:
   amount = 150.00
@@ -86,6 +89,7 @@ Result: Works perfectly
 ```
 
 ### ✅ 2. Payment to Credit Card
+
 ```
 -- Payment FROM bank account TO credit card
 transactions (payment on card):
@@ -107,6 +111,7 @@ Result: Works - two linked transactions
 ```
 
 ### ✅ 3. Refund/Return
+
 ```
 transactions:
   amount = 50.00
@@ -121,6 +126,7 @@ Result: Works - linked to original
 ```
 
 ### ✅ 4. Pending Charge
+
 ```
 transactions:
   amount = 200.00
@@ -129,7 +135,7 @@ transactions:
 
 Later update:
   status = 'completed'
-  
+
 transaction_metadata:
   audit.changeHistory += {
     version: 2,
@@ -140,6 +146,7 @@ Result: Works - status transitions tracked
 ```
 
 ### ✅ 5. Pre-authorization (hotel, gas)
+
 ```
 transactions:
   amount = 100.00
@@ -166,6 +173,7 @@ Result: Works - captures both amounts
 ```
 
 ### ✅ 6. Foreign Currency Purchase
+
 ```
 transactions:
   amount = 1850.00  // MXN
@@ -181,6 +189,7 @@ Result: Works - full currency tracking
 ```
 
 ### ⚠️ 7. Adjustment After Posting
+
 ```
 Original:
 transactions:
@@ -198,7 +207,7 @@ transactions (new):
   amount = 5.00
   transaction_type = 'income'
   transaction_subtype = 'adjustment'
-  
+
 transaction_metadata:
   relations.adjustmentOfTransactionId = original_uuid
 
@@ -207,6 +216,7 @@ Concern: Option A loses history in main table but keeps in metadata
 ```
 
 ### ✅ 8. Installments (MSI - 12 months)
+
 ```
 Parent transaction:
 transactions:
@@ -235,19 +245,21 @@ Result: Works perfectly - parent is informational only
 ```
 
 ### ✅ 9. Cash Advance
+
 ```
 transactions:
   amount = 2000.00
   transaction_type = 'expense'
   transaction_subtype = 'cash_advance'
-  
+
 transaction_amounts:
   fees = 100.00  // Separate cash advance fee
-  
+
 Result: Works - fee tracked separately
 ```
 
 ### ✅ 10. Annual Fee
+
 ```
 transactions:
   amount = 500.00
@@ -260,6 +272,7 @@ Result: Works
 ```
 
 ### ✅ 11. Interest Charges
+
 ```
 transactions:
   amount = 450.00
@@ -271,6 +284,7 @@ Result: Works
 ```
 
 ### ✅ 12. Duplicate Charge Detection
+
 ```
 FUNCTION check_duplicate():
   QUERY transactions WHERE
@@ -278,10 +292,10 @@ FUNCTION check_duplicate():
     AND amount SIMILAR TO target_amount (+/- 1%)
     AND transaction_date WITHIN 3 days
     AND merchant_name SIMILAR (fuzzy match)
-    
+
   IF similarity_score > 0.7:
     RETURN potential_duplicates
-    
+
 transaction_metadata:
   extra.possibleDuplicate = true
   extra.duplicateOfId = suspected_uuid
@@ -290,6 +304,7 @@ Result: Works - can detect via query + flag in metadata
 ```
 
 ### ✅ 13. Disputed/Chargeback
+
 ```
 transactions:
   amount = 350.00
@@ -297,7 +312,7 @@ transactions:
 
 Later:
   status = 'under_review'
-  
+
 transaction_metadata:
   audit.disputeStatus = 'pending'
   audit.disputeReason = 'Fraudulent charge'
@@ -308,7 +323,7 @@ transactions (new):
   amount = 350.00
   transaction_type = 'income'
   transaction_subtype = 'chargeback'
-  
+
 transaction_metadata:
   relations.reversalOfTransactionId = disputed_uuid
 
@@ -320,6 +335,7 @@ Result: Works - full dispute tracking
 ## DEBIT CARD Cases
 
 ### ✅ 14. Regular Purchase
+
 ```
 transactions:
   amount = 75.00
@@ -335,6 +351,7 @@ Result: Works - same as credit but balance decreases immediately
 ```
 
 ### ✅ 15. ATM Withdrawal
+
 ```
 transactions:
   amount = 500.00
@@ -349,6 +366,7 @@ Result: Works
 ```
 
 ### ✅ 16. Holds (gas station)
+
 ```
 Initial hold:
 transactions:
@@ -371,6 +389,7 @@ Result: Works - tracks both amounts
 ```
 
 ### ✅ 17. Overdraft
+
 ```
 transactions:
   amount = 200.00
@@ -394,6 +413,7 @@ Result: Works - allows negative balance
 ## BANK ACCOUNT Cases
 
 ### ✅ 18. Salary Deposit (Email)
+
 ```
 transactions:
   amount = 15000.00
@@ -408,11 +428,12 @@ transaction_metadata:
     subject: 'Depósito recibido',
     extractedData: {...}
   }
-  
+
 Result: Works
 ```
 
 ### ✅ 19. Transfer Sent
+
 ```
 transactions:
   amount = 2000.00
@@ -427,6 +448,7 @@ Result: Works
 ```
 
 ### ✅ 20. Transfer Received
+
 ```
 transactions:
   amount = 3000.00
@@ -443,6 +465,7 @@ Result: Works
 ```
 
 ### ✅ 21. Bill Payment (auto)
+
 ```
 transactions:
   amount = 850.00
@@ -455,11 +478,12 @@ scheduled_transactions:
   amount = 850.00
   frequency = 'monthly'
   auto_create = true
-  
+
 Result: Works - can track as scheduled recurring
 ```
 
 ### ✅ 22. Bounced Check
+
 ```
 Initial deposit:
 transactions:
@@ -484,6 +508,7 @@ Result: Works
 ```
 
 ### ✅ 23. Transfer Between Own Accounts
+
 ```
 FROM account:
 transactions:
@@ -513,6 +538,7 @@ Result: Works - linked transactions
 ## EDGE CASES
 
 ### ✅ 24. Split Categories (Supermarket)
+
 ```
 Option A - Main category only:
 transactions:
@@ -533,17 +559,18 @@ Limitation: No built-in multi-category support (intentional)
 ```
 
 ### ✅ 25. Recurring Pattern Detection
+
 ```
 QUERY transactions WHERE
   merchant_name SIMILAR
   AND amount SIMILAR (+/- 10%)
   AND occurs every ~30 days
-  
+
 IF pattern detected:
   scheduled_transactions.INSERT
     frequency = 'monthly'
     auto_create = false  // Just suggestion
-    
+
 transaction_metadata:
   tags += 'recurring'
   ml_features.isRecurringPattern = true
@@ -552,6 +579,7 @@ Result: Works - can detect and suggest
 ```
 
 ### ✅ 26. Subscription Management
+
 ```
 transactions (monthly):
   amount = 9.99
@@ -568,6 +596,7 @@ Result: Works
 ```
 
 ### ✅ 27. Tip Added Later (Restaurant)
+
 ```
 Initial authorization:
 transactions:
@@ -594,6 +623,7 @@ Result: Works perfectly
 ```
 
 ### ✅ 28. Work Expense Reimbursement
+
 ```
 Expense:
 transactions:
@@ -619,6 +649,7 @@ Result: Works - linked transactions
 ```
 
 ### ✅ 29. Shared Expense (Split Bill)
+
 ```
 transactions:
   amount = 1000.00  // Total paid
@@ -640,6 +671,7 @@ Note: Could create separate tracking table if needed
 ```
 
 ### ⚠️ 30. Pending Transactions in Multiple Emails
+
 ```
 Email 1 (pending):
 transactions:
@@ -669,6 +701,7 @@ Recommendation: Use external_ids for matching
 ```
 
 ### ✅ 31. Tax Withholding (Interest)
+
 ```
 transactions:
   amount = 50.00  // Net interest
@@ -684,6 +717,7 @@ Result: Works
 ```
 
 ### ✅ 32. Exchange Rate Adjustment
+
 ```
 Initial (estimated):
 transactions:
@@ -712,6 +746,7 @@ Result: Works - creates separate adjustment
 ```
 
 ### ✅ 33. Promotional Cashback
+
 ```
 Purchase:
 transactions:
@@ -731,12 +766,13 @@ Result: Works
 ```
 
 ### ✅ 34. Failed Payment
+
 ```
 Attempt:
 transactions:
   amount = 500.00
   status = 'failed'
-  
+
 transaction_metadata:
   extra.failureReason = 'Insufficient funds'
 
@@ -744,6 +780,7 @@ Result: Works - can track failed attempts
 ```
 
 ### ✅ 35. Scheduled Future Transaction
+
 ```
 scheduled_transactions:
   next_occurrence_date = '2025-03-15'
@@ -762,11 +799,13 @@ Result: Works
 ## MISSING or CONCERNS
 
 ### ⚠️ Issue 1: Multi-Category Transactions
+
 **Status:** Not directly supported  
 **Workaround:** Split into multiple transactions with parent link  
 **Decision:** Intentional - keeps model simple
 
 ### ⚠️ Issue 2: Balance History/Snapshots
+
 **Status:** No dedicated table  
 **Current:** Calculate on-demand  
 **Concern:** Heavy calculation for historical analysis  
@@ -783,6 +822,7 @@ payment_method_balance_snapshots:
 ```
 
 ### ⚠️ Issue 3: Credit Card Statement Tracking
+
 **Status:** Partial support  
 **Current:** Only `last_statement_balance` in credit_details  
 **Missing:** Full statement history  
@@ -800,12 +840,14 @@ payment_method_statements:
 ```
 
 ### ⚠️ Issue 4: Investment Tracking
+
 **Status:** Limited  
 **Current:** Can track deposits/withdrawals  
 **Missing:** Portfolio value, gains/losses  
 **Decision:** Out of scope for V1 (focus on cash flow)
 
 ### ✅ Issue 5: Alerts/Notifications
+
 **Status:** External to DB  
 **Note:** Handled by application logic + existing budget_alerts table
 
@@ -816,20 +858,24 @@ payment_method_statements:
 ### ✅ CAN HANDLE (35/35 cases)
 
 **Credit Card:**
+
 - ✅ All 13 credit card scenarios
 - ✅ Installments (MSI)
 - ✅ Payments, refunds, disputes
 - ✅ Pre-auth, pending, adjustments
 
 **Debit Card:**
+
 - ✅ All 4 debit scenarios
 - ✅ Holds, overdrafts
 
 **Bank Account:**
+
 - ✅ All 6 bank scenarios
 - ✅ Deposits, transfers, bill pay
 
 **Edge Cases:**
+
 - ✅ All 12 edge cases
 - ✅ Recurring detection
 - ✅ Shared expenses (via metadata)
@@ -845,6 +891,7 @@ payment_method_statements:
 ### 📊 OPTIONAL ENHANCEMENTS
 
 If scale/complexity grows:
+
 1. `payment_method_balance_snapshots` - Historical balance tracking
 2. `payment_method_statements` - Full statement history
 3. `shared_expenses` - Dedicated split/IOU tracking
@@ -857,6 +904,7 @@ If scale/complexity grows:
 ### ✅ Schema is Complete for V1
 
 Our current design (Level 2 - Pragmatic Separation) can handle:
+
 - ✅ All transaction types (credit, debit, bank)
 - ✅ All edge cases from requirements
 - ✅ Email parsing and deduplication
@@ -873,6 +921,7 @@ We can proceed with implementation using current schema.
 ### 📈 Future Additions (Non-Breaking)
 
 If needed later, can add:
+
 - Balance snapshot table (performance optimization)
 - Statement history table (detailed tracking)
 - Shared expense table (if heavily used)
@@ -886,12 +935,14 @@ All additions would be non-breaking (new tables only).
 ✅ **Proceed with current schema design**
 
 The Level 2 (Pragmatic Separation) design is:
+
 - Complete for all defined requirements
 - Flexible enough for edge cases
 - Performant for common queries
 - Extensible for future needs
 
 Next steps:
+
 1. Create migration SQL files
 2. Generate TypeScript types
 3. Build repository layer
@@ -902,6 +953,6 @@ Next steps:
 
 ## Document Version
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-10-08 | Initial validation - all 35 cases verified |
+| Version | Date       | Changes                                    |
+| ------- | ---------- | ------------------------------------------ |
+| 1.0     | 2025-10-08 | Initial validation - all 35 cases verified |

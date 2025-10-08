@@ -16,7 +16,8 @@ export type TransactionUpdate =
 
 // Enums
 export type TransactionType = Database['public']['Enums']['transaction_type'];
-export type TransactionStatus = Database['public']['Enums']['transaction_status'];
+export type TransactionStatus =
+  Database['public']['Enums']['transaction_status'];
 export type TransactionSubtype =
   Database['public']['Enums']['transaction_subtype'];
 

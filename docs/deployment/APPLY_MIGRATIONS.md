@@ -20,11 +20,13 @@ supabase link --project-ref <tu-project-ref>
 ```
 
 **¿Dónde encuentro mi project-ref?**
+
 - Ve a tu dashboard de Supabase
 - URL será: `https://supabase.com/dashboard/project/<project-ref>`
 - O en Settings → General → Reference ID
 
 **Te pedirá:**
+
 - Database password (la que configuraste al crear el proyecto)
 
 ### Paso 2: Verificar conexión
@@ -52,8 +54,8 @@ supabase migration list
 
 # Ver las tablas creadas
 supabase db remote exec "
-  SELECT table_name 
-  FROM information_schema.tables 
+  SELECT table_name
+  FROM information_schema.tables
   WHERE table_schema = 'public'
   ORDER BY table_name;
 "
@@ -73,6 +75,7 @@ supabase start
 ```
 
 Esto iniciará:
+
 - PostgreSQL (Base de datos)
 - API REST
 - Auth
@@ -80,6 +83,7 @@ Esto iniciará:
 - Etc.
 
 **Salida esperada:**
+
 ```
 Started supabase local development setup.
 
@@ -104,8 +108,8 @@ open http://localhost:54323
 
 # O verificar por CLI
 supabase db remote exec "
-  SELECT COUNT(*) as total_tables 
-  FROM information_schema.tables 
+  SELECT COUNT(*) as total_tables
+  FROM information_schema.tables
   WHERE table_schema = 'public';
 "
 ```
@@ -150,20 +154,20 @@ supabase db remote exec "
 
 ```sql
 -- Verificar tablas
-SELECT table_name 
-FROM information_schema.tables 
+SELECT table_name
+FROM information_schema.tables
 WHERE table_schema = 'public'
 ORDER BY table_name;
 
 -- Verificar funciones
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_schema = 'public'
 ORDER BY routine_name;
 
 -- Verificar vistas
-SELECT table_name 
-FROM information_schema.views 
+SELECT table_name
+FROM information_schema.views
 WHERE table_schema = 'public'
 ORDER BY table_name;
 ```
@@ -173,31 +177,37 @@ ORDER BY table_name;
 ## Comandos Útiles
 
 ### Ver migraciones pendientes
+
 ```bash
 supabase migration list
 ```
 
 ### Aplicar solo UNA migración específica
+
 ```bash
 supabase db push --file supabase/migrations/20251008000001_create_enums.sql
 ```
 
 ### Ver diferencias entre local y remoto
+
 ```bash
 supabase db diff
 ```
 
 ### Resetear base de datos local (cuidado!)
+
 ```bash
 supabase db reset
 ```
 
 ### Ver logs de la base de datos
+
 ```bash
 supabase logs db
 ```
 
 ### Detener servicios locales
+
 ```bash
 supabase stop
 ```
@@ -209,6 +219,7 @@ supabase stop
 ### Error: "Project not linked"
 
 **Solución:**
+
 ```bash
 supabase link --project-ref <tu-project-ref>
 ```
@@ -216,6 +227,7 @@ supabase link --project-ref <tu-project-ref>
 ### Error: "Authentication failed"
 
 **Solución:**
+
 ```bash
 # Re-login
 supabase login
@@ -231,6 +243,7 @@ supabase link --project-ref <tu-project-ref>
 ### Error: "Could not connect to database"
 
 **Verificar:**
+
 ```bash
 # Para local
 supabase status
@@ -253,26 +266,26 @@ supabase db push --debug
 
 ```sql
 -- Contar tablas
-SELECT COUNT(*) FROM information_schema.tables 
+SELECT COUNT(*) FROM information_schema.tables
 WHERE table_schema = 'public';
 -- Esperado: 13 tablas (6 existentes + 7 nuevas)
 
 -- Verificar ENUMs
-SELECT COUNT(*) FROM pg_type 
+SELECT COUNT(*) FROM pg_type
 WHERE typtype = 'e' AND typnamespace = (
   SELECT oid FROM pg_namespace WHERE nspname = 'public'
 );
 -- Esperado: 9 ENUMs (3 existentes + 6 nuevos)
 
 -- Verificar funciones
-SELECT COUNT(*) FROM pg_proc 
+SELECT COUNT(*) FROM pg_proc
 WHERE pronamespace = (
   SELECT oid FROM pg_namespace WHERE nspname = 'public'
 );
 -- Esperado: Incluye las 6 nuevas funciones
 
 -- Verificar vistas
-SELECT COUNT(*) FROM information_schema.views 
+SELECT COUNT(*) FROM information_schema.views
 WHERE table_schema = 'public';
 -- Esperado: 7 vistas nuevas
 ```
@@ -294,7 +307,7 @@ INSERT INTO payment_methods (
 ) RETURNING *;
 
 -- Ver en la vista
-SELECT * FROM v_payment_methods_with_stats 
+SELECT * FROM v_payment_methods_with_stats
 WHERE user_id = auth.uid();
 ```
 
@@ -404,6 +417,7 @@ supabase gen types typescript > packages/shared-types/src/database.ts
 ## Soporte
 
 Si encuentras errores:
+
 1. Revisa los logs: `supabase logs db`
 2. Verifica conexión: `supabase status`
 3. Consulta docs: https://supabase.com/docs/reference/cli

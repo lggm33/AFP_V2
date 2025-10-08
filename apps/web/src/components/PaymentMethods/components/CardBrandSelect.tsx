@@ -46,14 +46,14 @@ export function CardBrandSelect({
   return (
     <div className='space-y-2'>
       <Label htmlFor='card_brand'>
-        Card Brand {required && <span className='text-red-500'>*</span>}
+        Marca de Tarjeta {required && <span className='text-red-500'>*</span>}
       </Label>
       <Select value={value || ''} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
           id='card_brand'
           className={error ? 'border-red-500' : ''}
         >
-          <SelectValue placeholder='Select card brand' />
+          <SelectValue placeholder='Selecciona la marca de tarjeta' />
         </SelectTrigger>
         <SelectContent>
           {cardBrands.map(brand => (

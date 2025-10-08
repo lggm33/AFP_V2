@@ -5,7 +5,8 @@ import type { Database } from '../database';
 // DATABASE TYPES
 // =====================================================================================
 
-export type PaymentMethod = Database['public']['Tables']['payment_methods']['Row'];
+export type PaymentMethod =
+  Database['public']['Tables']['payment_methods']['Row'];
 export type PaymentMethodInsert =
   Database['public']['Tables']['payment_methods']['Insert'];
 export type PaymentMethodUpdate =
@@ -98,7 +99,7 @@ export interface PaymentMethodCreateRequest {
   credit_details?: PaymentMethodCreditDetailsCreate;
 
   // Metadata
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentMethodUpdateRequest {
@@ -112,7 +113,7 @@ export interface PaymentMethodUpdateRequest {
   current_balance?: number;
   available_balance?: number;
   credit_details?: PaymentMethodCreditDetailsUpdate;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentMethodCreditDetailsCreate {
@@ -123,7 +124,7 @@ export interface PaymentMethodCreditDetailsCreate {
   interest_rate?: number;
   grace_period_days?: number;
   next_payment_due_date?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // =====================================================================================

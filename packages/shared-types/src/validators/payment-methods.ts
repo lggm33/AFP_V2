@@ -195,22 +195,39 @@ export const paymentMethodCreateSchema = z
   })
   .refine(
     data => {
-      // Credit/Debit cards require last_four_digits and card_brand
-      if (
-        data.account_type === 'credit_card' ||
-        data.account_type === 'debit_card'
-      ) {
-        return !!data.last_four_digits && !!data.card_brand;
-      }
-      // Other account types that require identifier
+      // Check if last_four_digits are required and valid
       if (requiresAccountIdentifier(data.account_type)) {
-        return !!data.last_four_digits;
+        const hasValidDigits =
+          data.last_four_digits &&
+          typeof data.last_four_digits === 'string' &&
+          data.last_four_digits.length === 4 &&
+          /^\d{4}$/.test(data.last_four_digits);
+        return hasValidDigits;
       }
       return true;
     },
     {
       message: 'Últimos 4 dígitos son requeridos para este tipo de cuenta',
       path: ['last_four_digits'],
+    }
+  )
+  .refine(
+    data => {
+      // Credit/Debit cards require card_brand
+      if (
+        data.account_type === 'credit_card' ||
+        data.account_type === 'debit_card'
+      ) {
+        const hasValidBrand = !!data.card_brand;
+
+        return hasValidBrand;
+      }
+      return true;
+    },
+    {
+      message:
+        'Marca de tarjeta es requerida para tarjetas de crédito y débito',
+      path: ['card_brand'],
     }
   )
   .refine(

@@ -1,7 +1,9 @@
 # Migration Summary - Transaction System V2
 
 ## Overview
-Successfully created 8 SQL migration files implementing the **Level 2 Pragmatic Domain Separation** design for the AFP Finance App transaction system.
+
+Successfully created 8 SQL migration files implementing the **Level 2 Pragmatic Domain Separation**
+design for the AFP Finance App transaction system.
 
 **Total Size:** ~53 KB of SQL migrations  
 **Status:** ✅ Ready to apply  
@@ -13,16 +15,16 @@ Successfully created 8 SQL migration files implementing the **Level 2 Pragmatic 
 
 ### 📁 Migration Files
 
-| File | Size | Description | Status |
-|------|------|-------------|--------|
-| `20251008000001_create_enums.sql` | 2.4 KB | New ENUM types | ✅ Safe |
-| `20251008000002_create_payment_methods.sql` | 4.9 KB | Payment methods tables | ✅ Safe |
-| `20251008000003_create_scheduled_transactions.sql` | 3.4 KB | Scheduled transactions | ✅ Safe |
-| `20251008000004_enhance_transactions.sql` | 3.4 KB | Enhance existing table | ✅ Non-breaking |
-| `20251008000005_create_transaction_details.sql` | 9.0 KB | Detail tables | ✅ Safe |
-| `20251008000006_create_functions.sql` | 13 KB | Helper functions | ✅ Idempotent |
-| `20251008000007_create_views.sql` | 11 KB | Useful views | ✅ Idempotent |
-| `20251008000008_data_migration.sql` | 6.6 KB | Migrate existing data | ⚠️ Review first |
+| File                                               | Size   | Description            | Status          |
+| -------------------------------------------------- | ------ | ---------------------- | --------------- |
+| `20251008000001_create_enums.sql`                  | 2.4 KB | New ENUM types         | ✅ Safe         |
+| `20251008000002_create_payment_methods.sql`        | 4.9 KB | Payment methods tables | ✅ Safe         |
+| `20251008000003_create_scheduled_transactions.sql` | 3.4 KB | Scheduled transactions | ✅ Safe         |
+| `20251008000004_enhance_transactions.sql`          | 3.4 KB | Enhance existing table | ✅ Non-breaking |
+| `20251008000005_create_transaction_details.sql`    | 9.0 KB | Detail tables          | ✅ Safe         |
+| `20251008000006_create_functions.sql`              | 13 KB  | Helper functions       | ✅ Idempotent   |
+| `20251008000007_create_views.sql`                  | 11 KB  | Useful views           | ✅ Idempotent   |
+| `20251008000008_data_migration.sql`                | 6.6 KB | Migrate existing data  | ⚠️ Review first |
 
 ---
 
@@ -78,12 +80,14 @@ Successfully created 8 SQL migration files implementing the **Level 2 Pragmatic 
 ## Key Features Implemented
 
 ### ✅ Payment Methods
+
 - Support for credit cards, debit cards, bank accounts, cash, wallets
 - Balance tracking (current, available)
 - Credit card specifics (limits, billing cycles, due dates)
 - Automatic balance updates
 
 ### ✅ Transactions (Enhanced)
+
 - Transaction subtypes (20 options for granularity)
 - Transaction status (lifecycle tracking)
 - Payment method linking
@@ -91,29 +95,34 @@ Successfully created 8 SQL migration files implementing the **Level 2 Pragmatic 
 - Review flagging
 
 ### ✅ Transaction Details (Separated)
+
 - **Amounts:** Desglose completo (tips, fees, exchange rates)
 - **Merchant:** Info detallada para categorización
 - **Metadata:** JSONB flexible para todo lo demás
 
 ### ✅ Installments (MSI)
+
 - Parent transaction (informational)
 - Child transactions (monthly payments)
 - Automatic creation function
 - Progress tracking view
 
 ### ✅ Scheduled Transactions
+
 - Recurring bills/subscriptions
 - Custom frequencies
 - Auto-creation option
 - Processing function (cron ready)
 
 ### ✅ Balance Management
+
 - Automatic calculation
 - Credit card: available = limit - debt - pending
 - Bank account: available = balance - pending
 - Update function for all accounts
 
 ### ✅ Data Quality
+
 - Duplicate detection (fuzzy matching)
 - Confidence scoring
 - Review flagging
@@ -158,9 +167,10 @@ psql $DATABASE_URL -f supabase/migrations/20251008000002_create_payment_methods.
 After applying migrations, run these checks:
 
 ### 1. Check Tables Created
+
 ```sql
-SELECT table_name 
-FROM information_schema.tables 
+SELECT table_name
+FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_name IN (
     'payment_methods',
@@ -174,9 +184,10 @@ WHERE table_schema = 'public'
 ```
 
 ### 2. Check ENUMs Created
+
 ```sql
-SELECT typname 
-FROM pg_type 
+SELECT typname
+FROM pg_type
 WHERE typname IN (
   'account_type',
   'card_brand',
@@ -189,12 +200,13 @@ WHERE typname IN (
 ```
 
 ### 3. Check Functions Created
+
 ```sql
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_schema = 'public'
   AND (
-    routine_name LIKE '%payment_method%' 
+    routine_name LIKE '%payment_method%'
     OR routine_name LIKE '%installment%'
     OR routine_name LIKE '%duplicate%'
     OR routine_name LIKE '%scheduled%'
@@ -203,17 +215,19 @@ WHERE routine_schema = 'public'
 ```
 
 ### 4. Check Views Created
+
 ```sql
-SELECT table_name 
-FROM information_schema.views 
+SELECT table_name
+FROM information_schema.views
 WHERE table_schema = 'public'
   AND table_name LIKE 'v_%';
 -- Should return 7 views
 ```
 
 ### 5. Check Data Migrated
+
 ```sql
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM payment_methods WHERE deleted_at IS NULL) as payment_methods,
   (SELECT COUNT(*) FROM transactions WHERE payment_method_id IS NOT NULL) as linked_transactions,
   (SELECT COUNT(*) FROM transaction_metadata) as metadata_records;
@@ -225,23 +239,27 @@ SELECT
 ## Safety Features
 
 ### ✅ Idempotent
+
 - All migrations can run multiple times safely
 - ENUMs use DO blocks with exception handling
 - Tables/indexes use `IF NOT EXISTS`
 - Functions/views use `CREATE OR REPLACE`
 
 ### ✅ Non-Breaking
+
 - All new columns are nullable or have defaults
 - Existing data preserved
 - No data deletion
 - Backward compatible
 
 ### ✅ Rollback Safe
+
 - Soft deletes (`deleted_at`)
 - Change history in JSONB
 - Original data never lost
 
 ### ✅ Performance Optimized
+
 - Strategic indexes created
 - Partial indexes for active records only
 - GIN indexes for JSONB queries
@@ -252,6 +270,7 @@ SELECT
 ## What to Do Next
 
 ### 1. Apply Migrations (Staging First)
+
 ```bash
 # Apply to staging
 supabase db push --project-ref staging-ref
@@ -264,12 +283,14 @@ supabase db push --project-ref production-ref
 ```
 
 ### 2. Generate TypeScript Types
+
 ```bash
 # Generate updated types from schema
 supabase gen types typescript --project-id your-project > src/types/database.ts
 ```
 
 ### 3. Update Application Code
+
 - [ ] Update shared-types package
 - [ ] Create repository layer for new tables
 - [ ] Update API endpoints
@@ -277,6 +298,7 @@ supabase gen types typescript --project-id your-project > src/types/database.ts
 - [ ] Update email-service parsing logic
 
 ### 4. Test Thoroughly
+
 - [ ] Test payment method CRUD
 - [ ] Test transaction creation (manual + email)
 - [ ] Test installment creation
@@ -285,6 +307,7 @@ supabase gen types typescript --project-id your-project > src/types/database.ts
 - [ ] Test scheduled transactions
 
 ### 5. Monitor Performance
+
 - [ ] Check query performance
 - [ ] Monitor index usage
 - [ ] Track slow queries
@@ -333,6 +356,7 @@ Complete documentation available in `/docs/development/`:
 🎉 **Successfully created complete migration suite for Transaction System V2**
 
 **What we achieved:**
+
 - ✅ 8 migration files totaling ~53 KB
 - ✅ 7 new tables (Level 2 separation)
 - ✅ 6 new ENUMs
@@ -351,6 +375,6 @@ Complete documentation available in `/docs/development/`:
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-10-08 | Initial migration suite created |
+| Version | Date       | Changes                         |
+| ------- | ---------- | ------------------------------- |
+| 1.0     | 2025-10-08 | Initial migration suite created |
