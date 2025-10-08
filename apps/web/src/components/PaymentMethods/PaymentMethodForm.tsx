@@ -4,7 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { BasicInformationSection } from './components/BasicInformationSection';
 import { CardDetailsSection } from './components/CardDetailsSection';
-import { BalanceInformationSection } from './components/BalanceInformationSection';
+import { MultiCurrencyBalanceSection } from './components/MultiCurrencyBalanceSection';
 import { CreditDetailsForm } from './components/CreditDetailsForm';
 import {
   usePaymentMethodForm,
@@ -54,14 +54,12 @@ export function PaymentMethodForm({
             name: paymentMethod.name,
             account_type: paymentMethod.account_type,
             institution_name: paymentMethod.institution_name,
-            currency: paymentMethod.currency || 'CRC',
+            primary_currency: paymentMethod.primary_currency || 'CRC',
             color: paymentMethod.color || undefined,
             is_primary: paymentMethod.is_primary ?? false,
             exclude_from_totals: paymentMethod.exclude_from_totals ?? false,
             last_four_digits: paymentMethod.last_four_digits || undefined,
             card_brand: paymentMethod.card_brand || undefined,
-            current_balance: paymentMethod.current_balance || undefined,
-            available_balance: paymentMethod.available_balance || undefined,
             credit_details: paymentMethod.credit_details
               ? {
                   credit_limit: paymentMethod.credit_details.credit_limit,
@@ -113,7 +111,7 @@ export function PaymentMethodForm({
             firstErrorElement.focus();
           }
         }
-      }, 300);
+      }, 1000);
       return;
     }
 
@@ -121,8 +119,11 @@ export function PaymentMethodForm({
   };
 
   // Wrapper to handle type compatibility
-  const handleSetField = (field: string, value: string | number | boolean) => {
-    setField(field as keyof typeof formData, value);
+  const handleSetField = (field: string, value: unknown) => {
+    setField(
+      field as keyof typeof formData,
+      value as string | number | boolean | Record<string, unknown>
+    );
   };
 
   return (
@@ -188,20 +189,21 @@ export function PaymentMethodForm({
         />
       )}
 
-      {/* Balance Information */}
-      <BalanceInformationSection
-        formData={formData}
+      {/* Multi-Currency Balance Information */}
+      <MultiCurrencyBalanceSection
+        balances={formData.currency_balances || []}
+        primaryCurrency={formData.primary_currency || 'CRC'}
         needsCreditDetails={needsCreditDetails}
-        setField={handleSetField}
+        onChange={balances => setField('currency_balances', balances)}
         getFieldError={getFieldError}
       />
 
       {/* Credit Card Details */}
       {needsCreditDetails && (
         <CreditDetailsForm
-          creditDetails={formData.credit_details || {}}
+          creditDetails={{ credit_limit: 0, ...formData.credit_details }}
           onChange={details =>
-            setField('credit_details', details as Record<string, unknown>)
+            setField('credit_details', { credit_limit: 0, ...details })
           }
           errors={errors}
         />

@@ -13,6 +13,13 @@ import {
   getRandomPaymentMethodColor,
 } from '@afp/shared-types';
 
+// Multi-currency balance type
+interface CurrencyBalance {
+  currency: string;
+  current_balance: number;
+  available_balance?: number;
+}
+
 type AccountType = Database['public']['Enums']['account_type'];
 type CardBrand = Database['public']['Enums']['card_brand'];
 
@@ -30,15 +37,27 @@ interface UsePaymentMethodFormOptions {
 }
 
 interface UsePaymentMethodFormReturn {
-  formData: PaymentMethodCreateInput;
+  formData: PaymentMethodCreateInput & {
+    currency_balances?: CurrencyBalance[];
+  };
   errors: FormErrors;
   isDirty: boolean;
   isValid: boolean;
-  setField: <K extends keyof PaymentMethodCreateInput>(
+  setField: <
+    K extends keyof (PaymentMethodCreateInput & {
+      currency_balances?: CurrencyBalance[];
+    }),
+  >(
     field: K,
-    value: PaymentMethodCreateInput[K]
+    value: (PaymentMethodCreateInput & {
+      currency_balances?: CurrencyBalance[];
+    })[K]
   ) => void;
-  setFields: (fields: Partial<PaymentMethodCreateInput>) => void;
+  setFields: (
+    fields: Partial<
+      PaymentMethodCreateInput & { currency_balances?: CurrencyBalance[] }
+    >
+  ) => void;
   validate: () => boolean;
   reset: () => void;
   getFieldError: (field: string) => string | undefined;
@@ -52,7 +71,7 @@ const defaultFormData: PaymentMethodCreateInput = {
   name: '',
   account_type: 'debit_card',
   institution_name: '',
-  currency: 'CRC',
+  primary_currency: 'CRC',
   color: getRandomPaymentMethodColor(),
   is_primary: false,
   exclude_from_totals: false,
@@ -63,9 +82,12 @@ export function usePaymentMethodForm(
 ): UsePaymentMethodFormReturn {
   const { initialData, mode = 'create' } = options;
 
-  const [formData, setFormData] = useState<PaymentMethodCreateInput>({
+  const [formData, setFormData] = useState<
+    PaymentMethodCreateInput & { currency_balances?: CurrencyBalance[] }
+  >({
     ...defaultFormData,
     ...initialData,
+    currency_balances: initialData?.currency_balances || [],
   });
 
   const [errors, setErrors] = useState<FormErrors>({});

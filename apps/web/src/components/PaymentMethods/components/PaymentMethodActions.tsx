@@ -20,9 +20,14 @@ export function PaymentMethodActions({
   const { id, is_primary } = paymentMethod;
 
   return (
-    <CardFooter className='flex justify-end gap-2 pt-0'>
+    <CardFooter className='flex flex-wrap justify-end gap-1 pt-0'>
       {!is_primary && onSetPrimary && (
-        <Button variant='outline' size='sm' onClick={() => onSetPrimary(id)}>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => onSetPrimary(id)}
+          className='text-xs px-2'
+        >
           Establecer como Principal
         </Button>
       )}
@@ -31,12 +36,18 @@ export function PaymentMethodActions({
           variant='outline'
           size='sm'
           onClick={() => onEdit(paymentMethod)}
+          className='text-xs px-2'
         >
           Editar
         </Button>
       )}
       {onDelete && (
-        <Button variant='destructive' size='sm' onClick={() => onDelete(id)}>
+        <Button
+          variant='destructive'
+          size='sm'
+          onClick={() => onDelete(id)}
+          className='text-xs px-2'
+        >
           Eliminar
         </Button>
       )}

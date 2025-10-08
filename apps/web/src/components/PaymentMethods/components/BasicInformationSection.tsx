@@ -87,7 +87,7 @@ interface BasicInformationSectionProps {
     name: string;
     account_type?: AccountType;
     institution_name: string;
-    currency: string;
+    primary_currency?: string;
     color?: string;
     is_primary: boolean;
     exclude_from_totals: boolean;
@@ -147,13 +147,13 @@ export function BasicInformationSection({
       />
 
       <div className='space-y-2'>
-        <Label htmlFor='currency'>Moneda</Label>
+        <Label htmlFor='primary_currency'>Moneda Principal</Label>
         <Select
-          value={formData.currency}
-          onValueChange={value => setField('currency', value)}
+          value={formData.primary_currency}
+          onValueChange={(value: string) => setField('primary_currency', value)}
         >
-          <SelectTrigger id='currency'>
-            <SelectValue placeholder='Seleccionar moneda' />
+          <SelectTrigger id='primary_currency'>
+            <SelectValue placeholder='Seleccionar moneda principal' />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='CRC'>CRC (Colón Costarricense)</SelectItem>
@@ -161,6 +161,9 @@ export function BasicInformationSection({
             <SelectItem value='EUR'>EUR (Euro)</SelectItem>
           </SelectContent>
         </Select>
+        <p className='text-xs text-gray-500'>
+          Esta será la moneda principal para reportes y cálculos
+        </p>
       </div>
 
       <div className='space-y-2'>

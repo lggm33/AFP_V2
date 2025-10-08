@@ -146,7 +146,7 @@ export const paymentMethodCreateSchema = z
       .trim(),
 
     // Optional fields
-    currency: z
+    primary_currency: z
       .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]], {
         message: 'Moneda no soportada',
       })
@@ -176,12 +176,28 @@ export const paymentMethodCreateSchema = z
       })
       .optional(),
 
-    // Balance fields
+    // Balance fields (legacy - for backward compatibility)
     current_balance: z.number().optional(),
 
     available_balance: z
       .number()
       .nonnegative('Saldo disponible no puede ser negativo')
+      .optional(),
+
+    // Initial balance for primary currency
+    initial_balance: z.number().optional(),
+
+    // Multi-currency balances
+    currency_balances: z
+      .array(
+        z.object({
+          currency: z.enum(
+            SUPPORTED_CURRENCIES as unknown as [string, ...string[]]
+          ),
+          current_balance: z.number(),
+          available_balance: z.number().optional(),
+        })
+      )
       .optional(),
 
     // Account number hash
@@ -280,7 +296,7 @@ export const paymentMethodUpdateSchema = z
       .enum(['active', 'inactive', 'expired', 'blocked', 'closed'])
       .optional(),
 
-    currency: z
+    primary_currency: z
       .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]], {
         message: 'Moneda no soportada',
       })

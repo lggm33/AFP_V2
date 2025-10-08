@@ -80,6 +80,9 @@ export type {
   PaymentMethod,
   PaymentMethodInsert,
   PaymentMethodUpdate,
+  PaymentMethodBalance,
+  PaymentMethodBalanceInsert,
+  PaymentMethodBalanceUpdate,
   PaymentMethodWithDetails,
   PaymentMethodWithStats,
   PaymentMethodCreditDetails,
@@ -115,3 +118,15 @@ export type {
   EmailProcessingRequest,
   EmailProcessingResponse,
 } from './email-accounts';
+
+export type {
+  // Common API Types
+  ApiResponse,
+  PaginatedResponse,
+  PaginationParams,
+  DateRangeFilter,
+  SearchFilter,
+  StatusFilter,
+  UserContextRequest,
+  MonthContextRequest,
+} from './common';

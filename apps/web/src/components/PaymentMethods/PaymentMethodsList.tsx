@@ -80,8 +80,8 @@ export function PaymentMethodsList({
       )}
 
       {/* Header */}
-      <div className='flex items-center justify-between'>
-        <div>
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+        <div className='text-center sm:text-left'>
           <h2 className='text-2xl font-bold text-gray-900'>
             Tus Métodos de Pago
           </h2>
@@ -92,7 +92,7 @@ export function PaymentMethodsList({
         </div>
         <Button
           onClick={handleCreate}
-          className='bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200'
+          className='bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto'
         >
           + Agregar Método de Pago
         </Button>
@@ -102,7 +102,7 @@ export function PaymentMethodsList({
       {paymentMethods.length === 0 ? (
         <PaymentMethodsEmpty onAddFirst={handleCreate} />
       ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch'>
           {paymentMethods.map(pm => (
             <PaymentMethodCard
               key={pm.id}

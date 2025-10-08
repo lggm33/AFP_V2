@@ -8,6 +8,12 @@ import {
   validatePaymentMethodUpdate,
   getValidationErrorMessage,
 } from '@afp/shared-types';
+// Using database types directly since they're not properly exported
+type PaymentMethodBalance =
+  Database['public']['Tables']['payment_method_balances']['Row'];
+type PaymentMethodBalanceInsert =
+  Database['public']['Tables']['payment_method_balances']['Insert'];
+type AccountType = Database['public']['Enums']['account_type'];
 
 // Local types
 type PaymentMethod = Database['public']['Tables']['payment_methods']['Row'];
@@ -16,6 +22,7 @@ type CreditDetails =
 
 type PaymentMethodWithDetails = PaymentMethod & {
   credit_details: CreditDetails | null;
+  currency_balances?: PaymentMethodBalance[];
 };
 
 // =====================================================================================
@@ -28,7 +35,8 @@ class PaymentMethodService {
    */
   async getUserPaymentMethods(
     userId: string,
-    includeDeleted = false
+    includeDeleted = false,
+    includeBalances = false
   ): Promise<PaymentMethodWithDetails[]> {
     try {
       let query = supabase
@@ -51,12 +59,42 @@ class PaymentMethodService {
 
       if (error) throw error;
 
-      return (data || []).map(pm => ({
+      const paymentMethods = (data || []).map(pm => ({
         ...pm,
         credit_details: Array.isArray(pm.credit_details)
           ? pm.credit_details[0] || null
           : null,
       }));
+
+      // If balances are requested, fetch them separately
+      if (includeBalances && paymentMethods.length > 0) {
+        const paymentMethodIds = paymentMethods.map(pm => pm.id);
+        const { data: balances } = await supabase
+          .from('payment_method_balances')
+          .select('*')
+          .in('payment_method_id', paymentMethodIds)
+          .order('currency');
+
+        // Group balances by payment method ID
+        const balancesByPaymentMethod = (balances || []).reduce(
+          (acc, balance) => {
+            if (!acc[balance.payment_method_id]) {
+              acc[balance.payment_method_id] = [];
+            }
+            acc[balance.payment_method_id].push(balance);
+            return acc;
+          },
+          {} as Record<string, PaymentMethodBalance[]>
+        );
+
+        // Add balances to payment methods
+        return paymentMethods.map(pm => ({
+          ...pm,
+          currency_balances: balancesByPaymentMethod[pm.id] || [],
+        }));
+      }
+
+      return paymentMethods;
     } catch (error) {
       console.error('Error fetching payment methods:', error);
       throw new Error('Failed to fetch payment methods');
@@ -142,57 +180,39 @@ class PaymentMethodService {
     data: PaymentMethodCreateInput
   ): Promise<PaymentMethodWithDetails> {
     try {
-      // Validate data
       const validation = validatePaymentMethodCreate(data);
       if (!validation.success) {
         throw new Error(getValidationErrorMessage(validation.error));
       }
 
-      // Start transaction
-      const { account_type, credit_details, ...paymentMethodData } =
-        validation.data;
+      const {
+        account_type,
+        credit_details,
+        currency_balances,
+        initial_balance,
+        ...paymentMethodData
+      } = validation.data;
 
-      // If setting as primary, unset current primary
       if (data.is_primary) {
         await this.unsetPrimaryPaymentMethod(userId);
       }
 
-      // Insert payment method
-      const { data: paymentMethod, error: pmError } = await supabase
-        .from('payment_methods')
-        .insert({
-          ...paymentMethodData,
-          account_type,
-          user_id: userId,
-        })
-        .select()
-        .single();
-
-      if (pmError) throw pmError;
-
-      // Insert credit details if credit card
-      let creditDetailsData: CreditDetails | null = null;
-      if (account_type === 'credit_card' && credit_details) {
-        const { data: cd, error: cdError } = await supabase
-          .from('payment_method_credit_details')
-          .insert({
-            payment_method_id: paymentMethod.id,
-            ...credit_details,
-          })
-          .select()
-          .single();
-
-        if (cdError) {
-          // Rollback: delete payment method
-          await supabase
-            .from('payment_methods')
-            .delete()
-            .eq('id', paymentMethod.id);
-          throw cdError;
-        }
-
-        creditDetailsData = cd;
-      }
+      const paymentMethod = await this.insertPaymentMethod(
+        userId,
+        paymentMethodData,
+        account_type
+      );
+      const creditDetailsData = await this.handleCreditDetails(
+        paymentMethod.id,
+        account_type,
+        credit_details
+      );
+      await this.handleBalanceCreation(
+        paymentMethod.id,
+        paymentMethod.primary_currency,
+        currency_balances,
+        initial_balance
+      );
 
       return {
         ...paymentMethod,
@@ -321,6 +341,110 @@ class PaymentMethodService {
   }
 
   /**
+   * Insert payment method into database
+   */
+  private async insertPaymentMethod(
+    userId: string,
+    paymentMethodData: Omit<
+      PaymentMethodCreateInput,
+      | 'account_type'
+      | 'credit_details'
+      | 'currency_balances'
+      | 'initial_balance'
+    >,
+    accountType: AccountType
+  ): Promise<PaymentMethod> {
+    const { data: paymentMethod, error: pmError } = await supabase
+      .from('payment_methods')
+      .insert({
+        ...paymentMethodData,
+        account_type: accountType,
+        user_id: userId,
+      })
+      .select()
+      .single();
+
+    if (pmError) throw pmError;
+    return paymentMethod;
+  }
+
+  /**
+   * Handle credit details creation for credit cards
+   */
+  private async handleCreditDetails(
+    paymentMethodId: string,
+    accountType: AccountType,
+    creditDetails?: PaymentMethodCreateInput['credit_details']
+  ): Promise<CreditDetails | null> {
+    if (accountType !== 'credit_card' || !creditDetails) {
+      return null;
+    }
+
+    try {
+      const { data: cd, error: cdError } = await supabase
+        .from('payment_method_credit_details')
+        .insert({
+          payment_method_id: paymentMethodId,
+          ...creditDetails,
+        })
+        .select()
+        .single();
+
+      if (cdError) throw cdError;
+      return cd;
+    } catch (error) {
+      await this.rollbackPaymentMethod(paymentMethodId);
+      throw error;
+    }
+  }
+
+  /**
+   * Handle balance creation for payment method
+   */
+  private async handleBalanceCreation(
+    paymentMethodId: string,
+    primaryCurrency: string | null,
+    currencyBalances?: PaymentMethodCreateInput['currency_balances'],
+    initialBalance?: number
+  ): Promise<void> {
+    try {
+      if (currencyBalances && currencyBalances.length > 0) {
+        for (const balance of currencyBalances) {
+          await this.upsertPaymentMethodBalance(
+            paymentMethodId,
+            balance.currency,
+            {
+              current_balance: balance.current_balance,
+              available_balance: balance.available_balance,
+              pending_amount: 0,
+            }
+          );
+        }
+      } else {
+        await this.createInitialBalance(
+          paymentMethodId,
+          primaryCurrency || 'USD',
+          initialBalance
+        );
+      }
+    } catch (error) {
+      await this.rollbackPaymentMethod(paymentMethodId);
+      throw error;
+    }
+  }
+
+  /**
+   * Rollback payment method creation
+   */
+  private async rollbackPaymentMethod(paymentMethodId: string): Promise<void> {
+    try {
+      await supabase.from('payment_methods').delete().eq('id', paymentMethodId);
+    } catch (rollbackError) {
+      console.error('Error during rollback:', rollbackError);
+    }
+  }
+
+  /**
    * Unset the current primary payment method
    */
   private async unsetPrimaryPaymentMethod(
@@ -371,6 +495,103 @@ class PaymentMethodService {
     } catch (error) {
       console.error('Error checking duplicate:', error);
       return false;
+    }
+  }
+
+  /**
+   * Get balances for a payment method
+   */
+  async getPaymentMethodBalances(
+    paymentMethodId: string
+  ): Promise<PaymentMethodBalance[]> {
+    try {
+      const { data, error } = await supabase
+        .from('payment_method_balances')
+        .select('*')
+        .eq('payment_method_id', paymentMethodId)
+        .order('currency');
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching payment method balances:', error);
+      throw new Error('Failed to fetch payment method balances');
+    }
+  }
+
+  /**
+   * Create or update a balance for a payment method
+   */
+  async upsertPaymentMethodBalance(
+    paymentMethodId: string,
+    currency: string,
+    balance: Partial<PaymentMethodBalanceInsert>
+  ): Promise<PaymentMethodBalance> {
+    try {
+      const { data, error } = await supabase
+        .from('payment_method_balances')
+        .upsert({
+          payment_method_id: paymentMethodId,
+          currency,
+          ...balance,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error upserting payment method balance:', error);
+      throw new Error('Failed to update payment method balance');
+    }
+  }
+
+  /**
+   * Delete a balance for a payment method
+   */
+  async deletePaymentMethodBalance(
+    paymentMethodId: string,
+    currency: string
+  ): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('payment_method_balances')
+        .delete()
+        .eq('payment_method_id', paymentMethodId)
+        .eq('currency', currency);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting payment method balance:', error);
+      throw new Error('Failed to delete payment method balance');
+    }
+  }
+
+  /**
+   * Create initial balance when creating a payment method
+   */
+  async createInitialBalance(
+    paymentMethodId: string,
+    primaryCurrency: string,
+    initialBalance?: number
+  ): Promise<PaymentMethodBalance> {
+    try {
+      const { data, error } = await supabase
+        .from('payment_method_balances')
+        .insert({
+          payment_method_id: paymentMethodId,
+          currency: primaryCurrency,
+          current_balance: initialBalance || 0,
+          pending_amount: 0,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating initial balance:', error);
+      throw new Error('Failed to create initial balance');
     }
   }
 }

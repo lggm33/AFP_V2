@@ -66,7 +66,8 @@ export function usePaymentMethods(
       setError(null);
       const data = await paymentMethodService.getUserPaymentMethods(
         userId,
-        includeDeleted
+        includeDeleted,
+        true // includeBalances = true para mostrar balances multi-moneda
       );
       setPaymentMethods(data);
     } catch (err) {
@@ -108,6 +109,17 @@ export function usePaymentMethods(
           event: '*',
           schema: 'public',
           table: 'payment_method_credit_details',
+        },
+        () => {
+          fetchPaymentMethods();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payment_method_balances',
         },
         () => {
           fetchPaymentMethods();

@@ -199,17 +199,94 @@ export type Database = {
         };
         Relationships: [];
       };
+      payment_method_balances: {
+        Row: {
+          available_balance: number | null;
+          created_at: string | null;
+          currency: string;
+          current_balance: number | null;
+          id: string;
+          last_balance_update: string | null;
+          last_transaction_date: string | null;
+          payment_method_id: string;
+          pending_amount: number | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          available_balance?: number | null;
+          created_at?: string | null;
+          currency: string;
+          current_balance?: number | null;
+          id?: string;
+          last_balance_update?: string | null;
+          last_transaction_date?: string | null;
+          payment_method_id: string;
+          pending_amount?: number | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          available_balance?: number | null;
+          created_at?: string | null;
+          currency?: string;
+          current_balance?: number | null;
+          id?: string;
+          last_balance_update?: string | null;
+          last_transaction_date?: string | null;
+          payment_method_id?: string;
+          pending_amount?: number | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_method_balances_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_methods';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_balances_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_balances_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_balances_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_balances_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_stats';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       payment_method_credit_details: {
         Row: {
           billing_cycle_day: number | null;
           created_at: string | null;
           credit_limit: number;
+          credit_limit_currency: string | null;
           grace_period_days: number | null;
           interest_rate: number | null;
           last_statement_balance: number | null;
           last_statement_date: string | null;
           metadata: Json | null;
           minimum_payment_percentage: number | null;
+          multi_currency_limits: Json | null;
           next_payment_due_date: string | null;
           payment_due_day: number | null;
           payment_method_id: string;
@@ -219,12 +296,14 @@ export type Database = {
           billing_cycle_day?: number | null;
           created_at?: string | null;
           credit_limit: number;
+          credit_limit_currency?: string | null;
           grace_period_days?: number | null;
           interest_rate?: number | null;
           last_statement_balance?: number | null;
           last_statement_date?: string | null;
           metadata?: Json | null;
           minimum_payment_percentage?: number | null;
+          multi_currency_limits?: Json | null;
           next_payment_due_date?: string | null;
           payment_due_day?: number | null;
           payment_method_id: string;
@@ -234,12 +313,14 @@ export type Database = {
           billing_cycle_day?: number | null;
           created_at?: string | null;
           credit_limit?: number;
+          credit_limit_currency?: string | null;
           grace_period_days?: number | null;
           interest_rate?: number | null;
           last_statement_balance?: number | null;
           last_statement_date?: string | null;
           metadata?: Json | null;
           minimum_payment_percentage?: number | null;
+          multi_currency_limits?: Json | null;
           next_payment_due_date?: string | null;
           payment_due_day?: number | null;
           payment_method_id?: string;
@@ -264,6 +345,20 @@ export type Database = {
             foreignKeyName: 'payment_method_credit_details_payment_method_id_fkey';
             columns: ['payment_method_id'];
             isOneToOne: true;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_credit_details_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_method_credit_details_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: true;
             referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
@@ -273,22 +368,19 @@ export type Database = {
         Row: {
           account_number_hash: string | null;
           account_type: Database['public']['Enums']['account_type'];
-          available_balance: number | null;
           card_brand: Database['public']['Enums']['card_brand'] | null;
           color: string | null;
           created_at: string | null;
-          currency: string | null;
-          current_balance: number | null;
           deleted_at: string | null;
           exclude_from_totals: boolean | null;
           icon: string | null;
           id: string;
           institution_name: string;
           is_primary: boolean | null;
-          last_balance_update: string | null;
           last_four_digits: string | null;
           metadata: Json | null;
           name: string;
+          primary_currency: string | null;
           status: Database['public']['Enums']['payment_method_status'] | null;
           updated_at: string | null;
           user_id: string;
@@ -296,22 +388,19 @@ export type Database = {
         Insert: {
           account_number_hash?: string | null;
           account_type: Database['public']['Enums']['account_type'];
-          available_balance?: number | null;
           card_brand?: Database['public']['Enums']['card_brand'] | null;
           color?: string | null;
           created_at?: string | null;
-          currency?: string | null;
-          current_balance?: number | null;
           deleted_at?: string | null;
           exclude_from_totals?: boolean | null;
           icon?: string | null;
           id?: string;
           institution_name: string;
           is_primary?: boolean | null;
-          last_balance_update?: string | null;
           last_four_digits?: string | null;
           metadata?: Json | null;
           name: string;
+          primary_currency?: string | null;
           status?: Database['public']['Enums']['payment_method_status'] | null;
           updated_at?: string | null;
           user_id: string;
@@ -319,22 +408,19 @@ export type Database = {
         Update: {
           account_number_hash?: string | null;
           account_type?: Database['public']['Enums']['account_type'];
-          available_balance?: number | null;
           card_brand?: Database['public']['Enums']['card_brand'] | null;
           color?: string | null;
           created_at?: string | null;
-          currency?: string | null;
-          current_balance?: number | null;
           deleted_at?: string | null;
           exclude_from_totals?: boolean | null;
           icon?: string | null;
           id?: string;
           institution_name?: string;
           is_primary?: boolean | null;
-          last_balance_update?: string | null;
           last_four_digits?: string | null;
           metadata?: Json | null;
           name?: string;
+          primary_currency?: string | null;
           status?: Database['public']['Enums']['payment_method_status'] | null;
           updated_at?: string | null;
           user_id?: string;
@@ -448,6 +534,20 @@ export type Database = {
             columns: ['payment_method_id'];
             isOneToOne: false;
             referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
             referencedColumns: ['id'];
           },
           {
@@ -975,6 +1075,20 @@ export type Database = {
             foreignKeyName: 'transactions_payment_method_id_fkey';
             columns: ['payment_method_id'];
             isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
             referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
@@ -1031,20 +1145,24 @@ export type Database = {
       v_credit_card_summary: {
         Row: {
           available_credit: number | null;
+          billing_cycle_day: number | null;
           color: string | null;
           credit_limit: number | null;
+          credit_limit_currency: string | null;
           current_debt: number | null;
           days_until_due: number | null;
+          has_multiple_currencies: boolean | null;
           id: string | null;
           institution_name: string | null;
           last_four_digits: string | null;
-          last_payment_amount: number | null;
-          last_payment_date: string | null;
+          last_statement_balance: number | null;
           last_statement_date: string | null;
-          last_statement_debt: number | null;
           minimum_payment_due: number | null;
+          minimum_payment_percentage: number | null;
+          multi_currency_limits: Json | null;
           name: string | null;
           next_payment_due_date: string | null;
+          payment_due_day: number | null;
           payment_status: string | null;
           pending_charges: number | null;
           user_id: string | null;
@@ -1141,11 +1259,93 @@ export type Database = {
             foreignKeyName: 'transactions_payment_method_id_fkey';
             columns: ['payment_method_id'];
             isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
             referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
           {
             foreignKeyName: 'transactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_payment_methods_with_all_balances: {
+        Row: {
+          account_type: Database['public']['Enums']['account_type'] | null;
+          card_brand: Database['public']['Enums']['card_brand'] | null;
+          color: string | null;
+          created_at: string | null;
+          currency_balances: Json | null;
+          deleted_at: string | null;
+          exclude_from_totals: boolean | null;
+          icon: string | null;
+          id: string | null;
+          institution_name: string | null;
+          is_primary: boolean | null;
+          last_four_digits: string | null;
+          name: string | null;
+          primary_available_balance: number | null;
+          primary_balance: number | null;
+          primary_currency: string | null;
+          status: Database['public']['Enums']['payment_method_status'] | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_methods_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      v_payment_methods_with_primary_balance: {
+        Row: {
+          account_number_hash: string | null;
+          account_type: Database['public']['Enums']['account_type'] | null;
+          available_balance: number | null;
+          card_brand: Database['public']['Enums']['card_brand'] | null;
+          color: string | null;
+          created_at: string | null;
+          current_balance: number | null;
+          deleted_at: string | null;
+          exclude_from_totals: boolean | null;
+          icon: string | null;
+          id: string | null;
+          institution_name: string | null;
+          is_primary: boolean | null;
+          last_balance_update: string | null;
+          last_four_digits: string | null;
+          last_transaction_date: string | null;
+          metadata: Json | null;
+          name: string | null;
+          pending_amount: number | null;
+          primary_currency: string | null;
+          status: Database['public']['Enums']['payment_method_status'] | null;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_methods_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -1162,10 +1362,10 @@ export type Database = {
           color: string | null;
           created_at: string | null;
           credit_limit: number | null;
-          currency: string | null;
           current_balance: number | null;
           deleted_at: string | null;
           exclude_from_totals: boolean | null;
+          has_multiple_currencies: boolean | null;
           icon: string | null;
           id: string | null;
           institution_name: string | null;
@@ -1178,6 +1378,7 @@ export type Database = {
           name: string | null;
           next_payment_due_date: string | null;
           pending_amount: number | null;
+          primary_currency: string | null;
           status: Database['public']['Enums']['payment_method_status'] | null;
           transaction_count: number | null;
           updated_at: string | null;
@@ -1326,6 +1527,20 @@ export type Database = {
             foreignKeyName: 'transactions_payment_method_id_fkey';
             columns: ['payment_method_id'];
             isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
             referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
@@ -1437,6 +1652,20 @@ export type Database = {
             columns: ['payment_method_id'];
             isOneToOne: false;
             referencedRelation: 'v_credit_card_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
             referencedColumns: ['id'];
           },
           {
@@ -1565,6 +1794,20 @@ export type Database = {
             foreignKeyName: 'transactions_payment_method_id_fkey';
             columns: ['payment_method_id'];
             isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
             referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
@@ -1638,6 +1881,20 @@ export type Database = {
             foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
             columns: ['payment_method_id'];
             isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_all_balances';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_payment_methods_with_primary_balance';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scheduled_transactions_payment_method_id_fkey';
+            columns: ['payment_method_id'];
+            isOneToOne: false;
             referencedRelation: 'v_payment_methods_with_stats';
             referencedColumns: ['id'];
           },
@@ -1688,6 +1945,18 @@ export type Database = {
           p_user_id: string;
         };
         Returns: undefined;
+      };
+      create_payment_method_balance: {
+        Args: {
+          p_currency: string;
+          p_initial_balance?: number;
+          p_payment_method_id: string;
+        };
+        Returns: string;
+      };
+      get_payment_method_total_balance: {
+        Args: { p_payment_method_id: string; p_target_currency?: string };
+        Returns: number;
       };
       gtrgm_compress: {
         Args: { '': unknown };

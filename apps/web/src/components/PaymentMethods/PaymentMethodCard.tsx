@@ -8,6 +8,8 @@ import { type Database } from '@afp/shared-types';
 type PaymentMethod = Database['public']['Tables']['payment_methods']['Row'];
 type CreditDetails =
   Database['public']['Tables']['payment_method_credit_details']['Row'];
+type PaymentMethodBalance =
+  Database['public']['Tables']['payment_method_balances']['Row'];
 
 // =====================================================================================
 // TYPES
@@ -16,6 +18,7 @@ type CreditDetails =
 interface PaymentMethodCardProps {
   paymentMethod: PaymentMethod & {
     credit_details?: CreditDetails | null;
+    currency_balances?: PaymentMethodBalance[];
   };
   onEdit?: (paymentMethod: PaymentMethod) => void;
   onDelete?: (paymentMethodId: string) => void;
@@ -36,7 +39,7 @@ export function PaymentMethodCard({
 
   return (
     <Card
-      className={`relative transition-all duration-200 hover:shadow-xl ${
+      className={`relative transition-all duration-200 hover:shadow-xl flex flex-col h-full ${
         is_primary ? 'ring-2 ring-orange-500 shadow-lg' : ''
       }`}
     >
@@ -51,14 +54,15 @@ export function PaymentMethodCard({
         status={paymentMethod.status}
       />
 
-      <PaymentMethodDetails
-        accountType={paymentMethod.account_type}
-        cardBrand={paymentMethod.card_brand}
-        currentBalance={paymentMethod.current_balance}
-        availableBalance={paymentMethod.available_balance}
-        currency={paymentMethod.currency}
-        creditDetails={paymentMethod.credit_details}
-      />
+      <div className='flex-1'>
+        <PaymentMethodDetails
+          accountType={paymentMethod.account_type}
+          cardBrand={paymentMethod.card_brand}
+          primaryCurrency={paymentMethod.primary_currency}
+          currencyBalances={paymentMethod.currency_balances}
+          creditDetails={paymentMethod.credit_details}
+        />
+      </div>
 
       <PaymentMethodActions
         paymentMethod={paymentMethod}

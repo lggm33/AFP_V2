@@ -1,4 +1,7 @@
-import { formatCurrency } from '@afp/shared-types';
+import { formatCurrency, type Database } from '@afp/shared-types';
+
+type PaymentMethodBalance =
+  Database['public']['Tables']['payment_method_balances']['Row'];
 
 interface CreditCardInfoProps {
   creditDetails: {
@@ -6,32 +9,47 @@ interface CreditCardInfoProps {
     billing_cycle_day?: number | null;
     payment_due_day?: number | null;
   };
-  availableBalance?: number | null;
-  currency?: string | null;
+  // Legacy fields
+  // New multi-currency fields
+  currencyBalances?: PaymentMethodBalance[];
+  primaryCurrency?: string;
 }
 
 export function CreditCardInfo({
   creditDetails,
-  availableBalance,
-  currency,
+  currencyBalances,
+  primaryCurrency,
 }: CreditCardInfoProps) {
+  const effectiveCurrency = primaryCurrency || 'USD';
+  const hasMultiCurrencyBalances =
+    currencyBalances && currencyBalances.length > 0;
+
   return (
     <>
       <div className='flex justify-between text-sm'>
-        <span className='text-gray-500'>Crédito Disponible:</span>
+        <span className='text-gray-500'>Límite de Crédito:</span>
         <span className='font-medium'>
-          {formatCurrency(creditDetails.credit_limit, currency || 'USD')}
+          {formatCurrency(creditDetails.credit_limit, effectiveCurrency)}
         </span>
       </div>
 
-      {availableBalance !== null && availableBalance !== undefined && (
-        <div className='flex justify-between text-sm'>
-          <span className='text-gray-500'>Disponible:</span>
-          <span className='font-medium'>
-            {formatCurrency(availableBalance, currency || 'USD')}
-          </span>
-        </div>
-      )}
+      {/* Show available credit per currency */}
+      {hasMultiCurrencyBalances &&
+        currencyBalances
+          .filter(balance => balance.available_balance !== null)
+          .map(balance => (
+            <div
+              key={`credit-${balance.currency}`}
+              className='flex justify-between text-sm'
+            >
+              <span className='text-gray-500'>
+                Crédito Disponible ({balance.currency}):
+              </span>
+              <span className='font-medium text-green-600'>
+                {formatCurrency(balance.current_balance || 0, balance.currency)}
+              </span>
+            </div>
+          ))}
 
       {creditDetails.billing_cycle_day && (
         <div className='flex justify-between text-sm'>
