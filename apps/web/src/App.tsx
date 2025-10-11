@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { AppRouter } from '@/components/Router/AppRouter';
 import { useAuthStore } from '@/stores/authStore';
 import { SuspensionDetector } from '@/components/Auth/SuspensionDetector';
+import { PWAAuthValidator } from '@/components/Auth/PWAAuthValidator';
 
 export default function App() {
   const initialize = useAuthStore(state => state.initialize);
@@ -14,11 +15,13 @@ export default function App() {
   }, [initialize, isInitialized]);
 
   return (
-    <SuspensionDetector
-      inactivityCheckThresholdMinutes={30}
-      checkIntervalMinutes={0.2}
-    >
-      <AppRouter />
-    </SuspensionDetector>
+    <PWAAuthValidator>
+      <SuspensionDetector
+        inactivityCheckThresholdMinutes={30}
+        checkIntervalMinutes={0.2}
+      >
+        <AppRouter />
+      </SuspensionDetector>
+    </PWAAuthValidator>
   );
 }
