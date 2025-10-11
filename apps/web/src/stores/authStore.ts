@@ -18,6 +18,7 @@ interface AuthActions {
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  forceLocalCleanup: () => void;
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -33,23 +34,60 @@ const handleAuthStateChange =
     });
   };
 
-// Helper function for sign out
+// Helper function to force cleanup of local auth state
+const forceLocalCleanup =
+  (set: (partial: Partial<AuthState>) => void) => () => {
+    // Clear Zustand store state
+    set({
+      user: null,
+      session: null,
+      loading: false,
+    });
+
+    // Clear Supabase localStorage data
+    try {
+      // Clear all Supabase auth related localStorage keys
+      const keysToRemove = Object.keys(localStorage).filter(
+        key => key.startsWith('sb-') || key.includes('supabase')
+      );
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+    } catch (error) {
+      // localStorage might not be available in some environments
+      console.warn('Could not clear localStorage:', error);
+    }
+  };
+
+// Helper function for defensive sign out - NEVER fails from UI perspective
 const createSignOut =
   (set: (partial: Partial<AuthState>) => void) => async () => {
     try {
       set({ loading: true });
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
 
-      set({
-        user: null,
-        session: null,
-        loading: false,
-      });
+      // Attempt normal Supabase logout
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        // Check if it's a session missing error (user already logged out)
+        if (
+          error.message?.includes('session') ||
+          error.message?.includes('missing')
+        ) {
+          console.warn(
+            'Session already expired or missing during logout - this is expected'
+          );
+        } else {
+          // Log other errors but don't throw them
+          console.error('Logout error (ignored for UX):', error);
+        }
+      }
     } catch (error) {
-      console.error('Error signing out:', error);
-      set({ loading: false });
-      throw error;
+      // Catch any unexpected errors and log them
+      console.error('Unexpected logout error (ignored for UX):', error);
+    } finally {
+      // ALWAYS clean up local state regardless of Supabase success/failure
+      forceLocalCleanup(set)();
+
+      // NEVER throw errors to the UI - logout must always appear successful
     }
   };
 
@@ -138,6 +176,7 @@ export const useAuthStore = create<AuthStore>()(
       signOut: createSignOut(set),
       initialize: createInitialize(set),
       refreshSession: createRefreshSession(set),
+      forceLocalCleanup: forceLocalCleanup(set),
     }),
     {
       name: 'afp-auth-storage',
@@ -160,4 +199,29 @@ export const useAuth = () => {
     isLoading: store.loading,
     isInitialized: store.initialized,
   };
+};
+
+// Emergency cleanup function - can be called from anywhere
+export const emergencyAuthCleanup = () => {
+  // Force cleanup of Zustand store
+  useAuthStore.setState({
+    user: null,
+    session: null,
+    loading: false,
+    initialized: false,
+  });
+
+  // Clear Supabase localStorage data
+  try {
+    const keysToRemove = Object.keys(localStorage).filter(
+      key => key.startsWith('sb-') || key.includes('supabase')
+    );
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    console.warn('Emergency auth cleanup executed');
+  } catch (error) {
+    console.warn(
+      'Could not clear localStorage during emergency cleanup:',
+      error
+    );
+  }
 };
