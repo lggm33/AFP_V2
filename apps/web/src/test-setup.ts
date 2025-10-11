@@ -2,7 +2,6 @@ import '@testing-library/jest-dom';
 import './mocks/server';
 import { vi } from 'vitest';
 
-
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
@@ -37,7 +36,7 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock localStorage with realistic behavior
 const createStorageMock = () => {
   const store: Record<string, string> = {};
-  
+
   const mockStorage = {
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -65,7 +64,7 @@ const createStorageMock = () => {
         delete (mockStorage as any)[key];
       }
     });
-    
+
     // Add current store keys as enumerable properties
     Object.keys(store).forEach(key => {
       Object.defineProperty(mockStorage, key, {

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AppRouter } from '@/components/Router/AppRouter';
 import { useAuthStore } from '@/stores/authStore';
+import { SuspensionDetector } from '@/components/Auth/SuspensionDetector';
 
 export default function App() {
   const initialize = useAuthStore(state => state.initialize);
@@ -12,5 +13,12 @@ export default function App() {
     }
   }, [initialize, isInitialized]);
 
-  return <AppRouter />;
+  return (
+    <SuspensionDetector
+      inactivityCheckThresholdMinutes={30}
+      checkIntervalMinutes={0.2}
+    >
+      <AppRouter />
+    </SuspensionDetector>
+  );
 }

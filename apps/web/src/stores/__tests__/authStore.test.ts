@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { server } from '@/mocks/server';
 import { http, HttpResponse } from 'msw';
 import { useAuthStore, emergencyAuthCleanup } from '@/stores/authStore';
+import { supabase } from '@/config/supabase';
 import {
   resetAllMocks,
   clearSupabaseLocalStorage,
@@ -295,6 +296,127 @@ describe('AuthStore - Defensive Logout', () => {
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
       expect(state.session).toBeNull();
+    });
+  });
+
+  describe('validateSession() - Phase 2 Validation', () => {
+    it('should return true for valid session', async () => {
+      // Setup: Mock Supabase getSession to return valid session
+      const mockSession = {
+        access_token: 'valid-token',
+        refresh_token: 'refresh-token',
+        user: { id: 'test-user', email: 'test@example.com' },
+      };
+
+      // Mock the supabase.auth.getSession method directly
+      vi.spyOn(supabase.auth, 'getSession').mockResolvedValueOnce({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const store = useAuthStore.getState();
+      const isValid = await store.validateSession();
+
+      expect(isValid).toBe(true);
+
+      // Should update store with valid session
+      const state = useAuthStore.getState();
+      expect(state.user).toBeTruthy();
+      expect(state.session).toBeTruthy();
+      expect(state.user?.id).toBe('test-user');
+    });
+
+    it('should return false and cleanup for invalid session', async () => {
+      // Setup: Mock Supabase getSession to return no session
+      vi.spyOn(supabase.auth, 'getSession').mockResolvedValueOnce({
+        data: { session: null },
+        error: null,
+      });
+
+      // Setup: Store appears to have user
+      useAuthStore.setState({
+        user: { id: 'test-user' } as any,
+        session: { access_token: 'invalid-token' } as any,
+      });
+
+      const store = useAuthStore.getState();
+      const isValid = await store.validateSession();
+
+      expect(isValid).toBe(false);
+
+      // Should cleanup store
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.session).toBeNull();
+    });
+
+    it('should handle validation errors gracefully', async () => {
+      // Setup: Mock Supabase getSession to return error
+      vi.spyOn(supabase.auth, 'getSession').mockResolvedValueOnce({
+        data: { session: null },
+        error: { message: 'validation_error' },
+      });
+
+      const store = useAuthStore.getState();
+      const isValid = await store.validateSession();
+
+      expect(isValid).toBe(false);
+
+      // Should cleanup on error
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.session).toBeNull();
+    });
+
+    it('should handle network errors during validation', async () => {
+      // Setup: Mock Supabase getSession to throw error
+      vi.spyOn(supabase.auth, 'getSession').mockRejectedValueOnce(
+        new Error('Network error')
+      );
+
+      const store = useAuthStore.getState();
+      const isValid = await store.validateSession();
+
+      expect(isValid).toBe(false);
+
+      // Should cleanup on network error
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.session).toBeNull();
+    });
+
+    it('should sync store with Supabase session state', async () => {
+      // Setup: Mock session with different user data
+      const supabaseUser = {
+        id: 'supabase-user',
+        email: 'supabase@example.com',
+      };
+      const mockSession = {
+        access_token: 'synced-token',
+        refresh_token: 'refresh-token',
+        user: supabaseUser,
+      };
+
+      vi.spyOn(supabase.auth, 'getSession').mockResolvedValueOnce({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      // Setup: Store has different user data
+      useAuthStore.setState({
+        user: { id: 'old-user', email: 'old@example.com' } as any,
+        session: { access_token: 'old-token' } as any,
+      });
+
+      const store = useAuthStore.getState();
+      const isValid = await store.validateSession();
+
+      expect(isValid).toBe(true);
+
+      // Should sync with Supabase data
+      const state = useAuthStore.getState();
+      expect(state.user?.id).toBe('supabase-user');
+      expect(state.user?.email).toBe('supabase@example.com');
     });
   });
 });

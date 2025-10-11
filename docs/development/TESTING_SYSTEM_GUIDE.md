@@ -2,7 +2,9 @@
 
 ## 🎯 Objetivo
 
-Esta guía explica cómo funciona nuestro sistema de testing robusto basado en **Vitest + Testing Library + MSW**, diseñado para testear la lógica de negocio sin necesidad de servidores reales o navegadores.
+Esta guía explica cómo funciona nuestro sistema de testing robusto basado en **Vitest + Testing
+Library + MSW**, diseñado para testear la lógica de negocio sin necesidad de servidores reales o
+navegadores.
 
 ## 📋 Tabla de Contenidos
 
@@ -61,16 +63,17 @@ apps/web/
 ```typescript
 export default defineConfig({
   test: {
-    globals: true,                    // Variables globales (describe, it, expect)
-    environment: 'jsdom',             // Simula browser en Node.js
+    globals: true, // Variables globales (describe, it, expect)
+    environment: 'jsdom', // Simula browser en Node.js
     setupFiles: ['./src/test-setup.ts'], // ← PUNTO DE ENTRADA
-    css: true,                        // Soporte para CSS
-    coverage: {                       // Configuración de coverage
+    css: true, // Soporte para CSS
+    coverage: {
+      // Configuración de coverage
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
     },
   },
-})
+});
 ```
 
 ### 2. `src/test-setup.ts` - Setup Global
@@ -95,9 +98,9 @@ import { authHandlers } from './handlers/auth';
 export const server = setupServer(...authHandlers);
 
 // ✨ Se ejecuta automáticamente al importar:
-beforeAll(() => server.listen());    // Inicia MSW
+beforeAll(() => server.listen()); // Inicia MSW
 afterEach(() => server.resetHandlers()); // Reset entre tests
-afterAll(() => server.close());     // Cierra al final
+afterAll(() => server.close()); // Cierra al final
 ```
 
 ### 4. `src/mocks/handlers/auth.ts` - HTTP Handlers
@@ -110,7 +113,7 @@ export const authHandlers = [
   http.post(`${SUPABASE_URL}/auth/v1/logout`, () => {
     return HttpResponse.json({ message: 'Logged out successfully' });
   }),
-  
+
   // Otros endpoints...
 ];
 ```
@@ -119,7 +122,7 @@ export const authHandlers = [
 
 ```typescript
 // Custom render con providers
-export const customRender = (ui, options) => 
+export const customRender = (ui, options) =>
   render(ui, { wrapper: AllTheProviders, ...options });
 
 // Helpers específicos
@@ -137,31 +140,37 @@ npm run test
 ```
 
 ### 1. **Vitest Inicia**
+
 ```
 vitest → lee vitest.config.ts → setupFiles: ['./src/test-setup.ts']
 ```
 
 ### 2. **Setup Global se Ejecuta**
+
 ```
 test-setup.ts → import './mocks/server' → MSW se inicia automáticamente
 ```
 
 ### 3. **MSW se Configura**
+
 ```
 beforeAll(() => server.listen()) → MSW intercepta HTTP requests
 ```
 
 ### 4. **Tests se Ejecutan**
+
 ```
 authStore.test.ts → import { useAuthStore } → ejecuta funciones reales
 ```
 
 ### 5. **Interacción con MSW**
+
 ```
 store.signOut() → supabase.auth.signOut() → fetch() → MSW intercepta → respuesta fake
 ```
 
 ### 6. **Verificación**
+
 ```
 expect(store.user).toBeNull() → verifica que la lógica funcionó
 ```
@@ -188,12 +197,12 @@ describe('PaymentStore', () => {
 
   it('should add payment method', async () => {
     const store = usePaymentStore.getState();
-    
+
     await store.addPaymentMethod({
       name: 'Visa',
       type: 'credit_card',
     });
-    
+
     const newState = usePaymentStore.getState();
     expect(newState.paymentMethods).toHaveLength(1);
     expect(newState.paymentMethods[0].name).toBe('Visa');
@@ -216,20 +225,20 @@ describe('AuthGuard', () => {
         <div>Protected Content</div>
       </AuthGuard>
     );
-    
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
-  
+
   it('redirects when not authenticated', () => {
     // Mock unauthenticated state
     useAuthStore.setState({ user: null, initialized: true });
-    
+
     render(
       <AuthGuard>
         <div>Protected Content</div>
       </AuthGuard>
     );
-    
+
     // Should redirect (test navigation)
   });
 });
@@ -245,14 +254,14 @@ export const paymentHandlers = [
       data: [
         { id: '1', name: 'Visa', type: 'credit_card' },
         { id: '2', name: 'Savings', type: 'bank_account' },
-      ]
+      ],
     });
   }),
-  
+
   http.post('/api/payment-methods', async ({ request }) => {
     const newMethod = await request.json();
     return HttpResponse.json({
-      data: { id: '3', ...newMethod }
+      data: { id: '3', ...newMethod },
     });
   }),
 ];
@@ -269,16 +278,13 @@ it('handles API errors gracefully', async () => {
   // Override handler para este test específico
   server.use(
     http.post('/api/payment-methods', () => {
-      return HttpResponse.json(
-        { error: 'Validation failed' },
-        { status: 400 }
-      );
+      return HttpResponse.json({ error: 'Validation failed' }, { status: 400 });
     })
   );
-  
+
   const store = usePaymentStore.getState();
   await store.addPaymentMethod({ name: 'Invalid' });
-  
+
   expect(store.error).toBe('Validation failed');
 });
 ```
@@ -349,10 +355,10 @@ describe('ComponentName/StoreName', () => {
     it('should do something specific', async () => {
       // 1. Arrange - preparar datos
       const mockData = { ... };
-      
+
       // 2. Act - ejecutar acción
       const result = await someFunction(mockData);
-      
+
       // 3. Assert - verificar resultado
       expect(result).toBe(expected);
     });
@@ -482,9 +488,9 @@ http.post('/api/slow', async () => {
 // Agregar logs temporales para debugging
 it('debug test', async () => {
   console.log('Estado inicial:', useAuthStore.getState());
-  
+
   await store.signOut();
-  
+
   console.log('Estado final:', useAuthStore.getState());
   expect(store.user).toBeNull();
 });
@@ -505,7 +511,7 @@ authStore.ts       |   47.71 |    84.21 |   58.33 |   47.71 |
 ```
 
 - **% Stmts**: Porcentaje de statements ejecutados
-- **% Branch**: Porcentaje de branches (if/else) cubiertos  
+- **% Branch**: Porcentaje de branches (if/else) cubiertos
 - **% Funcs**: Porcentaje de funciones ejecutadas
 - **% Lines**: Porcentaje de líneas ejecutadas
 
@@ -518,16 +524,19 @@ authStore.ts       |   47.71 |    84.21 |   58.33 |   47.71 |
 ## 🎯 Próximos Pasos
 
 ### Fase 2: Component Testing
+
 - Tests de AuthGuard
 - Tests de formularios
 - Tests de componentes de UI
 
 ### Fase 3: E2E Testing
+
 - Playwright setup
 - User journey tests
 - PWA scenarios
 
 ### Fase 4: Visual Testing
+
 - Storybook integration
 - Visual regression tests
 - Cross-browser testing
@@ -543,4 +552,5 @@ authStore.ts       |   47.71 |    84.21 |   58.33 |   47.71 |
 
 ---
 
-**¿Preguntas?** Consulta esta guía o revisa los tests existentes en `src/stores/__tests__/authStore.test.ts` como referencia.
+**¿Preguntas?** Consulta esta guía o revisa los tests existentes en
+`src/stores/__tests__/authStore.test.ts` como referencia.

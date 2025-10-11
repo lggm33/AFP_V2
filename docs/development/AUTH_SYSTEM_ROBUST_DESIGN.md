@@ -1,14 +1,16 @@
 # Sistema de Autenticación Robusto - Casos Edge y Soluciones
 
 ## 🎯 Objetivo
-Crear un sistema de autenticación que **nunca falle** desde la perspectiva del usuario y maneje todos los edge cases de manera elegante.
+
+Crear un sistema de autenticación que **nunca falle** desde la perspectiva del usuario y maneje
+todos los edge cases de manera elegante.
 
 ## 📋 Casos Edge Identificados
 
 ### 1. **Logout Fallido**
-**Problema**: `supabase.auth.signOut()` falla con `AuthSessionMissingError`
-**Impacto**: Usuario queda "atrapado" en la UI
-**Solución**: Logout defensivo
+
+**Problema**: `supabase.auth.signOut()` falla con `AuthSessionMissingError` **Impacto**: Usuario
+queda "atrapado" en la UI **Solución**: Logout defensivo
 
 ```pseudocode
 función signOut():
@@ -16,28 +18,28 @@ función signOut():
     verificar_sesion_supabase()
     if sesion_existe:
       intentar_logout_normal()
-    
+
   catch error:
     if error == "session_missing":
       log_warning("Sesión ya expirada")
     else:
       log_error(error)
-  
+
   finally:
     SIEMPRE_limpiar_estado_local()
     NUNCA_lanzar_error_al_UI()
 ```
 
 ### 2. **Desincronización Store vs Supabase**
-**Problema**: Store local mantiene datos obsoletos
-**Impacto**: AuthGuard permite acceso con sesiones inválidas
-**Solución**: Supabase como fuente de verdad
+
+**Problema**: Store local mantiene datos obsoletos **Impacto**: AuthGuard permite acceso con
+sesiones inválidas **Solución**: Supabase como fuente de verdad
 
 ```pseudocode
 función initialize():
   sesion_real = supabase.getSession()
   store.sincronizar(sesion_real)
-  
+
   configurar_listener():
     on_auth_change(event, session):
       store.sincronizar(session)
@@ -46,29 +48,29 @@ función initialize():
 ```
 
 ### 3. **Suspensión del Sistema**
-**Problema**: Sistema se suspende, sesión expira, store no se entera
-**Impacto**: Usuario parece logueado pero sesión inválida
-**Solución**: Detección de inactividad + validación
+
+**Problema**: Sistema se suspende, sesión expira, store no se entera **Impacto**: Usuario parece
+logueado pero sesión inválida **Solución**: Detección de inactividad + validación
 
 ```pseudocode
 función detectar_suspension():
   ultimo_tiempo_activo = now()
-  
+
   cada_minuto():
     tiempo_inactivo = now() - ultimo_tiempo_activo
     if tiempo_inactivo > 30_MINUTOS:
       validar_sesion_actual()
       if sesion_invalida:
         auto_logout("suspension_detected")
-  
+
   on_visibility_change():
     if pagina_visible:
       validar_sesion_actual()
 ```
 
 ### 4. **PWA en Background**
-**Problema**: PWA va a background, vuelve después de horas
-**Impacto**: Sesión puede haber expirado
+
+**Problema**: PWA va a background, vuelve después de horas **Impacto**: Sesión puede haber expirado
 **Solución**: Validación al reactivar PWA
 
 ```pseudocode
@@ -84,9 +86,9 @@ función manejar_pwa():
 ```
 
 ### 5. **Múltiples Tabs**
-**Problema**: Usuario hace logout en una tab, otras tabs no se enteran
-**Impacto**: Estado inconsistente entre tabs
-**Solución**: Sincronización via localStorage events
+
+**Problema**: Usuario hace logout en una tab, otras tabs no se enteran **Impacto**: Estado
+inconsistente entre tabs **Solución**: Sincronización via localStorage events
 
 ```pseudocode
 función sincronizar_tabs():
@@ -102,9 +104,9 @@ función sincronizar_tabs():
 ```
 
 ### 6. **Sesión Expirada Durante Uso**
-**Problema**: Usuario está usando la app, sesión expira silenciosamente
-**Impacto**: API calls fallan con 401
-**Solución**: Interceptor de requests + auto-refresh
+
+**Problema**: Usuario está usando la app, sesión expira silenciosamente **Impacto**: API calls
+fallan con 401 **Solución**: Interceptor de requests + auto-refresh
 
 ```pseudocode
 función interceptor_api():
@@ -118,9 +120,9 @@ función interceptor_api():
 ```
 
 ### 7. **Errores de Red**
-**Problema**: Requests de auth fallan por problemas de conectividad
-**Impacto**: Estados inconsistentes
-**Solución**: Retry con backoff + fallback
+
+**Problema**: Requests de auth fallan por problemas de conectividad **Impacto**: Estados
+inconsistentes **Solución**: Retry con backoff + fallback
 
 ```pseudocode
 función manejar_errores_red():
@@ -134,9 +136,9 @@ función manejar_errores_red():
 ```
 
 ### 8. **Corrupción de localStorage**
-**Problema**: Datos de auth en localStorage se corrompen
-**Impacto**: App no puede determinar estado de auth
-**Solución**: Validación + limpieza
+
+**Problema**: Datos de auth en localStorage se corrompen **Impacto**: App no puede determinar estado
+de auth **Solución**: Validación + limpieza
 
 ```pseudocode
 función validar_storage():
@@ -206,6 +208,7 @@ NetworkManager:
 ## 🔄 Flujos Principales
 
 ### Flujo de Inicialización
+
 ```pseudocode
 1. App inicia
 2. AuthStore.initialize()
@@ -217,6 +220,7 @@ NetworkManager:
 ```
 
 ### Flujo de Logout
+
 ```pseudocode
 1. Usuario hace click en logout
 2. AuthStore.signOut()
@@ -228,6 +232,7 @@ NetworkManager:
 ```
 
 ### Flujo de Validación
+
 ```pseudocode
 1. Trigger de validación (reactivar app, API error, etc.)
 2. Obtener sesión actual de Supabase
@@ -238,6 +243,7 @@ NetworkManager:
 ```
 
 ### Flujo de Recuperación
+
 ```pseudocode
 1. Detectar error/inconsistencia
 2. Intentar recuperación automática
@@ -249,6 +255,7 @@ NetworkManager:
 ## 🎯 Casos de Uso Específicos
 
 ### Caso: Usuario deja laptop suspendida
+
 ```
 Trigger: visibilitychange event
 Acción: Validar sesión, auto-logout si expiró
@@ -256,6 +263,7 @@ Resultado: Usuario ve login screen con mensaje explicativo
 ```
 
 ### Caso: PWA en background por horas
+
 ```
 Trigger: PWA vuelve a foreground
 Acción: Validar + refresh si es posible
@@ -263,6 +271,7 @@ Resultado: Sesión renovada o logout limpio
 ```
 
 ### Caso: Múltiples tabs, logout en una
+
 ```
 Trigger: localStorage change event
 Acción: Sincronizar estado en todas las tabs
@@ -270,6 +279,7 @@ Resultado: Todas las tabs muestran login
 ```
 
 ### Caso: API call falla con 401
+
 ```
 Trigger: HTTP interceptor
 Acción: Intentar refresh token, si falla -> logout
@@ -279,6 +289,7 @@ Resultado: Request se reintenta o usuario va a login
 ## 📊 Métricas y Monitoreo
 
 ### Eventos a Trackear
+
 - `auth_logout_success`
 - `auth_logout_failed_but_cleaned`
 - `auth_session_expired_detected`
@@ -289,6 +300,7 @@ Resultado: Request se reintenta o usuario va a login
 - `auth_network_error_recovered`
 
 ### Logs Importantes
+
 - Razón de cada auto-logout
 - Errores de sincronización
 - Fallos de validación
@@ -297,31 +309,37 @@ Resultado: Request se reintenta o usuario va a login
 ## 🚀 Plan de Implementación
 
 ### Fase 1: Logout Defensivo
+
 - Modificar `createSignOut()` para nunca fallar
 - Implementar `forceLocalCleanup()`
 - Testing de casos edge de logout
 
 ### Fase 2: Validación Robusta
+
 - Mejorar `AuthGuard` con validación real
 - Implementar `validateSession()`
 - Sincronización bidireccional
 
 ### Fase 3: Detección de Suspensión
+
 - Implementar `SuspensionDetector`
 - Manejar `visibilitychange` events
 - Auto-logout por inactividad
 
 ### Fase 4: Soporte PWA
+
 - Implementar `PWAManager`
 - Persistencia mejorada
 - Validación específica PWA
 
 ### Fase 5: Sincronización Multi-Tab
+
 - Listeners de localStorage
 - Sincronización automática
 - Testing cross-tab
 
 ### Fase 6: Recuperación de Errores
+
 - HTTP interceptors
 - Retry logic
 - Fallbacks offline

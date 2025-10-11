@@ -55,7 +55,7 @@ export const clearSupabaseLocalStorage = () => {
   // Use getAllKeys method from our mock if available
   const getAllKeys = (localStorage as any).getAllKeys;
   const keys = getAllKeys ? getAllKeys() : Object.keys(localStorage);
-  
+
   const supabaseKeys = keys.filter(
     (key: string) => key.startsWith('sb-') || key.includes('supabase')
   );
