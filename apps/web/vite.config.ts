@@ -50,18 +50,22 @@ export default defineConfig({
         theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
-        start_url: '/',
+        orientation: 'portrait-primary',
+        start_url: '/?pwa=true',
         scope: '/',
+        categories: ['finance', 'productivity'],
         icons: [
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any maskable',
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any maskable',
           },
         ],
       },

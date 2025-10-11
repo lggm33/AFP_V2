@@ -4,7 +4,7 @@ import { supabase } from '@/config/supabase';
 import { Mail, Lock, User } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { useAuthErrors } from '@/hooks/useAuthErrors';
-import { AuthLayout } from './shared/AuthLayout';
+import { PWAAuthLayout } from './shared/PWAAuthLayout';
 import { AlertMessage } from './shared/AlertMessage';
 import { AuthFormInput } from './shared/AuthFormInput';
 import { FormDivider } from './shared/FormDivider';
@@ -131,7 +131,7 @@ export function SignUpPage() {
   );
 
   return (
-    <AuthLayout
+    <PWAAuthLayout
       title='Comienza gratis hoy'
       subtitle={subtitle}
       footer='Al crear una cuenta, aceptas nuestros Términos de Servicio y Política de Privacidad'
@@ -231,6 +231,6 @@ export function SignUpPage() {
           Iniciar sesión
         </Link>
       </div>
-    </AuthLayout>
+    </PWAAuthLayout>
   );
 }

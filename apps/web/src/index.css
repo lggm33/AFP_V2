@@ -65,3 +65,36 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
 }
+
+/* PWA Safe Area Support */
+@supports (padding: max(0px)) {
+  .pt-safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .pb-safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .h-safe-top {
+    height: env(safe-area-inset-top);
+  }
+  
+  .h-safe-bottom {
+    height: env(safe-area-inset-bottom);
+  }
+}
+
+/* PWA Specific Styles */
+@media (display-mode: standalone) {
+  body {
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior: none;
+  }
+  
+  /* Hide scrollbars in PWA mode for cleaner look */
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}

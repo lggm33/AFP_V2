@@ -4,7 +4,7 @@ import { supabase } from '@/config/supabase';
 import { Mail, Lock } from 'lucide-react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { useAuthErrors } from '@/hooks/useAuthErrors';
-import { AuthLayout } from './shared/AuthLayout';
+import { PWAAuthLayout } from './shared/PWAAuthLayout';
 import { AlertMessage } from './shared/AlertMessage';
 import { AuthFormInput } from './shared/AuthFormInput';
 import { FormDivider } from './shared/FormDivider';
@@ -90,7 +90,7 @@ export function SignInPage() {
   );
 
   return (
-    <AuthLayout
+    <PWAAuthLayout
       title='Bienvenido de vuelta'
       subtitle={subtitle}
       footer='Al iniciar sesión, aceptas nuestros Términos de Servicio y Política de Privacidad'
@@ -169,6 +169,6 @@ export function SignInPage() {
           Crear nueva cuenta
         </Link>
       </div>
-    </AuthLayout>
+    </PWAAuthLayout>
   );
 }
