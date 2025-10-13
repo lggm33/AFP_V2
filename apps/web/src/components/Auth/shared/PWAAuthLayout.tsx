@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, ArrowLeft } from 'lucide-react';
-import { usePWAManager } from '@/hooks/usePWAManager';
+import { useAuth } from '@/auth';
 
 interface PWAAuthLayoutProps {
   title: string;
@@ -18,7 +18,10 @@ export function PWAAuthLayout({
   footer,
   showBackButton = true,
 }: PWAAuthLayoutProps) {
-  const { isPWA } = usePWAManager();
+  const { authManager } = useAuth();
+
+  // Get PWA state from AuthManager's PWACoordinator
+  const isPWA = authManager?.pwaCoordinator?.isPWA ?? false;
 
   const containerClasses = `min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50 flex flex-col justify-center ${
     isPWA ? 'pt-safe-top pb-safe-bottom' : 'py-12'

@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 // Dashboard Layout Component
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/stores/authStore';
+import { useAuth } from '@/auth';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 

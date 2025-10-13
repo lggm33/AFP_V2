@@ -1,7 +1,7 @@
 // PWA Persistence Hook - Enhanced offline data management for PWA
 import { useCallback } from 'react';
 import { usePWAStorage } from './usePWAStorage';
-import { useLogger } from './useLogger';
+import { createLogger } from './useLogger';
 
 interface PWAPersistenceOptions {
   storagePrefix?: string;
@@ -52,7 +52,7 @@ export function usePWAPersistence(
     maxCacheAgeMinutes,
     enableCompression,
   } = storage;
-  const logger = useLogger({ prefix: 'PWAPersistence' });
+  const logger = createLogger('PWAPersistence', false);
   // Store data with PWA optimizations
   const storeData = useCallback(
     async <T>(key: string, data: T): Promise<boolean> => {

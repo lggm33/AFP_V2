@@ -1,12 +1,6 @@
-// Centralized Logging Hook
-import { useCallback } from 'react';
+// Centralized Logging Utility
 
 type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
-
-interface LoggerOptions {
-  prefix?: string;
-  enabled?: boolean;
-}
 
 interface Logger {
   log: (message: string, data?: unknown) => void;
@@ -23,119 +17,29 @@ interface Logger {
 const isLoggingEnabled = import.meta.env.VITE_ENABLE_DEBUG_LOGGING === 'true';
 
 /**
- * Custom logging hook that respects VITE_ENABLE_DEBUG_LOGGING environment variable
+ * Centralized logger that respects VITE_ENABLE_DEBUG_LOGGING environment variable
+ * Can be used in React components, classes, and utility functions
  *
- * @param options - Configuration options for the logger
+ * @param prefix - Optional prefix for log messages
+ * @param enabled - Override logging enabled state (defaults to env variable)
  * @returns Logger object with various logging methods
  *
  * @example
  * ```typescript
- * const logger = useLogger({ prefix: 'AuthStore' });
+ * // In React components
+ * const logger = createLogger('AuthStore');
  * logger.log('User signed in', { userId: user.id });
+ *
+ * // In classes/utilities
+ * const logger = createLogger('Utils');
  * logger.warn('Session about to expire');
  * logger.error('Login failed', error);
  * ```
  */
-export function useLogger(options: LoggerOptions = {}): Logger {
-  const { prefix = '', enabled = isLoggingEnabled } = options;
-
-  const createLogFunction = useCallback(
-    (level: LogLevel) => (message: string, data?: unknown) => {
-      if (!enabled) return;
-
-      const formattedPrefix = prefix ? `[${prefix}]` : '';
-      const fullMessage = `${formattedPrefix} ${message}`;
-
-      // Use appropriate console method
-      switch (level) {
-        case 'log':
-          // eslint-disable-next-line no-console
-          console.log(fullMessage, data);
-          break;
-        case 'info':
-          // eslint-disable-next-line no-console
-          console.info(fullMessage, data);
-          break;
-        case 'warn':
-          // eslint-disable-next-line no-console
-          console.warn(fullMessage, data);
-          break;
-        case 'error':
-          // eslint-disable-next-line no-console
-          console.error(fullMessage, data);
-          break;
-        case 'debug':
-          // eslint-disable-next-line no-console
-          console.debug(fullMessage, data);
-          break;
-      }
-    },
-    [enabled, prefix]
-  );
-
-  const group = useCallback(
-    (label: string) => {
-      if (!enabled) return;
-      const formattedLabel = prefix ? `[${prefix}] ${label}` : label;
-      // eslint-disable-next-line no-console
-      console.group(formattedLabel);
-    },
-    [enabled, prefix]
-  );
-
-  const groupEnd = useCallback(() => {
-    if (!enabled) return;
-    // eslint-disable-next-line no-console
-    console.groupEnd();
-  }, [enabled]);
-
-  const time = useCallback(
-    (label: string) => {
-      if (!enabled) return;
-      const formattedLabel = prefix ? `[${prefix}] ${label}` : label;
-      // eslint-disable-next-line no-console
-      console.time(formattedLabel);
-    },
-    [enabled, prefix]
-  );
-
-  const timeEnd = useCallback(
-    (label: string) => {
-      if (!enabled) return;
-      const formattedLabel = prefix ? `[${prefix}] ${label}` : label;
-      // eslint-disable-next-line no-console
-      console.timeEnd(formattedLabel);
-    },
-    [enabled, prefix]
-  );
-
-  return {
-    log: createLogFunction('log'),
-    info: createLogFunction('info'),
-    warn: createLogFunction('warn'),
-    error: createLogFunction('error'),
-    debug: createLogFunction('debug'),
-    group,
-    groupEnd,
-    time,
-    timeEnd,
-  };
-}
-
-/**
- * Static logger for use outside of React components
- *
- * @param prefix - Optional prefix for log messages
- * @returns Logger object
- *
- * @example
- * ```typescript
- * const logger = createLogger('Utils');
- * logger.log('Processing data', data);
- * ```
- */
-export function createLogger(prefix?: string): Logger {
-  const enabled = isLoggingEnabled;
+export function createLogger(
+  prefix?: string,
+  enabled = isLoggingEnabled
+): Logger {
   const formattedPrefix = prefix ? `[${prefix}]` : '';
 
   const createLogFunction =

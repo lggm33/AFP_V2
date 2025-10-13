@@ -11,7 +11,7 @@ import {
 } from './PaymentMethodsStates';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { usePaymentMethodHandlers } from '@/hooks/usePaymentMethodHandlers';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuth } from '@/auth';
 
 // =====================================================================================
 // COMPONENT
@@ -24,7 +24,7 @@ interface PaymentMethodsListProps {
 export function PaymentMethodsList({
   autoOpenForm = false,
 }: PaymentMethodsListProps) {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   // Only call usePaymentMethods if we have a user ID
   const shouldFetch = !!user?.id;
