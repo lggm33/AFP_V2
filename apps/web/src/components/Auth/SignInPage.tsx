@@ -164,7 +164,7 @@ export function SignInPage() {
       <div className='mt-6'>
         <Link
           to={`/signup${location.search}`}
-          className='w-full flex justify-center py-3 px-6 border-2 border-transparent rounded-xl shadow-sm text-base font-semibold text-orange-600 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300'
+          className='w-full flex justify-center py-3 px-6 border-2 border-transparent rounded-xl shadow-sm text-base font-semibold text-orange-600 bg-orange-50 dark:bg-orange-950 hover:bg-orange-100 dark:hover:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300'
         >
           Crear nueva cuenta
         </Link>

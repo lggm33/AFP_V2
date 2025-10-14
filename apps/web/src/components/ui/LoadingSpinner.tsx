@@ -24,12 +24,14 @@ export function LoadingSpinner({
     >
       <div
         className={cn(
-          'animate-spin rounded-full border-2 border-gray-300 border-t-blue-600',
+          'animate-spin rounded-full border-2 border-border border-t-orange-600',
           sizeClasses[size]
         )}
       />
       {message && (
-        <p className='mt-4 text-sm text-gray-600 font-medium'>{message}</p>
+        <p className='mt-4 text-sm text-muted-foreground font-medium'>
+          {message}
+        </p>
       )}
     </div>
   );

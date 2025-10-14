@@ -38,13 +38,13 @@ export function AuthFormInput({
     <div>
       <label
         htmlFor={id}
-        className='block text-sm font-medium text-gray-700 mb-2'
+        className='block text-sm font-medium text-foreground mb-2'
       >
         {label}
       </label>
       <div className='relative'>
         <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-          <Icon className='h-5 w-5 text-gray-400' />
+          <Icon className='h-5 w-5 text-muted-foreground' />
         </div>
         <input
           id={id}
@@ -54,7 +54,7 @@ export function AuthFormInput({
           required={required}
           value={value}
           onChange={e => onChange(e.target.value)}
-          className='block w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all'
+          className='block w-full pl-12 pr-12 py-3 border border-input rounded-xl text-foreground placeholder-muted-foreground bg-background focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all'
           placeholder={placeholder}
           disabled={disabled}
         />
@@ -62,7 +62,7 @@ export function AuthFormInput({
           <button
             type='button'
             onClick={() => setShowPassword(!showPassword)}
-            className='absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600'
+            className='absolute inset-y-0 right-0 pr-4 flex items-center text-muted-foreground hover:text-foreground'
             disabled={disabled}
           >
             {showPassword ? (

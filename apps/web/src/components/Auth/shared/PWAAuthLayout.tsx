@@ -23,7 +23,7 @@ export function PWAAuthLayout({
   // Get PWA state from AuthManager's PWACoordinator
   const isPWA = authManager?.pwaCoordinator?.isPWA ?? false;
 
-  const containerClasses = `min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50 flex flex-col justify-center ${
+  const containerClasses = `min-h-screen bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950 flex flex-col justify-center ${
     isPWA ? 'pt-safe-top pb-safe-bottom' : 'py-12'
   } sm:px-6 lg:px-8`;
 
@@ -31,11 +31,11 @@ export function PWAAuthLayout({
     isPWA ? 'px-4' : ''
   }`;
 
-  const titleClasses = `mt-8 text-center font-bold text-gray-900 ${
+  const titleClasses = `mt-8 text-center font-bold text-foreground ${
     isPWA ? 'text-3xl' : 'text-4xl'
   }`;
 
-  const subtitleClasses = `mt-3 text-center text-gray-600 ${
+  const subtitleClasses = `mt-3 text-center text-muted-foreground ${
     isPWA ? 'text-base' : 'text-lg'
   }`;
 
@@ -43,14 +43,14 @@ export function PWAAuthLayout({
     isPWA ? 'px-4' : ''
   }`;
 
-  const footerClasses = `mt-8 text-center text-xs text-gray-500 max-w-sm mx-auto ${
+  const footerClasses = `mt-8 text-center text-xs text-muted-foreground max-w-sm mx-auto ${
     isPWA ? 'px-4' : ''
   }`;
 
   const renderStatusBarSpacer = () => {
     if (!isPWA) return null;
     return (
-      <div className='h-safe-top bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50' />
+      <div className='h-safe-top bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950' />
     );
   };
 
@@ -70,7 +70,7 @@ export function PWAAuthLayout({
         <div className='mt-8 text-center'>
           <Link
             to='/'
-            className='text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors'
+            className='text-sm font-medium text-muted-foreground hover:text-orange-600 transition-colors'
           >
             ← Volver al inicio
           </Link>
@@ -82,7 +82,7 @@ export function PWAAuthLayout({
       <div className='mt-6 flex justify-center'>
         <Link
           to='/'
-          className='inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors rounded-lg hover:bg-white/50'
+          className='inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-orange-600 transition-colors rounded-lg hover:bg-card/50'
         >
           <ArrowLeft className='h-4 w-4 mr-2' />
           Inicio
@@ -99,7 +99,7 @@ export function PWAAuthLayout({
   const renderBottomSafeArea = () => {
     if (!isPWA) return null;
     return (
-      <div className='h-safe-bottom bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50' />
+      <div className='h-safe-bottom bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950' />
     );
   };
 
@@ -114,7 +114,7 @@ export function PWAAuthLayout({
       </div>
 
       <div className={contentClasses}>
-        <div className='bg-white/80 backdrop-blur-md py-10 px-6 shadow-2xl rounded-2xl sm:px-12 border border-gray-200/50'>
+        <div className='bg-card/80 backdrop-blur-md py-10 px-6 shadow-2xl rounded-2xl sm:px-12 border border-border'>
           {children}
         </div>
         {renderNavigation()}

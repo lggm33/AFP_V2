@@ -74,18 +74,20 @@ export function PaymentMethodsList({
     <div className='space-y-6'>
       {/* Primary Error Alert */}
       {primaryError && (
-        <div className='bg-red-50 border border-red-200 rounded-lg p-3'>
-          <p className='text-red-800 text-sm'>{primaryError}</p>
+        <div className='bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-3'>
+          <p className='text-red-800 dark:text-red-200 text-sm'>
+            {primaryError}
+          </p>
         </div>
       )}
 
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div className='text-center sm:text-left'>
-          <h2 className='text-2xl font-bold text-gray-900'>
+          <h2 className='text-2xl font-bold text-foreground'>
             Tus Métodos de Pago
           </h2>
-          <p className='text-gray-600 mt-1'>
+          <p className='text-muted-foreground mt-1'>
             {paymentMethods.length} métodos de pago
             {paymentMethods.length !== 1 ? 's' : ''} configurados
           </p>

@@ -59,16 +59,16 @@ export function ConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-md'>
         <DialogHeader>
-          <DialogTitle className='text-gray-900'>{title}</DialogTitle>
-          <DialogDescription className='text-gray-600'>
+          <DialogTitle className='text-foreground'>{title}</DialogTitle>
+          <DialogDescription className='text-muted-foreground'>
             {description}
           </DialogDescription>
         </DialogHeader>
 
         {/* Error Display */}
         {error && (
-          <div className='bg-red-50 border border-red-200 rounded-lg p-3'>
-            <p className='text-red-800 text-sm'>{error}</p>
+          <div className='bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-3'>
+            <p className='text-red-800 dark:text-red-200 text-sm'>{error}</p>
           </div>
         )}
 
@@ -77,7 +77,7 @@ export function ConfirmationModal({
             variant='outline'
             onClick={handleCancel}
             disabled={loading}
-            className='border-gray-300 text-gray-700 hover:bg-gray-50'
+            className='border-border text-foreground hover:bg-muted'
           >
             {cancelText}
           </Button>

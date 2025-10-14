@@ -4,6 +4,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/auth';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
+import { ThemeToggle } from '@/components/Theme';
+import {
+  BarChart3,
+  CreditCard,
+  ArrowUpDown,
+  Target,
+  Mail,
+  DollarSign,
+  type LucideIcon,
+} from 'lucide-react';
 
 // =====================================================================================
 // TYPES
@@ -16,7 +26,7 @@ interface DashboardLayoutProps {
 type NavigationSection = {
   id: string;
   name: string;
-  icon: string;
+  icon: LucideIcon;
   description: string;
   path: string;
 };
@@ -25,35 +35,35 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
   {
     id: 'overview',
     name: 'Resumen',
-    icon: '📊',
+    icon: BarChart3,
     description: 'Resumen del dashboard',
     path: '/dashboard/overview',
   },
   {
     id: 'payment-methods',
     name: 'Métodos de Pago',
-    icon: '💳',
+    icon: CreditCard,
     description: 'Gestiona tus cuentas y tarjetas',
     path: '/dashboard/payment-methods',
   },
   {
     id: 'transactions',
     name: 'Transacciones',
-    icon: '💸',
+    icon: ArrowUpDown,
     description: 'Ver todas las transacciones',
     path: '/dashboard/transactions',
   },
   {
     id: 'budgets',
     name: 'Presupuestos',
-    icon: '🎯',
+    icon: Target,
     description: 'Rastrea tus presupuestos',
     path: '/dashboard/budgets',
   },
   {
     id: 'email-accounts',
     name: 'Cuentas de Email',
-    icon: '📧',
+    icon: Mail,
     description: 'Cuentas de email conectadas',
     path: '/dashboard/email-accounts',
   },
@@ -65,14 +75,23 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Initialize sidebar state from localStorage or default to false
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+
   const [isMobile, setIsMobile] = useState(false);
 
   // Check if mobile on mount and resize
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth < 1024) {
+      const isMobileView = window.innerWidth < 1024;
+      setIsMobile(isMobileView);
+
+      // Only force collapse on mobile if not already set by user preference
+      if (isMobileView && !localStorage.getItem('sidebar-collapsed')) {
         setSidebarCollapsed(true);
       }
     };
@@ -81,6 +100,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Persist sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   const handleSignOut = async () => {
     try {
@@ -101,7 +125,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50 flex'>
+    <div className='min-h-screen bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950 flex'>
       {/* Mobile Overlay */}
       {isMobile && !sidebarCollapsed && (
         <div
@@ -126,16 +150,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         }`}
       >
         {/* Top Header Bar */}
-        <header className='bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 sticky top-0 z-10'>
+        <header className='bg-background/80 backdrop-blur-md shadow-sm border-b border-border sticky top-0 z-10'>
           <div className='px-6 py-4'>
             <div className='flex justify-between items-center'>
               <div className='flex items-center space-x-4'>
                 <button
                   onClick={toggleSidebar}
-                  className='p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 lg:hidden'
+                  className='p-2 rounded-lg hover:bg-muted transition-colors duration-200 lg:hidden'
                 >
                   <svg
-                    className='w-6 h-6 text-gray-600'
+                    className='w-6 h-6 text-muted-foreground'
                     fill='none'
                     stroke='currentColor'
                     viewBox='0 0 24 24'
@@ -148,13 +172,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     />
                   </svg>
                 </button>
-                <h1 className='text-xl font-semibold text-gray-900'>
+                <h1 className='text-xl font-semibold text-foreground'>
                   Dashboard
                 </h1>
               </div>
 
               <div className='flex items-center space-x-4'>
-                <div className='hidden md:flex items-center space-x-3 bg-gradient-to-r from-orange-50 to-orange-100 px-4 py-2 rounded-full'>
+                <ThemeToggle />
+                <div className='hidden md:flex items-center space-x-3 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 px-4 py-2 rounded-full'>
                   {user?.user_metadata?.avatar_url && (
                     <img
                       className='h-8 w-8 rounded-full ring-2 ring-orange-300'
@@ -162,7 +187,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       alt='Profile'
                     />
                   )}
-                  <span className='text-sm font-medium text-gray-700'>
+                  <span className='text-sm font-medium text-foreground'>
                     {user?.user_metadata?.full_name || user?.email}
                   </span>
                 </div>
@@ -205,7 +230,7 @@ export function Sidebar({
 
   return (
     <div
-      className={`fixed left-0 top-0 h-full bg-white shadow-xl border-r border-gray-200 transition-all duration-300 z-20 ${
+      className={`fixed left-0 top-0 h-full bg-card shadow-xl border-r border-border transition-all duration-300 z-20 ${
         isMobile
           ? collapsed
             ? '-translate-x-full w-64'
@@ -216,17 +241,17 @@ export function Sidebar({
       }`}
     >
       {/* Logo Section */}
-      <div className='p-4 border-b border-gray-200'>
+      <div className='p-4 border-b border-border'>
         <div className='flex items-center'>
           <div className='h-10 w-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0'>
-            <span className='text-white text-xl'>💰</span>
+            <DollarSign className='text-white w-6 h-6' strokeWidth={2} />
           </div>
           {(!collapsed || isMobile) && (
             <div className='ml-3'>
-              <h1 className='text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'>
+              <h1 className='text-lg font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent'>
                 AFP Finanzas
               </h1>
-              <p className='text-xs text-gray-500'>
+              <p className='text-xs text-muted-foreground'>
                 Asistente de Finanzas Personales
               </p>
             </div>
@@ -236,10 +261,10 @@ export function Sidebar({
         {/* Toggle Button */}
         <button
           onClick={onToggle}
-          className='absolute -right-3 top-6 bg-white border border-gray-200 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-200 hidden lg:block'
+          className='absolute -right-3 top-15 bg-card border border-border rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-200 hidden lg:block'
         >
           <svg
-            className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`}
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'
@@ -264,33 +289,63 @@ export function Sidebar({
               key={section.id}
               to={section.path}
               className={`
-                flex items-center px-3 py-3 rounded-lg transition-all duration-200 group
+                flex items-center transition-all duration-200 group relative
+                ${
+                  collapsed && !isMobile
+                    ? 'justify-center'
+                    : 'px-3 py-3 rounded-lg'
+                }
                 ${
                   active
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? collapsed && !isMobile
+                      ? ''
+                      : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+                    : collapsed && !isMobile
+                      ? ''
+                      : 'text-card-foreground hover:bg-muted hover:text-foreground'
                 }
               `}
             >
-              <span className='text-xl flex-shrink-0'>{section.icon}</span>
-              {(!collapsed || isMobile) && (
-                <div className='ml-3'>
-                  <span className='text-sm font-medium block'>
-                    {section.name}
-                  </span>
-                  <span
-                    className={`text-xs block ${
-                      active ? 'text-orange-100' : 'text-gray-500'
-                    }`}
-                  >
-                    {section.description}
-                  </span>
+              {collapsed && !isMobile ? (
+                // Collapsed state - logo-like design
+                <div
+                  className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 ${
+                    active
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600'
+                      : 'bg-muted hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 hover:text-white'
+                  }`}
+                >
+                  <section.icon
+                    className={`w-6 h-6 ${active ? 'text-white' : ''}`}
+                    strokeWidth={2}
+                  />
                 </div>
+              ) : (
+                // Expanded state - original design
+                <>
+                  <div className='w-6 h-6 flex items-center justify-center flex-shrink-0'>
+                    <section.icon className='w-5 h-5' strokeWidth={1.5} />
+                  </div>
+                  {(!collapsed || isMobile) && (
+                    <div className='ml-3'>
+                      <span className='text-sm font-medium block'>
+                        {section.name}
+                      </span>
+                      <span
+                        className={`text-xs block ${
+                          active ? 'text-orange-100' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {section.description}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Tooltip for collapsed state */}
               {collapsed && !isMobile && (
-                <div className='absolute left-16 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50'>
+                <div className='absolute left-16 bg-popover text-popover-foreground border px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50'>
                   {section.name}
                 </div>
               )}
@@ -300,7 +355,7 @@ export function Sidebar({
       </nav>
 
       {/* User Profile Section */}
-      <div className='border-t border-gray-200 p-4'>
+      <div className='border-t border-border p-4'>
         {!collapsed || isMobile ? (
           <div className='flex items-center space-x-3 mb-4'>
             {user?.user_metadata?.avatar_url && (
@@ -311,10 +366,10 @@ export function Sidebar({
               />
             )}
             <div className='flex-1 min-w-0'>
-              <p className='text-sm font-medium text-gray-900 truncate'>
+              <p className='text-sm font-medium text-card-foreground truncate'>
                 {user?.user_metadata?.full_name || user?.email}
               </p>
-              <p className='text-xs text-gray-500'>Usuario activo</p>
+              <p className='text-xs text-muted-foreground'>Usuario activo</p>
             </div>
           </div>
         ) : (
@@ -333,7 +388,7 @@ export function Sidebar({
           onClick={onSignOut}
           className={`
             w-full flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-            bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 hover:shadow-md
+            bg-gradient-to-r from-muted to-muted/80 hover:from-muted/80 hover:to-muted text-card-foreground hover:shadow-md
             ${collapsed ? 'px-2' : ''}
           `}
         >

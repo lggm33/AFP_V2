@@ -13,7 +13,7 @@ export function GoogleSignInButton({
     <button
       onClick={onClick}
       disabled={loading || disabled}
-      className='w-full flex items-center justify-center px-6 py-4 border-2 border-gray-300 rounded-xl shadow-sm text-base font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+      className='w-full flex items-center justify-center px-6 py-4 border-2 border-border rounded-xl shadow-sm text-base font-semibold text-card-foreground bg-card hover:bg-muted hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
     >
       {loading ? (
         <>

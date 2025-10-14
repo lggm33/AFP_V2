@@ -18,13 +18,15 @@ export function LandingPage() {
 
   if (isOAuthCallback && (loading || !isInitialized)) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50'>
+      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto'></div>
-          <p className='mt-4 text-gray-600 font-medium'>
+          <p className='mt-4 text-foreground font-medium'>
             Completando autenticación...
           </p>
-          <p className='mt-2 text-sm text-gray-500'>Configurando tu sesión</p>
+          <p className='mt-2 text-sm text-muted-foreground'>
+            Configurando tu sesión
+          </p>
         </div>
       </div>
     );
@@ -32,7 +34,7 @@ export function LandingPage() {
 
   return (
     <>
-      <div className='min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50'>
+      <div className='min-h-screen bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950'>
         <Header />
 
         <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -42,10 +44,10 @@ export function LandingPage() {
 
           {/* CTA Section */}
           <div className='text-center py-16'>
-            <h2 className='text-3xl font-bold text-gray-900 mb-4'>
+            <h2 className='text-3xl font-bold text-foreground mb-4'>
               ¿Listo para transformar tus finanzas?
             </h2>
-            <p className='text-xl text-gray-600 mb-8 max-w-2xl mx-auto'>
+            <p className='text-xl text-muted-foreground mb-8 max-w-2xl mx-auto'>
               Únete a miles de usuarios que ya están tomando control de su
               futuro financiero
             </p>

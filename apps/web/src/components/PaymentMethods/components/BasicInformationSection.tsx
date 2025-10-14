@@ -161,7 +161,7 @@ export function BasicInformationSection({
             <SelectItem value='EUR'>EUR (Euro)</SelectItem>
           </SelectContent>
         </Select>
-        <p className='text-xs text-gray-500'>
+        <p className='text-xs text-muted-foreground'>
           Esta será la moneda principal para reportes y cálculos
         </p>
       </div>

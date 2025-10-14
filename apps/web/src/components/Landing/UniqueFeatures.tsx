@@ -48,10 +48,10 @@ export function UniqueFeatures() {
   ];
 
   return (
-    <div className='bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-12 text-white mb-20'>
+    <div className='bg-gradient-to-r from-card to-muted rounded-3xl p-12 text-card-foreground border mb-20'>
       <div className='text-center mb-12'>
         <h2 className='text-3xl font-bold mb-4'>Lo que nos hace únicos</h2>
-        <p className='text-gray-300 text-lg'>
+        <p className='text-muted-foreground text-lg'>
           Características exclusivas que no encontrarás en ninguna otra app
         </p>
       </div>
@@ -64,7 +64,9 @@ export function UniqueFeatures() {
             </div>
             <div>
               <h4 className='font-semibold mb-2'>{feature.title}</h4>
-              <p className='text-gray-300 text-sm'>{feature.description}</p>
+              <p className='text-muted-foreground text-sm'>
+                {feature.description}
+              </p>
             </div>
           </div>
         ))}

@@ -40,24 +40,24 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-orange-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-orange-50 dark:to-orange-950 py-12 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-md w-full space-y-8'>
         <div>
           <div className='mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl'>
             <TrendingUp className='h-8 w-8 text-white' />
           </div>
-          <h2 className='mt-8 text-center text-4xl font-bold text-gray-900'>
+          <h2 className='mt-8 text-center text-4xl font-bold text-foreground'>
             Bienvenido a AFP Finance
           </h2>
-          <p className='mt-3 text-center text-lg text-gray-600'>
+          <p className='mt-3 text-center text-lg text-muted-foreground'>
             Gestión inteligente de finanzas personales
           </p>
         </div>
 
         <div className='mt-8 space-y-6'>
-          <div className='bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-gray-200/50'>
+          <div className='bg-card/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-border'>
             {error && (
-              <div className='mb-6 rounded-xl bg-red-50 border border-red-200 p-4'>
+              <div className='mb-6 rounded-xl bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-4'>
                 <div className='flex'>
                   <div className='flex-shrink-0'>
                     <svg
@@ -73,7 +73,9 @@ export function LoginPage({ onSuccess }: LoginPageProps) {
                     </svg>
                   </div>
                   <div className='ml-3'>
-                    <p className='text-sm font-medium text-red-800'>{error}</p>
+                    <p className='text-sm font-medium text-red-800 dark:text-red-200'>
+                      {error}
+                    </p>
                   </div>
                 </div>
               </div>

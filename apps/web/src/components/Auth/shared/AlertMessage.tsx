@@ -7,10 +7,18 @@ interface AlertMessageProps {
 
 export function AlertMessage({ type, message }: AlertMessageProps) {
   const isError = type === 'error';
-  const bgColor = isError ? 'bg-red-50' : 'bg-green-50';
-  const borderColor = isError ? 'border-red-200' : 'border-green-200';
-  const textColor = isError ? 'text-red-800' : 'text-green-800';
-  const iconColor = isError ? 'text-red-400' : 'text-green-400';
+  const bgColor = isError
+    ? 'bg-red-50 dark:bg-red-950'
+    : 'bg-green-50 dark:bg-green-950';
+  const borderColor = isError
+    ? 'border-red-200 dark:border-red-800'
+    : 'border-green-200 dark:border-green-800';
+  const textColor = isError
+    ? 'text-red-800 dark:text-red-200'
+    : 'text-green-800 dark:text-green-200';
+  const iconColor = isError
+    ? 'text-red-400 dark:text-red-500'
+    : 'text-green-400 dark:text-green-500';
 
   return (
     <div className={`mb-6 rounded-xl ${bgColor} border ${borderColor} p-4`}>
