@@ -392,12 +392,7 @@ export function isDuplicatePaymentMethod(
 /**
  * Format Zod errors into user-friendly message
  */
-export function getValidationErrorMessage(error: z.ZodError): string {
-  const errors = error.issues;
-  if (errors.length === 0) return 'Error de validación';
-  if (errors.length === 1) return errors[0].message;
-  return `${errors.length} errores de validación: ${errors.map(e => e.message).join(', ')}`;
-}
+export { getValidationErrorMessage } from './utils';
 
 /**
  * Get all validation errors as array

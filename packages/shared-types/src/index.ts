@@ -9,6 +9,13 @@ export * from './database';
 // API TYPES (Organized by domain)
 // =====================================================================================
 export * from './api';
+export type {
+  TransactionFilters,
+  TransactionCreateInput,
+  TransactionUpdateInput,
+  PaginatedTransactionsResponse,
+  Transaction,
+} from './api';
 
 // =====================================================================================
 // CONSTANTS AND HELPERS

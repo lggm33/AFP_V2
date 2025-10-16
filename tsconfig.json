@@ -50,5 +50,5 @@
     "**/*.spec.ts",
     "**/*.spec.tsx"
   ],
-  "references": [{ "path": "./apps/web" }, { "path": "./apps/email-service" }, { "path": "./packages/supabase" }]
+  "references": [{ "path": "./apps/web" }, { "path": "./apps/email-service" }, { "path": "./packages/shared-types" }]
 }

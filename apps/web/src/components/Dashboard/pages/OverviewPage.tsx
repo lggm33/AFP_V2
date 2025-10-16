@@ -1,12 +1,67 @@
 // Overview Page - Dashboard Home
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../DashboardLayout';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../auth';
+import { usePaymentMethods } from '../../../hooks/usePaymentMethods';
+import { transactionService } from '../../../services/transactionService';
+import { TransactionCard } from '../../Transactions/TransactionCard';
+import { AmountDisplay } from '../../ui/AmountDisplay';
 
 export function OverviewPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [transactionSummary, setTransactionSummary] = useState<{
+    totalIncome: number;
+    totalExpenses: number;
+    netAmount: number;
+    transactionCount: number;
+  } | null>(null);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Get payment methods
+  const { paymentMethods, loading: paymentMethodsLoading } = usePaymentMethods({
+    userId: user?.id || '',
+    autoRefetch: !!user?.id,
+  });
+
+  // Fetch transaction data
+  useEffect(() => {
+    async function fetchTransactionData() {
+      if (!user?.id) return;
+
+      try {
+        setLoading(true);
+
+        // Fetch summary and recent transactions in parallel
+        const [summary, recent] = await Promise.all([
+          transactionService.getTransactionSummary(user.id),
+          transactionService.getRecentTransactions(user.id, 3),
+        ]);
+
+        setTransactionSummary(summary);
+        setRecentTransactions(recent);
+      } catch (error) {
+        console.error('Error fetching transaction data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTransactionData();
+  }, [user?.id]);
 
   const handleAddPaymentMethod = () => {
     navigate('/dashboard/payment-methods?openForm=true');
+  };
+
+  const handleAddTransaction = () => {
+    navigate('/dashboard/transactions');
+  };
+
+  const handleViewAllTransactions = () => {
+    navigate('/dashboard/transactions');
   };
 
   return (
@@ -33,7 +88,9 @@ export function OverviewPage() {
               </div>
             </div>
             <div className='mt-4'>
-              <p className='text-2xl font-bold text-foreground'>0</p>
+              <p className='text-2xl font-bold text-foreground'>
+                {loading ? '...' : transactionSummary?.transactionCount || 0}
+              </p>
               <p className='text-xs text-muted-foreground'>
                 Total de transacciones
               </p>
@@ -57,10 +114,19 @@ export function OverviewPage() {
               </div>
             </div>
             <div className='mt-4'>
-              <p className='text-2xl font-bold text-foreground'>$0.00</p>
-              <p className='text-xs text-muted-foreground'>
-                Total de presupuesto
-              </p>
+              <div className='text-2xl font-bold text-foreground'>
+                {loading ? (
+                  '...'
+                ) : (
+                  <AmountDisplay
+                    amount={transactionSummary?.netAmount || 0}
+                    currency='USD'
+                    showSign={true}
+                    size='lg'
+                  />
+                )}
+              </div>
+              <p className='text-xs text-muted-foreground'>Balance neto</p>
             </div>
           </div>
 
@@ -81,7 +147,9 @@ export function OverviewPage() {
               </div>
             </div>
             <div className='mt-4'>
-              <p className='text-2xl font-bold text-foreground'>0</p>
+              <p className='text-2xl font-bold text-foreground'>
+                {paymentMethodsLoading ? '...' : paymentMethods.length}
+              </p>
               <p className='text-xs text-muted-foreground'>Métodos de pago</p>
             </div>
           </div>
@@ -112,7 +180,10 @@ export function OverviewPage() {
                 Conectar email
               </p>
             </button>
-            <button className='p-4 rounded-xl border-2 border-dashed border-border hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950 transition-all duration-200 group'>
+            <button
+              onClick={handleAddTransaction}
+              className='p-4 rounded-xl border-2 border-dashed border-border hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950 transition-all duration-200 group'
+            >
               <div className='text-3xl mb-2 group-hover:scale-110 transition-transform'>
                 💸
               </div>
@@ -130,6 +201,33 @@ export function OverviewPage() {
             </button>
           </div>
         </div>
+
+        {/* Recent Transactions */}
+        {recentTransactions.length > 0 && (
+          <div className='bg-card/80 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-border'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-xl font-bold text-foreground'>
+                Transacciones recientes
+              </h3>
+              <button
+                onClick={handleViewAllTransactions}
+                className='text-sm text-blue-600 hover:text-blue-700 transition-colors'
+              >
+                Ver todas →
+              </button>
+            </div>
+            <div className='space-y-4'>
+              {recentTransactions.map(transaction => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  compact={true}
+                  showActions={false}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Getting Started */}
         <div className='bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 rounded-2xl p-6 border border-blue-200 dark:border-blue-800'>

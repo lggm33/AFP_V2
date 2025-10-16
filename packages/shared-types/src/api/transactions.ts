@@ -22,6 +22,60 @@ export type TransactionSubtype =
   Database['public']['Enums']['transaction_subtype'];
 
 // =====================================================================================
+// CREATE/UPDATE INPUT TYPES
+// =====================================================================================
+
+export interface TransactionCreateInput {
+  amount: number;
+  currency?: string;
+  description: string;
+  transaction_date: string; // ISO date string
+  transaction_type: TransactionType;
+  transaction_subtype?: TransactionSubtype;
+  status?: TransactionStatus;
+
+  // Relations
+  payment_method_id?: string;
+  category_id?: string;
+
+  // Optional fields
+  merchant_name?: string;
+  merchant_location?: string;
+  is_recurring?: boolean;
+
+  // Installments
+  installment_number?: number;
+  installment_total?: number;
+  parent_transaction_id?: string;
+}
+
+export interface TransactionUpdateInput {
+  amount?: number;
+  currency?: string;
+  description?: string;
+  transaction_date?: string;
+  transaction_type?: TransactionType;
+  transaction_subtype?: TransactionSubtype;
+  status?: TransactionStatus;
+
+  // Relations
+  payment_method_id?: string;
+  category_id?: string;
+
+  // Optional fields
+  merchant_name?: string;
+  merchant_location?: string;
+  is_recurring?: boolean;
+  is_verified?: boolean;
+  requires_review?: boolean;
+
+  // Installments
+  installment_number?: number;
+  installment_total?: number;
+  parent_transaction_id?: string;
+}
+
+// =====================================================================================
 // TRANSACTION OPERATIONS
 // =====================================================================================
 
@@ -29,14 +83,20 @@ export interface TransactionOperations {
   getUserTransactions: (
     userId: string,
     filters?: TransactionFilters
-  ) => Promise<TransactionWithRelations[]>;
-  getTransaction: (transactionId: string) => Promise<Transaction | null>;
-  createTransaction: (transaction: TransactionInsert) => Promise<Transaction>;
+  ) => Promise<PaginatedTransactionsResponse>;
+  getTransaction: (
+    transactionId: string
+  ) => Promise<TransactionWithRelations | null>;
+  createTransaction: (
+    userId: string,
+    transaction: TransactionCreateInput
+  ) => Promise<TransactionWithRelations>;
   updateTransaction: (
     transactionId: string,
-    updates: TransactionUpdate
-  ) => Promise<Transaction>;
-  deleteTransaction: (transactionId: string) => Promise<void>;
+    userId: string,
+    updates: TransactionUpdateInput
+  ) => Promise<TransactionWithRelations>;
+  deleteTransaction: (transactionId: string, userId: string) => Promise<void>;
 }
 
 // =====================================================================================
@@ -54,6 +114,14 @@ export interface TransactionFilters extends DateRangeFilter, SearchFilter {
   isVerified?: boolean;
   isRecurring?: boolean;
   requiresReview?: boolean;
+
+  // Pagination
+  page?: number;
+  limit?: number;
+
+  // Sorting
+  sortBy?: 'transaction_date' | 'amount' | 'description' | 'created_at';
+  sortOrder?: 'asc' | 'desc';
 }
 
 // =====================================================================================
@@ -71,7 +139,25 @@ export interface TransactionWithRelations extends Transaction {
     name: string;
     institution_name: string;
     last_four_digits?: string;
+    account_type: string;
+    color?: string;
   } | null;
+}
+
+// =====================================================================================
+// PAGINATED RESPONSE
+// =====================================================================================
+
+export interface PaginatedTransactionsResponse {
+  data: TransactionWithRelations[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 // =====================================================================================
