@@ -220,3 +220,36 @@ export function validateCurrency(currency: string): {
 
   return { valid: true };
 }
+
+// =====================================================================================
+// FORM OPTIONS HELPERS
+// =====================================================================================
+
+/**
+ * Get currency options for form selects (primary currencies only)
+ */
+export function getPrimaryCurrencyOptions(): Array<{
+  value: SupportedCurrency;
+  label: string;
+}> {
+  // Return only the most common currencies for forms
+  const primaryCurrencies: SupportedCurrency[] = ['CRC', 'USD', 'EUR'];
+
+  return primaryCurrencies.map(code => ({
+    value: code,
+    label: `${code} (${CURRENCY_METADATA[code].name})`,
+  }));
+}
+
+/**
+ * Get all currency options for form selects
+ */
+export function getAllCurrencyOptions(): Array<{
+  value: SupportedCurrency;
+  label: string;
+}> {
+  return SUPPORTED_CURRENCIES.map(code => ({
+    value: code,
+    label: `${code} (${CURRENCY_METADATA[code].name})`,
+  }));
+}

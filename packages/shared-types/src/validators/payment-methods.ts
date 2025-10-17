@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   PAYMENT_METHOD_VALIDATION,
   requiresAccountIdentifier,
+  requiresCardDetails,
 } from '../constants/payment-methods';
 import { SUPPORTED_CURRENCIES } from '../constants/currencies';
 
@@ -104,172 +105,202 @@ export const creditDetailsSchema = z
 /**
  * Payment method creation schema
  */
-export const paymentMethodCreateSchema = z
-  .object({
-    // Required fields
-    name: z
-      .string({ message: 'Name is required' })
-      .min(
-        PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH,
-        `Nombre debe ser al menos ${PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH} carácter`
-      )
-      .max(
-        PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH,
-        `Nombre debe ser menos de ${PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH} caracteres`
-      )
-      .trim(),
+export const paymentMethodCreateSchema = z.preprocess(
+  data => {
+    // Transform data BEFORE validation to auto-fill fields based on account type
+    const typed = data as Record<string, unknown>;
 
-    account_type: z.enum(
-      [
-        'credit_card',
-        'debit_card',
-        'checking_account',
-        'savings_account',
-        'cash',
-        'digital_wallet',
-        'investment_account',
-        'other',
-      ],
-      { message: 'Tipo de cuenta es requerido' }
-    ),
+    if (typed.account_type && typeof typed.account_type === 'string') {
+      const accountType = typed.account_type as
+        | 'credit_card'
+        | 'debit_card'
+        | 'checking_account'
+        | 'savings_account'
+        | 'cash'
+        | 'digital_wallet'
+        | 'investment_account'
+        | 'other';
 
-    institution_name: z
-      .string({ message: 'Nombre de la institución es requerido' })
-      .min(
-        PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH,
-        `Nombre de la institución debe ser al menos ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH} carácter`
-      )
-      .max(
-        PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH,
-        `Nombre de la institución debe ser menos de ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH} caracteres`
-      )
-      .trim(),
+      // Auto-fill last_four_digits for account types that don't require it
+      if (!requiresAccountIdentifier(accountType) && !typed.last_four_digits) {
+        typed.last_four_digits = '0000';
+      }
 
-    // Optional fields
-    primary_currency: z
-      .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]], {
-        message: 'Moneda no soportada',
-      })
-      .optional()
-      .default('USD'),
+      // Auto-fill card_brand for account types that don't require card details
+      if (!requiresCardDetails(accountType) && !typed.card_brand) {
+        typed.card_brand = 'other';
+      }
+    }
 
-    color: z
-      .string()
-      .regex(/^#[0-9A-F]{6}$/i, 'Formato de color inválido')
-      .optional(),
+    return typed;
+  },
+  z
+    .object({
+      // Required fields
+      name: z
+        .string({ message: 'Name is required' })
+        .min(
+          PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH,
+          `Nombre debe ser al menos ${PAYMENT_METHOD_VALIDATION.NAME_MIN_LENGTH} carácter`
+        )
+        .max(
+          PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH,
+          `Nombre debe ser menos de ${PAYMENT_METHOD_VALIDATION.NAME_MAX_LENGTH} caracteres`
+        )
+        .trim(),
 
-    icon: z.string().optional(),
+      account_type: z.enum(
+        [
+          'credit_card',
+          'debit_card',
+          'checking_account',
+          'savings_account',
+          'cash',
+          'digital_wallet',
+          'investment_account',
+          'other',
+        ],
+        { message: 'Tipo de cuenta es requerido' }
+      ),
 
-    is_primary: z.boolean().optional().default(false),
+      institution_name: z
+        .string({ message: 'Nombre de la institución es requerido' })
+        .min(
+          PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH,
+          `Nombre de la institución debe ser al menos ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH} carácter`
+        )
+        .max(
+          PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH,
+          `Nombre de la institución debe ser menos de ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH} caracteres`
+        )
+        .trim(),
 
-    exclude_from_totals: z.boolean().optional().default(false),
-
-    // Card specific fields
-    last_four_digits: z
-      .string({ message: 'Últimos 4 dígitos son requeridos' })
-      .regex(/^\d{4}$/, 'Últimos 4 dígitos deben ser exactamente 4 números'),
-
-    card_brand: z.enum(['visa', 'mastercard', 'amex', 'discover', 'other'], {
-      message: 'Marca de tarjeta es requerida',
-    }),
-
-    // Balance fields (legacy - for backward compatibility)
-    current_balance: z.coerce.number().optional(),
-
-    available_balance: z.coerce
-      .number()
-      .nonnegative('Saldo disponible no puede ser negativo')
-      .optional(),
-
-    // Initial balance for primary currency
-    initial_balance: z.coerce.number().optional(),
-
-    // Multi-currency balances
-    currency_balances: z
-      .array(
-        z.object({
-          currency: z.enum(
-            SUPPORTED_CURRENCIES as unknown as [string, ...string[]]
-          ),
-          current_balance: z.coerce.number(),
-          available_balance: z.coerce.number().optional(),
+      // Optional fields
+      primary_currency: z
+        .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]], {
+          message: 'Moneda no soportada',
         })
-      )
-      .optional(),
+        .optional()
+        .default('USD'),
 
-    // Account number hash
-    account_number_hash: z.string().optional(),
+      color: z
+        .string()
+        .regex(/^#[0-9A-F]{6}$/i, 'Formato de color inválido')
+        .optional(),
 
-    // Credit card details
-    credit_details: creditDetailsSchema.optional(),
+      icon: z.string().optional(),
 
-    // Metadata
-    metadata: z.record(z.string(), z.any()).optional(),
-  })
-  .refine(
-    data => {
-      // Check if last_four_digits are required and valid
-      if (requiresAccountIdentifier(data.account_type)) {
-        const hasValidDigits =
-          data.last_four_digits &&
-          typeof data.last_four_digits === 'string' &&
-          data.last_four_digits.length === 4 &&
-          /^\d{4}$/.test(data.last_four_digits);
-        return hasValidDigits;
-      }
-      return true;
-    },
-    {
-      message: 'Últimos 4 dígitos son requeridos para este tipo de cuenta',
-      path: ['last_four_digits'],
-    }
-  )
-  .refine(
-    data => {
-      // Credit/Debit cards require card_brand
-      if (
-        data.account_type === 'credit_card' ||
-        data.account_type === 'debit_card'
-      ) {
-        const hasValidBrand = !!data.card_brand;
+      is_primary: z.boolean().optional().default(false),
 
-        return hasValidBrand;
+      exclude_from_totals: z.boolean().optional().default(false),
+
+      // Card specific fields (auto-filled by preprocess for non-applicable account types)
+      last_four_digits: z
+        .string({ message: 'Últimos 4 dígitos son requeridos' })
+        .regex(/^\d{4}$/, 'Últimos 4 dígitos deben ser exactamente 4 números'),
+
+      card_brand: z.enum(['visa', 'mastercard', 'amex', 'discover', 'other'], {
+        message: 'Marca de tarjeta es requerida',
+      }),
+
+      // Balance fields (legacy - for backward compatibility)
+      current_balance: z.coerce.number().optional(),
+
+      available_balance: z.coerce
+        .number()
+        .nonnegative('Saldo disponible no puede ser negativo')
+        .optional(),
+
+      // Initial balance for primary currency
+      initial_balance: z.coerce.number().optional(),
+
+      // Multi-currency balances
+      currency_balances: z
+        .array(
+          z.object({
+            currency: z.enum(
+              SUPPORTED_CURRENCIES as unknown as [string, ...string[]]
+            ),
+            current_balance: z.coerce.number(),
+            available_balance: z.coerce.number().optional(),
+          })
+        )
+        .optional(),
+
+      // Account number hash
+      account_number_hash: z.string().optional(),
+
+      // Credit card details
+      credit_details: creditDetailsSchema.optional(),
+
+      // Metadata
+      metadata: z.record(z.string(), z.any()).optional(),
+    })
+    .refine(
+      data => {
+        // Check if last_four_digits are required and valid
+        if (requiresAccountIdentifier(data.account_type)) {
+          const hasValidDigits =
+            data.last_four_digits &&
+            typeof data.last_four_digits === 'string' &&
+            data.last_four_digits.length === 4 &&
+            /^\d{4}$/.test(data.last_four_digits);
+          return hasValidDigits;
+        }
+        return true;
+      },
+      {
+        message: 'Últimos 4 dígitos son requeridos para este tipo de cuenta',
+        path: ['last_four_digits'],
       }
-      return true;
-    },
-    {
-      message:
-        'Marca de tarjeta es requerida para tarjetas de crédito y débito',
-      path: ['card_brand'],
-    }
-  )
-  .refine(
-    data => {
-      // Credit cards require credit_details
-      if (data.account_type === 'credit_card') {
-        return !!data.credit_details;
+    )
+    .refine(
+      data => {
+        // Credit/Debit cards require card_brand
+        if (
+          data.account_type === 'credit_card' ||
+          data.account_type === 'debit_card'
+        ) {
+          const hasValidBrand = !!data.card_brand;
+
+          return hasValidBrand;
+        }
+        return true;
+      },
+      {
+        message:
+          'Marca de tarjeta es requerida para tarjetas de crédito y débito',
+        path: ['card_brand'],
       }
-      return true;
-    },
-    {
-      message:
-        'Detalles de la tarjeta de crédito son requeridos para tarjetas de crédito',
-      path: ['credit_details'],
-    }
-  )
-  .refine(
-    data => {
-      // Only credit cards can have negative balance
-      if (data.current_balance && data.current_balance < 0) {
-        return data.account_type === 'credit_card';
+    )
+    .refine(
+      data => {
+        // Credit cards require credit_details
+        if (data.account_type === 'credit_card') {
+          return !!data.credit_details;
+        }
+        return true;
+      },
+      {
+        message:
+          'Detalles de la tarjeta de crédito son requeridos para tarjetas de crédito',
+        path: ['credit_details'],
       }
-      return true;
-    },
-    {
-      message: 'El saldo no puede ser negativo para este tipo de cuenta',
-      path: ['current_balance'],
-    }
-  );
+    )
+    .refine(
+      data => {
+        // Only credit cards can have negative balance
+        if (data.current_balance && data.current_balance < 0) {
+          return data.account_type === 'credit_card';
+        }
+        return true;
+      },
+      {
+        message: 'El saldo no puede ser negativo para este tipo de cuenta',
+        path: ['current_balance'],
+      }
+    )
+);
 
 /**
  * Payment method update schema (all fields optional)

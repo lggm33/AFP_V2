@@ -7,6 +7,8 @@ import {
   validatePaymentMethodCreate,
   validatePaymentMethodUpdate,
   getValidationErrorMessage,
+  requiresAccountIdentifier,
+  requiresCardDetails,
 } from '@afp/shared-types';
 import { createLogger } from '../hooks/useLogger';
 // Using database types directly since they're not properly exported
@@ -25,6 +27,16 @@ type PaymentMethodWithDetails = PaymentMethod & {
   credit_details: CreditDetails | null;
   currency_balances?: PaymentMethodBalance[];
 };
+
+// Extended form data type (from the form hook)
+interface PaymentMethodFormData extends PaymentMethodCreateInput {
+  currency_balances?: Array<{
+    currency: string;
+    current_balance: number;
+    available_balance?: number;
+  }>;
+  status?: Database['public']['Enums']['payment_method_status'];
+}
 
 // =====================================================================================
 // SERVICE CLASS
@@ -175,11 +187,77 @@ class PaymentMethodService {
   }
 
   /**
+   * Check if data contains form-specific fields (like status)
+   */
+  private isFormData(
+    data: PaymentMethodCreateInput | PaymentMethodFormData
+  ): data is PaymentMethodFormData {
+    return 'status' in data || 'currency_balances' in data;
+  }
+
+  /**
+   * Clean payment method form data before processing
+   * Removes placeholder/default values for fields that are not applicable to the account type
+   */
+  private cleanPaymentMethodFormData(
+    data: PaymentMethodFormData
+  ): PaymentMethodCreateInput {
+    this.logger.debug('Cleaning payment method form data', {
+      originalData: {
+        account_type: data.account_type,
+        last_four_digits: data.last_four_digits,
+        card_brand: data.card_brand,
+        hasStatus: !!data.status,
+      },
+    });
+
+    const cleaned = { ...data } as Record<string, unknown>;
+
+    // Remove account identifier if not required for this account type
+    if (!requiresAccountIdentifier(data.account_type)) {
+      this.logger.debug(
+        'Removing last_four_digits - not required for account type',
+        {
+          account_type: data.account_type,
+        }
+      );
+      delete cleaned.last_four_digits;
+    } else if (cleaned.last_four_digits === '0000') {
+      // Remove placeholder value - let validation handle if it's actually required
+      this.logger.debug('Removing placeholder last_four_digits value');
+      delete cleaned.last_four_digits;
+    }
+
+    // Remove card brand if not required
+    if (!requiresCardDetails(data.account_type)) {
+      this.logger.debug('Removing card_brand - not required for account type', {
+        account_type: data.account_type,
+      });
+      delete cleaned.card_brand;
+    }
+    // Note: We don't remove 'other' when required because it could be a valid user selection
+
+    // Remove status field - it's not part of the creation schema
+    delete cleaned.status;
+
+    this.logger.debug('Form data cleaned successfully', {
+      cleanedData: {
+        account_type: cleaned.account_type,
+        last_four_digits: cleaned.last_four_digits,
+        card_brand: cleaned.card_brand,
+        hasStatus: !!(cleaned as Record<string, unknown>).status,
+      },
+    });
+
+    return cleaned as PaymentMethodCreateInput;
+  }
+
+  /**
    * Create a new payment method
    */
   async createPaymentMethod(
     userId: string,
-    data: PaymentMethodCreateInput
+    data: PaymentMethodCreateInput | PaymentMethodFormData
   ): Promise<PaymentMethodWithDetails> {
     this.logger.group('CREATE Payment Method Service');
     this.logger.time('service-create-payment-method');
@@ -191,8 +269,13 @@ class PaymentMethodService {
     });
 
     try {
+      // Clean form data if it contains form-specific fields
+      const cleanedData = this.isFormData(data)
+        ? this.cleanPaymentMethodFormData(data)
+        : data;
+
       this.logger.debug('Validating payment method creation data');
-      const validation = validatePaymentMethodCreate(data);
+      const validation = validatePaymentMethodCreate(cleanedData);
       if (!validation.success) {
         const errorMessage = getValidationErrorMessage(validation.error);
         this.logger.error('Validation failed', {

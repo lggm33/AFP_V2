@@ -6,7 +6,6 @@ import { AlertCircle } from 'lucide-react';
 import {
   usePaymentMethodForm,
   type PaymentMethodFormData,
-  type UsePaymentMethodFormReturn,
 } from '@/hooks/forms/usePaymentMethodForm';
 import {
   TextField,
@@ -18,9 +17,13 @@ import {
 import { CardDetailsSection } from './components/CardDetailsSection';
 import { CreditDetailsSection } from './components/CreditDetailsSection';
 import { MultiCurrencyBalanceSection } from './components/MultiCurrencyBalanceSection';
-import type { Database } from '@afp/shared-types';
+import {
+  type Database,
+  getAccountTypeOptions,
+  getPaymentMethodStatusOptions,
+  getPrimaryCurrencyOptions,
+} from '@afp/shared-types';
 import { createLogger } from '@/hooks/useLogger';
-import { useEffect } from 'react';
 
 // =====================================================================================
 // TYPES
@@ -40,33 +43,12 @@ interface PaymentMethodFormEnhancedProps {
 }
 
 // =====================================================================================
-// CONSTANTS
+// CONSTANTS - Using shared-types for consistency
 // =====================================================================================
 
-const ACCOUNT_TYPE_OPTIONS = [
-  { value: 'credit_card', label: 'Tarjeta de Crédito' },
-  { value: 'debit_card', label: 'Tarjeta de Débito' },
-  { value: 'checking_account', label: 'Cuenta Corriente' },
-  { value: 'savings_account', label: 'Cuenta de Ahorros' },
-  { value: 'cash', label: 'Efectivo' },
-  { value: 'digital_wallet', label: 'Billetera Digital' },
-  { value: 'investment_account', label: 'Cuenta de Inversión' },
-  { value: 'other', label: 'Otro' },
-];
-
-const CURRENCY_OPTIONS = [
-  { value: 'CRC', label: 'CRC (Colón Costarricense)' },
-  { value: 'USD', label: 'USD (Dólar Estadounidense)' },
-  { value: 'EUR', label: 'EUR (Euro)' },
-];
-
-const STATUS_OPTIONS = [
-  { value: 'active', label: 'Activo' },
-  { value: 'inactive', label: 'Inactivo' },
-  { value: 'expired', label: 'Expirado' },
-  { value: 'blocked', label: 'Bloqueado' },
-  { value: 'closed', label: 'Cerrado' },
-];
+const ACCOUNT_TYPE_OPTIONS = getAccountTypeOptions();
+const CURRENCY_OPTIONS = getPrimaryCurrencyOptions();
+const STATUS_OPTIONS = getPaymentMethodStatusOptions();
 
 // =====================================================================================
 // COMPONENT
@@ -125,26 +107,9 @@ export function PaymentMethodFormEnhanced({
   const handleSubmit = async (data: PaymentMethodFormData) => {
     logger.info('Submitting form data', { data });
 
-    // Clean default values before submitting
-    const cleanedData = { ...data };
-
-    // Remove default values for fields that are not visible/required
-    if (!form.needsAccountIdentifier) {
-      delete cleanedData.last_four_digits;
-    } else if (cleanedData.last_four_digits === '0000') {
-      // Don't send default value to server
-      delete cleanedData.last_four_digits;
-    }
-
-    if (!form.needsCardDetails) {
-      delete cleanedData.card_brand;
-    }
-    // Note: We don't delete 'other' when visible because it could be a valid user selection
-
-    logger.info('Cleaned form data for submission', { cleanedData });
-
     try {
-      await onSubmit(cleanedData);
+      // Data cleaning is now handled by the service layer
+      await onSubmit(data);
     } catch (error) {
       logger.error('Form submission error', { error });
     }
@@ -152,117 +117,6 @@ export function PaymentMethodFormEnhanced({
 
   // Get form state
   const { hasErrors, isFormDirty } = form;
-
-  // Log validation errors for debugging (optimized to prevent infinite loops)
-  useEffect(() => {
-    const errors = form.formState.errors;
-    const errorCount = Object.keys(errors).length;
-
-    // Get current form values once
-    const currentValues = form.getValues();
-
-    if (errorCount > 0) {
-      logger.warn('🔴 Validation Errors Detected:', {
-        errorCount,
-        hasErrors,
-        errors: Object.entries(errors).reduce(
-          (acc, [field, error]) => {
-            acc[field] = {
-              message: error?.message || 'Unknown error',
-              type: error?.type || 'Unknown type',
-            };
-            return acc;
-          },
-          {} as Record<string, { message: string; type: string }>
-        ),
-        formValues: {
-          account_type: currentValues.account_type,
-          last_four_digits: currentValues.last_four_digits,
-          card_brand: currentValues.card_brand,
-          name: currentValues.name,
-          institution_name: currentValues.institution_name,
-        },
-        fieldVisibility: {
-          needsCardDetails: form.needsCardDetails,
-          needsAccountIdentifier: form.needsAccountIdentifier,
-          needsCreditDetails: form.needsCreditDetails,
-        },
-        // Debug info for cash issue
-        debugInfo: {
-          accountType: currentValues.account_type,
-          shouldRequireIdentifier: currentValues.account_type
-            ? [
-                'credit_card',
-                'debit_card',
-                'checking_account',
-                'savings_account',
-                'digital_wallet',
-                'investment_account',
-              ].includes(currentValues.account_type)
-            : 'unknown',
-          expectedValue:
-            currentValues.account_type === 'cash' ? '0000' : 'depends on type',
-        },
-      });
-    } else if (errorCount === 0 && hasErrors === false) {
-      // Only log when there are truly no errors
-      logger.info('✅ No Validation Errors', {
-        hasErrors,
-        formValues: {
-          account_type: currentValues.account_type,
-          last_four_digits: currentValues.last_four_digits,
-          card_brand: currentValues.card_brand,
-        },
-        fieldVisibility: {
-          needsCardDetails: form.needsCardDetails,
-          needsAccountIdentifier: form.needsAccountIdentifier,
-          needsCreditDetails: form.needsCreditDetails,
-        },
-      });
-    }
-  }, [
-    // Only depend on the actual error object and hasErrors flag
-    form.formState.errors,
-    hasErrors,
-    // Use specific form properties instead of the whole form object
-    form.needsCardDetails,
-    form.needsAccountIdentifier,
-    form.needsCreditDetails,
-    logger,
-  ]);
-
-  // Debug: Force update values when account type changes to cash
-  useEffect(() => {
-    const accountType = form.watch('account_type');
-    const currentLastFour = form.watch('last_four_digits');
-    const currentCardBrand = form.watch('card_brand');
-
-    logger.info('🔄 Account Type Changed:', {
-      accountType,
-      currentLastFour,
-      currentCardBrand,
-      needsAccountIdentifier: form.needsAccountIdentifier,
-      needsCardDetails: form.needsCardDetails,
-    });
-
-    // Force update for cash type
-    if (accountType === 'cash') {
-      if (currentLastFour !== '0000') {
-        logger.warn('🔧 Forcing last_four_digits to 0000 for cash');
-        form.setValue('last_four_digits', '0000', {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-      if (currentCardBrand !== 'other') {
-        logger.warn('🔧 Forcing card_brand to other for cash');
-        form.setValue('card_brand', 'other', {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-    }
-  }, [form.watch('account_type'), form, logger]);
 
   return (
     <Form {...form}>
@@ -430,93 +284,5 @@ export function PaymentMethodFormEnhanced({
         </div>
       </form>
     </Form>
-  );
-}
-
-// =====================================================================================
-// FORM PROGRESS INDICATOR
-// =====================================================================================
-
-interface FormProgressProps {
-  form: UsePaymentMethodFormReturn;
-}
-
-export function FormProgress({ form }: FormProgressProps) {
-  const sections = [
-    {
-      name: 'Información Básica',
-      required: ['name', 'account_type', 'institution_name'],
-      optional: ['primary_currency', 'status'],
-    },
-    {
-      name: 'Identificación',
-      required:
-        form.needsCardDetails || form.needsAccountIdentifier
-          ? ['last_four_digits']
-          : [],
-      optional: ['color', 'icon'],
-    },
-    {
-      name: 'Configuración',
-      required: [],
-      optional: ['is_primary', 'exclude_from_totals'],
-    },
-  ];
-
-  if (form.needsCreditDetails) {
-    sections.push({
-      name: 'Detalles de Crédito',
-      required: ['credit_details.credit_limit'],
-      optional: [
-        'credit_details.billing_cycle_day',
-        'credit_details.payment_due_day',
-      ],
-    });
-  }
-
-  const calculateSectionProgress = (section: (typeof sections)[0]) => {
-    const allFields = [...section.required, ...section.optional];
-    const completedFields = allFields.filter(field => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = form.getFieldValue(field as any);
-      return value !== undefined && value !== null && value !== '';
-    });
-
-    return {
-      completed: completedFields.length,
-      total: allFields.length,
-      percentage:
-        allFields.length > 0
-          ? (completedFields.length / allFields.length) * 100
-          : 100,
-    };
-  };
-
-  return (
-    <div className='space-y-2'>
-      <h4 className='text-sm font-medium'>Progreso del Formulario</h4>
-      {sections.map(section => {
-        const progress = calculateSectionProgress(section);
-        return (
-          <div
-            key={section.name}
-            className='flex items-center justify-between text-sm'
-          >
-            <span>{section.name}</span>
-            <div className='flex items-center gap-2'>
-              <div className='w-16 h-2 bg-muted rounded-full overflow-hidden'>
-                <div
-                  className='h-full bg-primary transition-all duration-300'
-                  style={{ width: `${progress.percentage}%` }}
-                />
-              </div>
-              <span className='text-xs text-muted-foreground'>
-                {progress.completed}/{progress.total}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
   );
 }

@@ -200,6 +200,49 @@ export function getRandomPaymentMethodColor(): string {
   ];
 }
 
+// =====================================================================================
+// FORM OPTIONS HELPERS
+// =====================================================================================
+
+/**
+ * Get account type options for form selects
+ */
+export function getAccountTypeOptions(): Array<{
+  value: AccountType;
+  label: string;
+}> {
+  return Object.entries(ACCOUNT_TYPE_LABELS).map(([value, label]) => ({
+    value: value as AccountType,
+    label,
+  }));
+}
+
+/**
+ * Get payment method status options for form selects
+ */
+export function getPaymentMethodStatusOptions(): Array<{
+  value: PaymentMethodStatus;
+  label: string;
+}> {
+  return Object.entries(PAYMENT_METHOD_STATUS_LABELS).map(([value, label]) => ({
+    value: value as PaymentMethodStatus,
+    label,
+  }));
+}
+
+/**
+ * Get card brand options for form selects
+ */
+export function getCardBrandOptions(): Array<{
+  value: CardBrand;
+  label: string;
+}> {
+  return Object.entries(CARD_BRAND_LABELS).map(([value, label]) => ({
+    value: value as CardBrand,
+    label,
+  }));
+}
+
 /**
  * Format last four digits for display
  */

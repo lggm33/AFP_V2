@@ -1,7 +1,7 @@
 // Enhanced Card Details Section Component
 import { TextField, SelectField } from '@/components/Forms/FormField';
 import { type UsePaymentMethodFormReturn } from '@/hooks/forms/usePaymentMethodForm';
-import { type Database } from '@afp/shared-types';
+import { type Database, getCardBrandOptions } from '@afp/shared-types';
 
 // =====================================================================================
 // TYPES
@@ -18,13 +18,11 @@ interface CardDetailsSectionProps {
 // CONSTANTS
 // =====================================================================================
 
-const CARD_BRAND_OPTIONS = [
-  { value: 'visa', label: '💳 Visa' },
-  { value: 'mastercard', label: '💳 Mastercard' },
-  { value: 'amex', label: '💳 American Express' },
-  { value: 'discover', label: '💳 Discover' },
-  { value: 'other', label: '💳 Otra' },
-];
+// Use shared-types function but customize labels with icons
+const CARD_BRAND_OPTIONS = getCardBrandOptions().map(option => ({
+  ...option,
+  label: `💳 ${option.label}`,
+}));
 
 // =====================================================================================
 // HELPER FUNCTIONS
