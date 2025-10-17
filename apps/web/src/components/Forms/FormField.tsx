@@ -103,17 +103,6 @@ export function TextField<T extends FieldValues>({
               max={max}
               step={step}
               maxLength={maxLength}
-              value={field.value ?? ''}
-              onChange={e => {
-                const value = e.target.value;
-                if (type === 'number') {
-                  // Transform to number for numeric fields
-                  const numValue = value === '' ? undefined : parseFloat(value);
-                  field.onChange(isNaN(numValue!) ? undefined : numValue);
-                } else {
-                  field.onChange(value);
-                }
-              }}
               className={cn(
                 fieldState.error && 'border-red-500',
                 !fieldState.error && field.value && 'border-green-500'

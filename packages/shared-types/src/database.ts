@@ -702,7 +702,7 @@ export type Database = {
           name: string;
           parent_category_id: string | null;
           updated_at: string | null;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           color?: string | null;
@@ -714,7 +714,7 @@ export type Database = {
           name: string;
           parent_category_id?: string | null;
           updated_at?: string | null;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           color?: string | null;
@@ -726,7 +726,7 @@ export type Database = {
           name?: string;
           parent_category_id?: string | null;
           updated_at?: string | null;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
