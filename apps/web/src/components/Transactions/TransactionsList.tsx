@@ -10,7 +10,7 @@ import {
 import { TransactionsHeader } from './TransactionsHeader';
 import { TransactionsFiltersSection } from './TransactionsFiltersSection';
 import { TransactionsGrid } from './TransactionsGrid';
-import { TransactionFormModal } from './TransactionFormModal';
+// import { TransactionFormModal } from './TransactionFormModal';
 import { DeleteConfirmationModal } from '../ui/DeleteConfirmationModal';
 import { useTransactionsData } from './useTransactionsData';
 
@@ -107,14 +107,14 @@ export function TransactionsList({
       )}
 
       {/* Transaction Form Modal */}
-      <TransactionFormModal
+      {/* <TransactionFormModal
         isOpen={isFormOpen}
         onClose={handleCloseForm}
         transaction={editingTransaction}
         paymentMethods={formattedPaymentMethods}
         categories={categories}
         onSubmit={handleFormSubmit}
-      />
+      /> */}
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

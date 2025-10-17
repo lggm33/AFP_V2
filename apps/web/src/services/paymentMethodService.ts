@@ -8,6 +8,7 @@ import {
   validatePaymentMethodUpdate,
   getValidationErrorMessage,
 } from '@afp/shared-types';
+import { createLogger } from '../hooks/useLogger';
 // Using database types directly since they're not properly exported
 type PaymentMethodBalance =
   Database['public']['Tables']['payment_method_balances']['Row'];
@@ -30,6 +31,7 @@ type PaymentMethodWithDetails = PaymentMethod & {
 // =====================================================================================
 
 class PaymentMethodService {
+  private logger = createLogger('PaymentMethodService');
   /**
    * Get all payment methods for a user
    */
@@ -179,11 +181,27 @@ class PaymentMethodService {
     userId: string,
     data: PaymentMethodCreateInput
   ): Promise<PaymentMethodWithDetails> {
+    this.logger.group('CREATE Payment Method Service');
+    this.logger.time('service-create-payment-method');
+    this.logger.info('Starting payment method creation in service', {
+      userId,
+      paymentMethodName: data.name,
+      accountType: data.account_type,
+      isPrimary: data.is_primary,
+    });
+
     try {
+      this.logger.debug('Validating payment method creation data');
       const validation = validatePaymentMethodCreate(data);
       if (!validation.success) {
-        throw new Error(getValidationErrorMessage(validation.error));
+        const errorMessage = getValidationErrorMessage(validation.error);
+        this.logger.error('Validation failed', {
+          error: validation.error,
+          errorMessage,
+        });
+        throw new Error(errorMessage);
       }
+      this.logger.debug('Validation successful');
 
       const {
         account_type,
@@ -194,19 +212,28 @@ class PaymentMethodService {
       } = validation.data;
 
       if (data.is_primary) {
+        this.logger.debug('Setting as primary - unsetting current primary');
         await this.unsetPrimaryPaymentMethod(userId);
       }
 
+      this.logger.debug('Inserting payment method into database');
       const paymentMethod = await this.insertPaymentMethod(
         userId,
         paymentMethodData,
         account_type
       );
+      this.logger.debug('Payment method inserted successfully', {
+        id: paymentMethod.id,
+      });
+
+      this.logger.debug('Handling credit details');
       const creditDetailsData = await this.handleCreditDetails(
         paymentMethod.id,
         account_type,
         credit_details
       );
+
+      this.logger.debug('Handling balance creation');
       await this.handleBalanceCreation(
         paymentMethod.id,
         paymentMethod.primary_currency,
@@ -214,14 +241,25 @@ class PaymentMethodService {
         initial_balance
       );
 
-      return {
+      const result = {
         ...paymentMethod,
         credit_details: creditDetailsData,
       };
+
+      this.logger.info('Payment method creation completed successfully', {
+        id: result.id,
+        name: result.name,
+        accountType: result.account_type,
+      });
+
+      return result;
     } catch (error) {
-      console.error('Error creating payment method:', error);
+      this.logger.error('Payment method creation failed', { error, userId });
       if (error instanceof Error) throw error;
       throw new Error('Failed to create payment method');
+    } finally {
+      this.logger.timeEnd('service-create-payment-method');
+      this.logger.groupEnd();
     }
   }
 
@@ -233,21 +271,40 @@ class PaymentMethodService {
     userId: string,
     updates: PaymentMethodUpdateInput
   ): Promise<PaymentMethodWithDetails> {
+    this.logger.group('UPDATE Payment Method Service');
+    this.logger.time('service-update-payment-method');
+    this.logger.info('Starting payment method update in service', {
+      paymentMethodId,
+      userId,
+      updates: { ...updates, account_number: '[REDACTED]' }, // Hide sensitive data
+    });
+
     try {
       // Validate data
+      this.logger.debug('Validating payment method update data');
       const validation = validatePaymentMethodUpdate(updates);
       if (!validation.success) {
-        throw new Error(getValidationErrorMessage(validation.error));
+        const errorMessage = getValidationErrorMessage(validation.error);
+        this.logger.error('Validation failed', {
+          error: validation.error,
+          errorMessage,
+        });
+        throw new Error(errorMessage);
       }
+      this.logger.debug('Validation successful');
 
       const { credit_details, ...paymentMethodUpdates } = validation.data;
 
       // If setting as primary, unset current primary
       if (updates.is_primary) {
+        this.logger.debug('Setting as primary - unsetting current primary');
         await this.unsetPrimaryPaymentMethod(userId, paymentMethodId);
       }
 
       // Update payment method
+      this.logger.debug('Updating payment method in database', {
+        paymentMethodId,
+      });
       const { data: paymentMethod, error: pmError } = await supabase
         .from('payment_methods')
         .update(paymentMethodUpdates)
@@ -256,11 +313,16 @@ class PaymentMethodService {
         .select()
         .single();
 
-      if (pmError) throw pmError;
+      if (pmError) {
+        this.logger.error('Database update failed', { error: pmError });
+        throw pmError;
+      }
+      this.logger.debug('Payment method updated successfully in database');
 
       // Update credit details if provided
       let creditDetailsData: CreditDetails | null = null;
       if (credit_details) {
+        this.logger.debug('Updating credit details');
         const { data: cd, error: cdError } = await supabase
           .from('payment_method_credit_details')
           .upsert({
@@ -270,10 +332,15 @@ class PaymentMethodService {
           .select()
           .single();
 
-        if (cdError) throw cdError;
+        if (cdError) {
+          this.logger.error('Credit details update failed', { error: cdError });
+          throw cdError;
+        }
         creditDetailsData = cd;
+        this.logger.debug('Credit details updated successfully');
       } else {
         // Fetch existing credit details
+        this.logger.debug('Fetching existing credit details');
         const { data: cd } = await supabase
           .from('payment_method_credit_details')
           .select()
@@ -283,14 +350,29 @@ class PaymentMethodService {
         creditDetailsData = cd;
       }
 
-      return {
+      const result = {
         ...paymentMethod,
         credit_details: creditDetailsData,
       };
+
+      this.logger.info('Payment method update completed successfully', {
+        id: result.id,
+        name: result.name,
+        isPrimary: result.is_primary,
+      });
+
+      return result;
     } catch (error) {
-      console.error('Error updating payment method:', error);
+      this.logger.error('Payment method update failed', {
+        error,
+        paymentMethodId,
+        userId,
+      });
       if (error instanceof Error) throw error;
       throw new Error('Failed to update payment method');
+    } finally {
+      this.logger.timeEnd('service-update-payment-method');
+      this.logger.groupEnd();
     }
   }
 
@@ -301,17 +383,39 @@ class PaymentMethodService {
     paymentMethodId: string,
     userId: string
   ): Promise<void> {
+    this.logger.group('DELETE Payment Method Service');
+    this.logger.time('service-delete-payment-method');
+    this.logger.info('Starting payment method deletion in service', {
+      paymentMethodId,
+      userId,
+    });
+
     try {
+      this.logger.debug('Performing soft delete in database');
       const { error } = await supabase
         .from('payment_methods')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', paymentMethodId)
         .eq('user_id', userId);
 
-      if (error) throw error;
+      if (error) {
+        this.logger.error('Database deletion failed', { error });
+        throw error;
+      }
+
+      this.logger.info('Payment method deleted successfully', {
+        paymentMethodId,
+      });
     } catch (error) {
-      console.error('Error deleting payment method:', error);
+      this.logger.error('Payment method deletion failed', {
+        error,
+        paymentMethodId,
+        userId,
+      });
       throw new Error('Failed to delete payment method');
+    } finally {
+      this.logger.timeEnd('service-delete-payment-method');
+      this.logger.groupEnd();
     }
   }
 
@@ -322,21 +426,44 @@ class PaymentMethodService {
     paymentMethodId: string,
     userId: string
   ): Promise<void> {
+    this.logger.group('SET PRIMARY Payment Method Service');
+    this.logger.time('service-set-primary-payment-method');
+    this.logger.info('Starting set primary operation in service', {
+      paymentMethodId,
+      userId,
+    });
+
     try {
       // Unset current primary
+      this.logger.debug('Unsetting current primary payment method');
       await this.unsetPrimaryPaymentMethod(userId, paymentMethodId);
 
       // Set new primary
+      this.logger.debug('Setting new primary payment method');
       const { error } = await supabase
         .from('payment_methods')
         .update({ is_primary: true })
         .eq('id', paymentMethodId)
         .eq('user_id', userId);
 
-      if (error) throw error;
+      if (error) {
+        this.logger.error('Database update failed', { error });
+        throw error;
+      }
+
+      this.logger.info('Primary payment method set successfully', {
+        paymentMethodId,
+      });
     } catch (error) {
-      console.error('Error setting primary payment method:', error);
+      this.logger.error('Set primary operation failed', {
+        error,
+        paymentMethodId,
+        userId,
+      });
       throw new Error('Failed to set primary payment method');
+    } finally {
+      this.logger.timeEnd('service-set-primary-payment-method');
+      this.logger.groupEnd();
     }
   }
 

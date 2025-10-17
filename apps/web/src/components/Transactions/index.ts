@@ -2,5 +2,5 @@
 
 export { TransactionsList } from './TransactionsList';
 export { TransactionCard } from './TransactionCard';
-export { TransactionFormModal } from './TransactionFormModal';
+// export { TransactionFormModal } from './TransactionFormModal';
 export { TransactionFilters } from './TransactionFilters';

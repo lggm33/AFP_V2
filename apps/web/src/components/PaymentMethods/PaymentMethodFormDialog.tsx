@@ -5,12 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { PaymentMethodForm } from './PaymentMethodForm';
-import type {
-  Database,
-  PaymentMethodCreateInput,
-  PaymentMethodUpdateInput,
-} from '@afp/shared-types';
+import { PaymentMethodFormEnhanced } from './PaymentMethodFormEnhanced';
+import type { PaymentMethodFormData } from '@/hooks/forms/usePaymentMethodForm';
+import type { Database } from '@afp/shared-types';
 
 type PaymentMethod = Database['public']['Tables']['payment_methods']['Row'];
 type CreditDetails =
@@ -24,9 +21,7 @@ interface PaymentMethodFormDialogProps {
     | null;
   formError: string | null;
   formLoading: boolean;
-  onSubmit: (
-    data: PaymentMethodCreateInput | PaymentMethodUpdateInput
-  ) => Promise<void>;
+  onSubmit: (data: PaymentMethodFormData) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -56,12 +51,12 @@ export function PaymentMethodFormDialog({
         </DialogHeader>
 
         {formError && (
-          <div className='bg-red-50 border border-red-200 rounded-lg p-3'>
-            <p className='text-red-800 text-sm'>{formError}</p>
+          <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3'>
+            <p className='text-destructive text-sm'>{formError}</p>
           </div>
         )}
 
-        <PaymentMethodForm
+        <PaymentMethodFormEnhanced
           paymentMethod={editingPaymentMethod || undefined}
           onSubmit={onSubmit}
           onCancel={onCancel}

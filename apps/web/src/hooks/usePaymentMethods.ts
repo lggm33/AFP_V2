@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // usePaymentMethods Hook
 import { useState, useEffect, useCallback } from 'react';
 import { paymentMethodService } from '../services/paymentMethodService';
@@ -7,6 +8,7 @@ import {
   type PaymentMethodCreateInput,
   type PaymentMethodUpdateInput,
 } from '@afp/shared-types';
+import { createLogger } from './useLogger';
 
 // Local types
 type PaymentMethod = Database['public']['Tables']['payment_methods']['Row'];
@@ -48,10 +50,12 @@ interface UsePaymentMethodsReturn {
   ) => Promise<boolean>;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function usePaymentMethods(
   options: UsePaymentMethodsOptions
 ): UsePaymentMethodsReturn {
   const { userId, includeDeleted = false, autoRefetch = true } = options;
+  const logger = createLogger('PaymentMethods');
 
   const [paymentMethods, setPaymentMethods] = useState<
     PaymentMethodWithDetails[]
@@ -61,6 +65,8 @@ export function usePaymentMethods(
 
   // Fetch payment methods
   const fetchPaymentMethods = useCallback(async () => {
+    logger.debug('Fetching payment methods', { userId, includeDeleted });
+
     try {
       setLoading(true);
       setError(null);
@@ -69,12 +75,19 @@ export function usePaymentMethods(
         includeDeleted,
         true // includeBalances = true para mostrar balances multi-moneda
       );
+      logger.info('Payment methods fetched successfully', {
+        count: data.length,
+        primaryExists: data.some(pm => pm.is_primary),
+      });
       setPaymentMethods(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to fetch payment methods'
-      );
-      console.error('Error fetching payment methods:', err);
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to fetch payment methods';
+      logger.error('Failed to fetch payment methods', {
+        error: err,
+        errorMessage,
+      });
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -138,12 +151,27 @@ export function usePaymentMethods(
   // Create payment method
   const createPaymentMethod = useCallback(
     async (data: PaymentMethodCreateInput) => {
+      logger.group('CREATE Payment Method');
+      logger.time('create-payment-method');
+      logger.info('Starting payment method creation', {
+        userId,
+        paymentMethodName: data.name,
+        accountType: data.account_type,
+      });
+
       try {
         setError(null);
+        logger.debug('Calling paymentMethodService.createPaymentMethod');
         const newPaymentMethod = await paymentMethodService.createPaymentMethod(
           userId,
           data
         );
+        logger.info('Payment method created successfully', {
+          id: newPaymentMethod.id,
+          name: newPaymentMethod.name,
+        });
+
+        logger.debug('Refreshing payment methods list');
         await fetchPaymentMethods();
         return newPaymentMethod;
       } catch (err) {
@@ -151,8 +179,12 @@ export function usePaymentMethods(
           err instanceof Error
             ? err.message
             : 'Failed to create payment method';
+        logger.error('Payment method creation failed', { error: err, message });
         setError(message);
         throw err;
+      } finally {
+        logger.timeEnd('create-payment-method');
+        logger.groupEnd();
       }
     },
     [userId, fetchPaymentMethods]
@@ -161,13 +193,31 @@ export function usePaymentMethods(
   // Update payment method
   const updatePaymentMethod = useCallback(
     async (id: string, updates: PaymentMethodUpdateInput) => {
+      logger.group('UPDATE Payment Method');
+      logger.time('update-payment-method');
+      logger.info('Starting payment method update', {
+        paymentMethodId: id,
+        userId,
+        updates: { ...updates, account_number: '[REDACTED]' }, // Hide sensitive data
+      });
+
       try {
         setError(null);
+        logger.debug('Calling paymentMethodService.updatePaymentMethod', {
+          id,
+        });
         const updated = await paymentMethodService.updatePaymentMethod(
           id,
           userId,
           updates
         );
+        logger.info('Payment method updated successfully', {
+          id: updated.id,
+          name: updated.name,
+          isPrimary: updated.is_primary,
+        });
+
+        logger.debug('Refreshing payment methods list');
         await fetchPaymentMethods();
         return updated;
       } catch (err) {
@@ -175,8 +225,16 @@ export function usePaymentMethods(
           err instanceof Error
             ? err.message
             : 'Failed to update payment method';
+        logger.error('Payment method update failed', {
+          error: err,
+          message,
+          id,
+        });
         setError(message);
         throw err;
+      } finally {
+        logger.timeEnd('update-payment-method');
+        logger.groupEnd();
       }
     },
     [userId, fetchPaymentMethods]
@@ -185,17 +243,38 @@ export function usePaymentMethods(
   // Delete payment method
   const deletePaymentMethod = useCallback(
     async (id: string) => {
+      logger.group('DELETE Payment Method');
+      logger.time('delete-payment-method');
+      logger.info('Starting payment method deletion', {
+        paymentMethodId: id,
+        userId,
+      });
+
       try {
         setError(null);
+        logger.debug('Calling paymentMethodService.deletePaymentMethod', {
+          id,
+        });
         await paymentMethodService.deletePaymentMethod(id, userId);
+        logger.info('Payment method deleted successfully', { id });
+
+        logger.debug('Refreshing payment methods list');
         await fetchPaymentMethods();
       } catch (err) {
         const message =
           err instanceof Error
             ? err.message
             : 'Failed to delete payment method';
+        logger.error('Payment method deletion failed', {
+          error: err,
+          message,
+          id,
+        });
         setError(message);
         throw err;
+      } finally {
+        logger.timeEnd('delete-payment-method');
+        logger.groupEnd();
       }
     },
     [userId, fetchPaymentMethods]
@@ -204,17 +283,38 @@ export function usePaymentMethods(
   // Set primary payment method
   const setPrimary = useCallback(
     async (id: string) => {
+      logger.group('SET PRIMARY Payment Method');
+      logger.time('set-primary-payment-method');
+      logger.info('Starting set primary operation', {
+        paymentMethodId: id,
+        userId,
+      });
+
       try {
         setError(null);
+        logger.debug('Calling paymentMethodService.setPrimaryPaymentMethod', {
+          id,
+        });
         await paymentMethodService.setPrimaryPaymentMethod(id, userId);
+        logger.info('Primary payment method set successfully', { id });
+
+        logger.debug('Refreshing payment methods list');
         await fetchPaymentMethods();
       } catch (err) {
         const message =
           err instanceof Error
             ? err.message
             : 'Failed to set primary payment method';
+        logger.error('Set primary operation failed', {
+          error: err,
+          message,
+          id,
+        });
         setError(message);
         throw err;
+      } finally {
+        logger.timeEnd('set-primary-payment-method');
+        logger.groupEnd();
       }
     },
     [userId, fetchPaymentMethods]

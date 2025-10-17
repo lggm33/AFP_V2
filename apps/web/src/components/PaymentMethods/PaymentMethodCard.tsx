@@ -1,9 +1,9 @@
-// Payment Method Card Component
+// Unified Payment Method Card Component
 import { Card } from '@/components/ui/card';
-import { PaymentMethodHeader } from './components/PaymentMethodHeader';
-import { PaymentMethodDetails } from './components/PaymentMethodDetails';
+import { PaymentMethodIcon } from './components/PaymentMethodIcon';
 import { PaymentMethodActions } from './components/PaymentMethodActions';
-import { type Database } from '@afp/shared-types';
+import { type Database, formatCurrency } from '@afp/shared-types';
+import { Star, Wifi } from 'lucide-react';
 
 type PaymentMethod = Database['public']['Tables']['payment_methods']['Row'];
 type CreditDetails =
@@ -23,14 +23,43 @@ interface PaymentMethodCardProps {
   onEdit?: (paymentMethod: PaymentMethod) => void;
   onDelete?: (paymentMethodId: string) => void;
   onSetPrimary?: (paymentMethodId: string) => void;
+  variant?: 'card' | 'standard' | 'auto';
+  showBalances?: boolean;
 }
 
 // =====================================================================================
-// COMPONENT
+// CONSTANTS & STYLES
 // =====================================================================================
 
-// Card brand styling configurations with professional colors
-const getCardBrandStyles = (cardBrand?: string | null) => {
+// Unified styles for consistent UI across all variants
+const STYLES = {
+  primaryBadge:
+    'bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md border border-orange-400/50',
+  primaryRing: 'ring-2 ring-orange-500 ring-opacity-75',
+  transitions: 'transition-all duration-300 hover:scale-[1.02] hover:shadow-xl',
+  shadows: 'shadow-lg',
+  text: {
+    title: 'font-semibold text-lg truncate',
+    subtitle: 'text-sm text-muted-foreground truncate',
+    balance: 'text-sm font-medium',
+    label: 'text-xs text-muted-foreground uppercase tracking-wide',
+  },
+} as const;
+
+// Account type translations
+const ACCOUNT_TYPE_LABELS = {
+  credit_card: 'Tarjeta de Crédito',
+  debit_card: 'Tarjeta de Débito',
+  checking_account: 'Cuenta Corriente',
+  savings_account: 'Cuenta de Ahorros',
+  cash: 'Efectivo',
+  digital_wallet: 'Billetera Digital',
+  investment_account: 'Cuenta de Inversión',
+  other: 'Otro',
+} as const;
+
+// Card brand styling configurations
+const getCardBrandStyles = (cardBrand?: string | null | undefined) => {
   const brandStyles = {
     visa: {
       gradient: 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900',
@@ -39,7 +68,6 @@ const getCardBrandStyles = (cardBrand?: string | null) => {
       textColor: 'text-white',
       chipColor: 'bg-amber-400',
       brandName: 'VISA',
-      accent: 'from-blue-600/20',
     },
     mastercard: {
       gradient: 'bg-gradient-to-br from-slate-800 via-gray-800 to-gray-900',
@@ -48,7 +76,6 @@ const getCardBrandStyles = (cardBrand?: string | null) => {
       textColor: 'text-white',
       chipColor: 'bg-amber-400',
       brandName: 'MASTERCARD',
-      accent: 'from-red-600/20',
     },
     amex: {
       gradient: 'bg-gradient-to-br from-zinc-800 via-zinc-900 to-black',
@@ -57,7 +84,6 @@ const getCardBrandStyles = (cardBrand?: string | null) => {
       textColor: 'text-white',
       chipColor: 'bg-amber-400',
       brandName: 'AMEX',
-      accent: 'from-emerald-600/20',
     },
     discover: {
       gradient: 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900',
@@ -66,7 +92,6 @@ const getCardBrandStyles = (cardBrand?: string | null) => {
       textColor: 'text-white',
       chipColor: 'bg-amber-400',
       brandName: 'DISCOVER',
-      accent: 'from-orange-600/20',
     },
     other: {
       gradient: 'bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900',
@@ -75,7 +100,6 @@ const getCardBrandStyles = (cardBrand?: string | null) => {
       textColor: 'text-white',
       chipColor: 'bg-amber-400',
       brandName: 'CARD',
-      accent: 'from-gray-600/20',
     },
   };
 
@@ -84,11 +108,87 @@ const getCardBrandStyles = (cardBrand?: string | null) => {
   );
 };
 
+// =====================================================================================
+// HELPER COMPONENTS
+// =====================================================================================
+
+// Unified Primary Badge Component
+function PrimaryBadge({ variant }: { variant: 'card' | 'standard' }) {
+  const position =
+    variant === 'card'
+      ? '' // No position for card variant, will be inline
+      : 'absolute top-2 right-2 z-10';
+
+  const extraStyles =
+    variant === 'card' ? 'backdrop-blur-sm bg-orange-500/95' : '';
+
+  return (
+    <div className={position}>
+      <div className={`${STYLES.primaryBadge} ${extraStyles}`}>
+        <Star className='w-3 h-3 inline mr-1' />
+        Principal
+      </div>
+    </div>
+  );
+}
+
+// Unified Balance Display Component
+// eslint-disable-next-line complexity
+function BalanceDisplay({
+  balances,
+  primaryCurrency,
+  textColor = 'text-foreground',
+  variant = 'standard',
+}: {
+  balances?: PaymentMethodBalance[];
+  primaryCurrency?: string | null;
+  textColor?: string;
+  variant?: 'card' | 'standard';
+}) {
+  if (!balances || balances.length === 0) return null;
+
+  const primaryBalance =
+    balances.find(b => b.currency === primaryCurrency) || balances[0];
+  const isCard = variant === 'card';
+
+  return (
+    <div
+      className={`${textColor} ${isCard ? 'text-xs opacity-90' : 'text-sm'} mt-2`}
+    >
+      <div className='flex justify-between items-center'>
+        <span className={isCard ? 'opacity-80' : 'text-muted-foreground'}>
+          Saldo:
+        </span>
+        <span className={`font-medium ${isCard ? '' : STYLES.text.balance}`}>
+          {formatCurrency(
+            primaryBalance.current_balance || 0,
+            primaryBalance.currency
+          )}
+        </span>
+      </div>
+      {balances.length > 1 && (
+        <div
+          className={`text-xs mt-1 ${isCard ? 'opacity-70' : 'text-muted-foreground'}`}
+        >
+          +{balances.length - 1} moneda{balances.length > 2 ? 's' : ''} más
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =====================================================================================
+// MAIN COMPONENT
+// =====================================================================================
+
+// eslint-disable-next-line complexity
 export function PaymentMethodCard({
   paymentMethod,
   onEdit,
   onDelete,
   onSetPrimary,
+  variant = 'auto',
+  showBalances = true,
 }: PaymentMethodCardProps) {
   const {
     is_primary,
@@ -97,34 +197,38 @@ export function PaymentMethodCard({
     last_four_digits,
     name,
     institution_name,
+    primary_currency,
+    currency_balances,
+    color,
   } = paymentMethod;
+
   const isCard =
     account_type === 'credit_card' || account_type === 'debit_card';
+  const actualVariant =
+    variant === 'auto' ? (isCard ? 'card' : 'standard') : variant;
 
-  // If it's a card, render with realistic card design
-  if (isCard) {
+  // Render realistic card design
+  if (actualVariant === 'card') {
     const cardStyles = getCardBrandStyles(card_brand);
 
     return (
       <div
         className={`
-        relative w-full h-64 rounded-2xl overflow-hidden shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-3xl
-        ${cardStyles.gradient}
-        ${is_primary ? 'ring-4 ring-orange-400 ring-opacity-50' : ''}
-      `}
+          relative w-full h-64 rounded-2xl overflow-hidden ${STYLES.shadows} ${STYLES.transitions}
+          ${cardStyles.gradient}
+          ${is_primary ? STYLES.primaryRing : ''}
+        `}
       >
         {/* Background pattern */}
         <div className={`absolute inset-0 ${cardStyles.pattern}`} />
 
-        {/* Subtle metallic overlay */}
+        {/* Subtle overlays */}
         <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent opacity-40' />
-
-        {/* Professional texture overlay */}
         <div className='absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10' />
 
         {/* Card content */}
         <div className='relative h-full p-6 flex flex-col justify-between'>
-          {/* Top section - Logo and chip */}
+          {/* Top section */}
           <div className='flex justify-between items-start'>
             <div className='flex items-center gap-3'>
               {/* EMV Chip */}
@@ -136,20 +240,17 @@ export function PaymentMethodCard({
                 </div>
               </div>
 
-              {/* Contactless payment symbol */}
+              {/* Primary badge or Contactless symbol */}
               <div className={`${cardStyles.textColor} opacity-70`}>
-                <svg
-                  width='20'
-                  height='16'
-                  viewBox='0 0 24 24'
-                  fill='currentColor'
-                >
-                  <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z' />
-                </svg>
+                {is_primary ? (
+                  <PrimaryBadge variant='card' />
+                ) : (
+                  <Wifi className='w-5 h-5' />
+                )}
               </div>
             </div>
 
-            {/* Brand logo area */}
+            {/* Brand logo */}
             <div className={`${cardStyles.textColor} text-lg font-bold`}>
               {cardStyles.brandName}
             </div>
@@ -164,15 +265,10 @@ export function PaymentMethodCard({
             </div>
           </div>
 
-          {/* Bottom section - Cardholder info and actions */}
-          <div className='space-y-2'>
+          {/* Bottom section */}
+          <div className='space-y-3'>
             <div className='flex justify-between items-end'>
-              <div>
-                <div
-                  className={`${cardStyles.textColor} text-xs opacity-70 uppercase tracking-wide`}
-                >
-                  Card Holder
-                </div>
+              <div className='flex-1'>
                 <div
                   className={`${cardStyles.textColor} font-semibold text-sm uppercase tracking-wide truncate max-w-[200px]`}
                 >
@@ -183,78 +279,96 @@ export function PaymentMethodCard({
                 >
                   {institution_name}
                 </div>
+
+                {/* Balance for card variant */}
+                {showBalances && (
+                  <BalanceDisplay
+                    balances={currency_balances}
+                    primaryCurrency={primary_currency}
+                    textColor={cardStyles.textColor}
+                    variant='card'
+                  />
+                )}
               </div>
 
-              {/* Card type badge */}
-              <div
-                className={`${cardStyles.textColor} text-xs opacity-70 uppercase tracking-wide`}
-              >
-                {account_type === 'credit_card' ? 'CREDIT' : 'DEBIT'}
+              <div className={`${cardStyles.textColor} ${STYLES.text.label}`}>
+                {account_type === 'credit_card' ? 'CRÉDITO' : 'DÉBITO'}
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className='flex gap-2 mt-4'>
-              <PaymentMethodActions
-                paymentMethod={paymentMethod}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onSetPrimary={onSetPrimary}
-                cardStyle={true}
-              />
-            </div>
+            {/* Actions */}
+            <PaymentMethodActions
+              paymentMethod={paymentMethod}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onSetPrimary={onSetPrimary}
+              cardStyle={true}
+            />
           </div>
 
-          {/* Primary badge */}
-          {is_primary && (
-            <div className='absolute top-4 right-4'>
-              <div className='bg-amber-500/90 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg backdrop-blur-sm border border-amber-400/30'>
-                Principal
-              </div>
-            </div>
-          )}
-
-          {/* Subtle shine effect on hover */}
+          {/* Shine effect */}
           <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full opacity-0 hover:opacity-100 transition-all duration-700 ease-out' />
         </div>
       </div>
     );
   }
 
-  // For non-card accounts, use the original card design
+  // Render standard card design
   return (
     <Card
-      className={`relative transition-all duration-200 hover:shadow-xl flex flex-col h-full ${
-        is_primary ? 'ring-2 ring-orange-500 shadow-lg' : ''
-      }`}
+      className={`
+        relative ${STYLES.transitions} flex flex-col h-full
+        ${is_primary ? `${STYLES.primaryRing} ${STYLES.shadows}` : STYLES.shadows}
+      `}
     >
-      <PaymentMethodHeader
-        name={paymentMethod.name}
-        institutionName={paymentMethod.institution_name}
-        accountType={paymentMethod.account_type}
-        cardBrand={paymentMethod.card_brand}
-        lastFourDigits={paymentMethod.last_four_digits}
-        color={paymentMethod.color}
-        isPrimary={paymentMethod.is_primary}
-        status={paymentMethod.status}
-      />
+      {/* Primary badge */}
+      {is_primary && <PrimaryBadge variant='standard' />}
 
-      <div className='flex-1'>
-        <PaymentMethodDetails
-          accountType={paymentMethod.account_type}
-          cardBrand={paymentMethod.card_brand}
-          primaryCurrency={paymentMethod.primary_currency}
-          currencyBalances={paymentMethod.currency_balances}
-          creditDetails={paymentMethod.credit_details}
-        />
+      {/* Header */}
+      <div className='p-4 pb-2'>
+        <div className='flex items-start gap-3'>
+          <PaymentMethodIcon
+            accountType={account_type}
+            cardBrand={card_brand || undefined}
+            color={color || '#6366f1'}
+            size='md'
+          />
+
+          <div className='flex-1 min-w-0'>
+            <h3 className={STYLES.text.title}>{name}</h3>
+            <p className={STYLES.text.subtitle}>
+              {institution_name} • {ACCOUNT_TYPE_LABELS[account_type]}
+            </p>
+            {last_four_digits && (
+              <p className='text-xs text-muted-foreground mt-1'>
+                •••• {last_four_digits}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      <PaymentMethodActions
-        paymentMethod={paymentMethod}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onSetPrimary={onSetPrimary}
-      />
+      {/* Content */}
+      <div className='flex-1 px-4'>
+        {showBalances && (
+          <BalanceDisplay
+            balances={currency_balances}
+            primaryCurrency={primary_currency}
+            variant='standard'
+          />
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className='p-4 pt-2'>
+        <PaymentMethodActions
+          paymentMethod={paymentMethod}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onSetPrimary={onSetPrimary}
+          cardStyle={false}
+        />
+      </div>
     </Card>
   );
 }

@@ -15,11 +15,11 @@ import { SUPPORTED_CURRENCIES } from '../constants/currencies';
  */
 export const creditDetailsSchema = z
   .object({
-    credit_limit: z
+    credit_limit: z.coerce
       .number({ message: 'Límite de crédito debe ser un número' })
       .positive('Límite de crédito debe ser mayor que 0'),
 
-    billing_cycle_day: z
+    billing_cycle_day: z.coerce
       .number()
       .int()
       .min(
@@ -32,7 +32,7 @@ export const creditDetailsSchema = z
       )
       .optional(),
 
-    payment_due_day: z
+    payment_due_day: z.coerce
       .number()
       .int()
       .min(
@@ -45,7 +45,7 @@ export const creditDetailsSchema = z
       )
       .optional(),
 
-    minimum_payment_percentage: z
+    minimum_payment_percentage: z.coerce
       .number()
       .min(
         PAYMENT_METHOD_VALIDATION.MINIMUM_PAYMENT_PERCENTAGE_MIN,
@@ -57,7 +57,7 @@ export const creditDetailsSchema = z
       )
       .optional(),
 
-    interest_rate: z
+    interest_rate: z.coerce
       .number()
       .min(
         PAYMENT_METHOD_VALIDATION.INTEREST_RATE_MIN,
@@ -69,7 +69,7 @@ export const creditDetailsSchema = z
       )
       .optional(),
 
-    grace_period_days: z
+    grace_period_days: z.coerce
       .number()
       .int()
       .min(
@@ -166,26 +166,23 @@ export const paymentMethodCreateSchema = z
 
     // Card specific fields
     last_four_digits: z
-      .string()
-      .regex(/^\d{4}$/, 'Últimos 4 dígitos deben ser exactamente 4 números')
-      .optional(),
+      .string({ message: 'Últimos 4 dígitos son requeridos' })
+      .regex(/^\d{4}$/, 'Últimos 4 dígitos deben ser exactamente 4 números'),
 
-    card_brand: z
-      .enum(['visa', 'mastercard', 'amex', 'discover', 'other'], {
-        message: 'Marca de tarjeta inválida',
-      })
-      .optional(),
+    card_brand: z.enum(['visa', 'mastercard', 'amex', 'discover', 'other'], {
+      message: 'Marca de tarjeta es requerida',
+    }),
 
     // Balance fields (legacy - for backward compatibility)
-    current_balance: z.number().optional(),
+    current_balance: z.coerce.number().optional(),
 
-    available_balance: z
+    available_balance: z.coerce
       .number()
       .nonnegative('Saldo disponible no puede ser negativo')
       .optional(),
 
     // Initial balance for primary currency
-    initial_balance: z.number().optional(),
+    initial_balance: z.coerce.number().optional(),
 
     // Multi-currency balances
     currency_balances: z
@@ -194,8 +191,8 @@ export const paymentMethodCreateSchema = z
           currency: z.enum(
             SUPPORTED_CURRENCIES as unknown as [string, ...string[]]
           ),
-          current_balance: z.number(),
-          available_balance: z.number().optional(),
+          current_balance: z.coerce.number(),
+          available_balance: z.coerce.number().optional(),
         })
       )
       .optional(),
@@ -292,6 +289,19 @@ export const paymentMethodUpdateSchema = z
       .trim()
       .optional(),
 
+    institution_name: z
+      .string()
+      .min(
+        PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH,
+        `Nombre de la institución debe ser al menos ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MIN_LENGTH} carácter`
+      )
+      .max(
+        PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH,
+        `Nombre de la institución debe ser menos de ${PAYMENT_METHOD_VALIDATION.INSTITUTION_MAX_LENGTH} caracteres`
+      )
+      .trim()
+      .optional(),
+
     status: z
       .enum(['active', 'inactive', 'expired', 'blocked', 'closed'])
       .optional(),
@@ -313,12 +323,28 @@ export const paymentMethodUpdateSchema = z
 
     exclude_from_totals: z.boolean().optional(),
 
-    current_balance: z.number().optional(),
+    // Card specific fields
+    last_four_digits: z
+      .string()
+      .regex(/^\d{4}$/, 'Últimos 4 dígitos deben ser exactamente 4 números')
+      .optional(),
 
-    available_balance: z
+    card_brand: z
+      .enum(['visa', 'mastercard', 'amex', 'discover', 'other'], {
+        message: 'Marca de tarjeta inválida',
+      })
+      .optional(),
+
+    // Balance fields
+    current_balance: z.coerce.number().optional(),
+
+    available_balance: z.coerce
       .number()
       .nonnegative('Saldo disponible no puede ser negativo')
       .optional(),
+
+    // Account number hash
+    account_number_hash: z.string().optional(),
 
     credit_details: creditDetailsSchema.optional(),
 

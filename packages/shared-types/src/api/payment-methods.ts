@@ -163,12 +163,18 @@ export interface PaymentMethodCreateRequest {
 
 export interface PaymentMethodUpdateRequest {
   name?: string;
+  institution_name?: string;
   status?: PaymentMethodStatus;
   primary_currency?: string;
   color?: string;
   icon?: string;
   is_primary?: boolean;
   exclude_from_totals?: boolean;
+  last_four_digits?: string;
+  card_brand?: 'visa' | 'mastercard' | 'amex' | 'discover' | 'other';
+  current_balance?: number;
+  available_balance?: number;
+  account_number_hash?: string;
   credit_details?: PaymentMethodCreditDetailsUpdate;
   metadata?: Record<string, unknown>;
 }
